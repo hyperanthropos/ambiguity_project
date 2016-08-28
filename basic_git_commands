@@ -1,0 +1,14 @@
+# initialize git project
+git init
+
+# view status
+git status
+
+# add file 
+git add [file]
+
+# creat a commit
+git commmit -m "[message for commit]"
+
+# pull and push from github to local and vice versa
+git remote add origin https://github.com/[repo]
