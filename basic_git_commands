@@ -19,8 +19,11 @@ git commmit -m "[message for commit]"
 
 # set up remote repository
 git remote add origin https://github.com/[repo]
-gir remove origin
+git remote remove origin
 
 # pull and push from github to local and vice versa
 git pull origin [branch]
 git push origin [branch]
+
+# manage branches
+git branch [...]
