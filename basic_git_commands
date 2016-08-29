@@ -1,3 +1,7 @@
+# setup environment
+git config --global user.name "[name]"
+git config --global user.email "[email]"
+
 # initialize git project
 git init
 
@@ -10,8 +14,10 @@ git add [file]
 # create a commit
 git commmit -m "[message for commit]"
 
-# pull and push from github to local and vice versa
+# set up remote repository
 git remote add origin https://github.com/[repo]
+gir remove origin
 
+# pull and push from github to local and vice versa
 git pull origin [branch]
 git push origin [branch]
