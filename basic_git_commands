@@ -2,6 +2,9 @@
 git config --global user.name "[name]"
 git config --global user.email "[email]"
 
+git config --global credential.helper cache 				# set to cache user credentials
+git config --global credential.helper 'cache --timeout=7200'		# set credentials timeout (seconds)
+
 # initialize git project
 git init
 
