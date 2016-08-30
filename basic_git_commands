@@ -32,3 +32,6 @@ git checkout [branch]							# switch between branches
 git branch -d [branch]							# delete branch
 git merge [branch]							# merge into master (checkout to master first)
 
+# other stuff
+gitk									# show git GUI
+
