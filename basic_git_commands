@@ -26,4 +26,7 @@ git pull origin [branch]
 git push origin [branch]
 
 # manage branches
-git branch [...]
+git branch								# view branches
+git checkout -b [new branch]						# create branch
+git checkout [branch]							# switch between branches
+git merge [branch]							# merge branches
