@@ -30,5 +30,4 @@ git branch								# view branches
 git checkout -b [new branch]						# create branch
 git checkout [branch]							# switch between branches
 git branch -d [branch]							# delete branch
-git merge [branch]							# merge branches
 
