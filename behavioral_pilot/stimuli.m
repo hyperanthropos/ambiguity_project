@@ -3,41 +3,27 @@
 % can be fed into a task-presentation script
 
 % --- stim_matrix description
-% line 1 - stimulus number
-% line 2 - trial type (1 = risky, 2 = ambigious)
-% line 3 - resolve ambiguity (1 = yes, 2 = no)
+% line 01 - stimulus number
+% line 02 - trial type (1 = risky, 2 = ambigious)
+% line 03 - resolve ambiguity (1 = yes, 2 = no)
 
-% line 4 - risk variance level (1-4; low to high variance)
+% line 04 - risk variance level (1-4; low to high variance)
 %               for risk: 25 at 80%, 33 at 60%, 50 at 40%, 100 at 20%
-% line 5 - ambiguity variance level (1-4; low to high variance)
+% line 05 - ambiguity variance level (1-4; low to high variance)
 %               for ambiguity: 15 vs 25, 10 vs 30, 5 vs 35, 0 vs 40
-% line 6 - counteroffer level (1-number of levels; low to high counteroffer)
-%               maximum counteroffer (risk vs. ambiguity)
-%                   25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
-%                       for variance level 1: 75% - 125%
-%                       for variance level 2: 50% - 150%
-%                       for variance level 3: 25% - 175%
-%                       for variance level 4: 0% - 200%
+% line 06 - counteroffer level (1-number of levels; low to high counteroffer)
 
-% we need a function to calculate the variance for each trial !!!
-%       e.g.: 60% 50 & 40% 0 vs. 25% 80% 15 and 20% 25; 25% 60% 15 and 40% 20 ...
+% line 10 - option 1 - probability of offer [ line 4 ] (80%, 60%, 40%, 20%)
+% line 11 - option 1 - lower value risk [ line 4 ] (always 0 for risk) 
+% line 12 - option 1 - upper value risk [ line 4 ] (25, 33, 50, 100 for risk)
+% line 13 - option 1 - lower value ambiguity [ line 5 ] (15, 10, 5, 0 for ambigutiy) 
+% line 14 - option 1 - upper value ambiguity [ line 5 ] (25, 30, 35, 40 for ambiguity)
+% line 15 - option 2 - counteroffer value (variable, matched to 20 expected value (EV)
 
-% line 6 - option 1 - probability of offer [ line 4 ] (20%, 40%, 60%, 80%)
-% line 7 - option 1 - lower value [ line 4 ] (0 for risk; 15, 10, 5, 0 for ambigutiy) 
-% line 8 - option 2 - counteroffer value (variable, matched to 20 expected value (EV)
-
-
-
-%%% OLD STYLE (being updated)
-% line1 - probability option 1
-% line2 - amount option 1
-% line3 - probability option 2
-% line4 - amount option 2
-% line5 - ISI
-% line6 - position of fixed ammount
-% line8 - regressor probability (line 1)
-% line9 - regressor probabilistic amount (line 2)
-% line10 - regressor matched amount variaton (line 4)
+%%%%% randomisation and timing
+% line 20 - ISI (time until next decision)
+% line 21 - position of counteroffer (left, right)
+% line 22 - position of lower level (up or down)
 
 % further notes:
 % - expected value (EV) of all trials is fixed to 20 value units
@@ -46,24 +32,52 @@
 
 %% start function code
 
-function [stim_matrix, stim_nr] = stimuli()
+%% function [stim_matrix, stim_nr] = stimuli()
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
-stim_nr = 100;      % number of trials to generate
+clear;
+
+counteroffer.steps = 8;
+% counteroffer.var(1) = [];
+
+%               maximum counteroffer (risk vs. ambiguity)
+%                   25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
+%                       for variance level 1: 75% - 125%
+%                       for variance level 2: 50% - 150%
+%                       for variance level 3: 25% - 175%
+%                       for variance level 4: 0% - 200%
+
+repeats = 4;
+
+risk_probs = [.8 .6 .4 .2];
+risk_values = [25 33 50 100];
+ambi_lo_values = [15 10 5 0];
+ambi_hi_values = [25 30 35 40];
+
+stim_nr = (length(risk_probs)+length(ambi_lo_values))*counteroffer.steps*repeats;
+
+sessions = 2;
+
+ISI = 8;
 
 
 
+%% COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
-
-
-%% 
-
-
-
-
-
-
-
-% end function code
+% mean variance of risky trials
+for i = 1:4;
+    [mvar(i), ev(i)] = mean_variance(risk_probs(i), risk_values(i));
 end
+
+% mean variance for ambiguous trials
+for i = 1:4;
+    [mvar(i+4), ev(i+4)] = mean_variance(.25*.8, 15);
+end
+
+
+
+
+
+%% end function code
+% end
