@@ -3,15 +3,17 @@
 % can be fed into a task-presentation script
 
 % --- stim_matrix description
-% line 01 - stimulus number
-% line 02 - trial type (1 = risky, 2 = ambigious)
-% line 03 - resolve ambiguity (1 = yes, 2 = no)
+% line 01 - presentation number (sequential)
+% line 02 - repeat number (randomized)
+% line 03 - stimulus number (randomized)
+% line 04 - trial type (1 = risky, 2 = ambigious)
+% line 05 - resolve ambiguity (1 = yes, 2 = no)
 
-% line 04 - risk variance level (1-4; low to high variance)
+% line 06 - risk variance level (1-4; low to high variance)
 %               for risk: 25 at 80%, 33 at 60%, 50 at 40%, 100 at 20%
-% line 05 - ambiguity variance level (1-4; low to high variance)
+% line 07 - ambiguity variance level (1-4; low to high variance)
 %               for ambiguity: 15 vs 25, 10 vs 30, 5 vs 35, 0 vs 40
-% line 06 - counteroffer level (1-number of levels; low to high counteroffer)
+% line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 
 % line 10 - option 1 - probability of offer [ line 4 ] (80%, 60%, 40%, 20%)
 % line 11 - option 1 - lower value risk [ line 4 ] (always 0 for risk) 
@@ -32,13 +34,17 @@
 
 %% start function code
 
-%% function [stim_matrix, stim_nr] = stimuli()
+%% function [matrix, stim_nr] = stimuli()
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
 clear;
 
-counteroffer.steps = 8;
+sessions = 2;
+repeats = 4;
+ISI = 8;
+
+X.steps = 8;        % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 % counteroffer.var(1) = [];
 
 %               maximum counteroffer (risk vs. ambiguity)
@@ -48,34 +54,56 @@ counteroffer.steps = 8;
 %                       for variance level 3: 25% - 175%
 %                       for variance level 4: 0% - 200%
 
-repeats = 4;
+X.RP = [.8 .6 .4 .2]; % risky probability levels
+X.RV = [25 33 50 100]; % risky value levels
+X.RN = 4; % number of risky levels
+X.AVL = [15 10 5 0]; % ambiguitly levels low
+X.AVH = [25 30 35 40]; % ambiguitly levels high
+X.AN = 4; % number of ambiguous levels
 
-risk_probs = [.8 .6 .4 .2];
-risk_values = [25 33 50 100];
-ambi_lo_values = [15 10 5 0];
-ambi_hi_values = [25 30 35 40];
-
-stim_nr = (length(risk_probs)+length(ambi_lo_values))*counteroffer.steps*repeats;
-
-sessions = 2;
-
-ISI = 8;
+stim_nr = (length(X.RP)+length(X.AVL))*X.steps*repeats;
 
 
 
 %% COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
 % mean variance of risky trials
+mvar = NaN(2,4);
 for i = 1:4;
-    [mvar(i), ev(i)] = mean_variance(risk_probs(i), risk_values(i));
+    [mvar(1, i)] = mean_variance(X.RP(i), X.RV(i));
 end
 
 % mean variance for ambiguous trials
 for i = 1:4;
-    [mvar(i+4), ev(i+4)] = mean_variance(.25*.8, 15);
+    [mvar(2, i)] = mean_variance(   .25*X.RP(1), X.AVL(i), .25*(1-X.RP(1)), X.AVH(i), ...
+                                    .25*X.RP(2), X.AVL(i), .25*(1-X.RP(2)), X.AVH(i), ...
+                                    .25*X.RP(3), X.AVL(i), .25*(1-X.RP(3)), X.AVH(i), ...
+                                    .25*X.RP(4), X.AVL(i), .25*(1-X.RP(4)), X.AVH(i)           );
 end
 
+bar(mvar')
+legend('risk', 'ambiguity', 'location', 'northwest');
 
+%% CREATE MATRIX
+
+% create one repeat
+trials_risky = 1:X.RN*X.steps;
+trials_ambigous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
+
+matrix(3,:) =  1:X.RN*X.steps+X.AN*X.steps;                             % line 03 - stimulus number (randomized)
+matrix(4,trials_risky) = ones(1, X.RN*X.steps);                         % line 04 - trial type (1 = risky, 2 = ambigious)
+matrix(4,trials_ambigous) = ones(1, X.AN*X.steps)*2;                    % line 04 - trial type (1 = risky, 2 = ambigious)
+
+matrix(6,trials_risky) = kron(1:X.RN, ones(1,X.steps));                 % line 06 - risk variance level (1-4; low to high variance)
+matrix(6,trials_ambigous) = repmat(1:X.RN, 1, X.steps);                 % line 06 - risk variance level (1-4; low to high variance)
+matrix(7,trials_risky) = repmat(1:X.AN, 1, X.steps);                    % line 07 - ambiguity variance level (1-4; low to high variance)
+matrix(7,trials_ambigous) = kron(1:X.AN, ones(1,X.steps));              % line 07 - ambiguity variance level (1-4; low to high variance)                                                             
+matrix(8,:) = repmat(1:X.steps, 1, X.AN+X.RN);                          % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
+
+% matrix(10,:) = [];        % line 10 - option 1 - probability of offer [ line 4 ] (80%, 60%, 40%, 20%)
+
+% lines to do after repeated
+% 1 2 5
 
 
 
