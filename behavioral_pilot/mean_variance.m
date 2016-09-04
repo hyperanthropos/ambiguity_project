@@ -24,11 +24,13 @@ end
 % calculate expected value and mean variance      
 for i = 1:nargin/2
     ev_vector(i) = values(i)*probabilities(i);
-    mvar_vector(i) = ( values(i)-ev_vector(i) )^2 * probabilities(i);
 end
-
-mvar = sum(mvar_vector);
 ev = sum(ev_vector);
+
+for i = 1:nargin/2
+    mvar_vector(i) = ( values(i)-ev )^2 * probabilities(i);
+end
+mvar = sum(mvar_vector);
 
 % end function
 end
