@@ -1,6 +1,6 @@
 %%  matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
-% can be fed into a task-presentation script
+% can be fed into a task-presentation script pu
 
 % --- stim_matrix description
 % line 01 - presentation number (sequential)
@@ -65,17 +65,16 @@ X.AN = 4; % number of ambiguous levels
 
 stim_nr = (length(X.RP)+length(X.AVL))*X.steps*repeats;
 
-
-
 %% COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
 if SKIP_DIAG ~= 1;
 % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
 
 % set risk parameters for 
-k.mvar = -1/150;        % mean variance (<0 is risk averse)
-k.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
-k.pros = 0.92;          % prospect theory (<1 is risk averse)
+k.mvar = -1/180;        % mean variance (<0 is risk averse)
+k.hyp = 1.5;            % hyperbolic discounting (>1 is risk averse)
+k.pros = 0.95;          % prospect theory (<1 is risk averse)
+scale = [12 20];        % axis scale
     
 % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
 % mean variance of risky trials
@@ -102,16 +101,35 @@ sv.pros(2,:) = .5.*X.AVL.^k.pros + .5.*X.AVH.^k.pros;
 
 % PLOT AND COMPARE SV
 figs.fig1 = figure('Color', [1 1 1]);
-subplot(1,2,1);
+set(figs.fig1,'units','normalized','outerposition',[0 .6 .5 .6]);
+subplot(2,2,1);
 plot(sv.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
 plot(sv.hyp(1,:), 'r-', 'linewidth', 2);  
 plot(sv.pros(1,:), 'b-', 'linewidth', 2); 
+axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
 legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'southwest');
-subplot(1,2,2);
+subplot(2,2,2);
 plot(sv.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
 plot(sv.hyp(2,:), 'r--', 'linewidth', 2); 
 plot(sv.pros(2,:), 'b--', 'linewidth', 2);
+axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
 legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'southwest');
+subplot(2,3,4);
+plot(sv.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
+plot(sv.mvar(2,:), 'k--', 'linewidth', 2); box('off');
+axis([.5 4.5 scale]); title('mean variance'); xlabel('variance'); ylabel('expected value');
+legend('risk', 'ambiguity', 'location', 'southwest');
+subplot(2,3,5);
+plot(sv.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
+plot(sv.hyp(2,:), 'r--', 'linewidth', 2); box('off');
+axis([.5 4.5 scale]); title('hyperbolic'); xlabel('variance'); ylabel('expected value');
+legend('risk', 'ambiguity', 'location', 'southwest');
+axis([.5 4.5 scale]);
+subplot(2,3,6);
+plot(sv.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
+plot(sv.pros(2,:), 'b--', 'linewidth', 2); box('off');
+axis([.5 4.5 scale]); title('prospect theory'); xlabel('variance'); ylabel('expected value');
+legend('risk', 'ambiguity', 'location', 'southwest');
 
 % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
