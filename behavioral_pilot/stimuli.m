@@ -34,17 +34,19 @@
 
 %% start function code
 
+clear; close all; clc;
+
 %% function [matrix, stim_nr] = stimuli()
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
-clear;
+SKIP_DIAG = 0; % skip diagnostics of stimuli range
 
 sessions = 2;
-repeats = 4;
+repeats = 3;
 ISI = 8;
 
-X.steps = 8;        % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
+X.steps = 12;        % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 % counteroffer.var(1) = [];
 
 %               maximum counteroffer (risk vs. ambiguity)
@@ -55,7 +57,7 @@ X.steps = 8;        % steps of counteroffer value (this must be matched to level
 %                       for variance level 4: 0% - 200%
 
 X.RP = [.8 .6 .4 .2]; % risky probability levels
-X.RV = [25 33 50 100]; % risky value levels
+X.RV = [25 100/3 50 100]; % risky value levels
 X.RN = 4; % number of risky levels
 X.AVL = [15 10 5 0]; % ambiguitly levels low
 X.AVH = [25 30 35 40]; % ambiguitly levels high
@@ -67,22 +69,52 @@ stim_nr = (length(X.RP)+length(X.AVL))*X.steps*repeats;
 
 %% COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
+if SKIP_DIAG ~= 1;
+% --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
+
+% set risk parameters for 
+k.mvar = -1/150;        % mean variance (<0 is risk averse)
+k.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
+k.pros = 0.92;          % prospect theory (<1 is risk averse)
+    
+% SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
 % mean variance of risky trials
 mvar = NaN(2,4);
 for i = 1:4;
     [mvar(1, i)] = mean_variance(X.RP(i), X.RV(i));
 end
-
 % mean variance for ambiguous trials
 for i = 1:4;
-    [mvar(2, i)] = mean_variance(   .25*X.RP(1), X.AVL(i), .25*(1-X.RP(1)), X.AVH(i), ...
-                                    .25*X.RP(2), X.AVL(i), .25*(1-X.RP(2)), X.AVH(i), ...
-                                    .25*X.RP(3), X.AVL(i), .25*(1-X.RP(3)), X.AVH(i), ...
-                                    .25*X.RP(4), X.AVL(i), .25*(1-X.RP(4)), X.AVH(i)           );
+    [mvar(2, i)] = mean_variance( .5, X.AVL(i), .5, X.AVH(i) );
 end
+% subjective value according to k parameter
+sv.mvar = ones(2,4)*20 + mvar * k.mvar;
 
-bar(mvar')
-legend('risk', 'ambiguity', 'location', 'northwest');
+% SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
+odds = (1-X.RP)./X.RP;                                          % transform p to odds
+sv.hyp(1,:) = X.RV./(1+k.hyp.*odds);                                % subjective value of risky offers
+odds = [1 1 1 1];                                               % odds are equal for ambiguous offers
+sv.hyp(2,:) = X.AVL./(1+k.hyp.*odds) + X.AVH./(1+k.hyp.*odds);          % subjective value of ambiguous offers
+
+% SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
+sv.pros(1,:) = X.RP.*X.RV.^k.pros;
+sv.pros(2,:) = .5.*X.AVL.^k.pros + .5.*X.AVH.^k.pros;
+
+% PLOT AND COMPARE SV
+figs.fig1 = figure('Color', [1 1 1]);
+subplot(1,2,1);
+plot(sv.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
+plot(sv.hyp(1,:), 'r-', 'linewidth', 2);  
+plot(sv.pros(1,:), 'b-', 'linewidth', 2); 
+legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'southwest');
+subplot(1,2,2);
+plot(sv.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
+plot(sv.hyp(2,:), 'r--', 'linewidth', 2); 
+plot(sv.pros(2,:), 'b--', 'linewidth', 2);
+legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'southwest');
+
+% --- --- --- END SKIP THIS SECTION --- --- --- %
+end
 
 %% CREATE MATRIX
 
