@@ -1,4 +1,5 @@
-function [matrix, stim_nr] = stimuli( reveal_ambiguity )
+%function [matrix, stim_nr] = stimuli( reveal_ambiguity )
+clear; close all; clc;
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
 % can be fed into a task-presentation script pu
@@ -36,14 +37,14 @@ function [matrix, stim_nr] = stimuli( reveal_ambiguity )
 
 SKIP_DIAG = 0; % skip diagnostics of stimuli range
 
-repeats = 3;
+repeats = 2;
 isi = 1;
 
-X.steps = 8;            % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
+X.steps = 14;           % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
                         % maximum counteroffer (risk vs. ambiguity): 25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
-X.var{1} = [0.75 1.25];     % for variance level 1: 75% - 125%
-X.var{2} = [0.50 1.50];     % for variance level 2: 50% - 150%
-X.var{3} = [0.25 1.75];     % for variance level 3: 25% - 175%
+X.var{1} = [0.50 1.25];     % for variance level 1: 75% - 125%
+X.var{2} = [0.25 1.50];     % for variance level 2: 50% - 150%
+X.var{3} = [0.00 1.75];     % for variance level 3: 25% - 175%
 X.var{4} = [0.00 2.00];     % for variance level 4: 0% - 200% 
 
 X.RP = [.8 .6 .4 .2]; % risky probability levels
@@ -61,10 +62,15 @@ if SKIP_DIAG ~= 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % set risk parameters for
-    K.mvar = -1/180;        % mean variance (<0 is risk averse)
-    K.hyp = 1.5;            % hyperbolic discounting (>1 is risk averse)
-    K.pros = 0.95;          % prospect theory (<1 is risk averse)
-    scale = [12 20];        % axis scale
+%     K.mvar = -1/180;        % mean variance (<0 is risk averse)
+%     K.hyp = 1.5;            % hyperbolic discounting (>1 is risk averse)
+%     K.pros = 0.95;          % prospect theory (<1 is risk averse)
+%     scale = [12 20];        % axis scale
+    
+    K.mvar = -1/080;        % mean variance (<0 is risk averse)
+    K.hyp = 2.5;            % hyperbolic discounting (>1 is risk averse)
+    K.pros = 0.85;          % prospect theory (<1 is risk averse)
+    scale = [0 20];        % axis scale
     
     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
     % mean variance of risky trials
@@ -127,27 +133,27 @@ end
 %% CREATE MATRIX TO REPEAT
 
 trials_risky = 1:X.RN*X.steps;
-trials_ambigous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
+trials_ambiguous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
 
 r_matrix(3,:) =  1:X.RN*X.steps+X.AN*X.steps;                             % line 03 - stimulus number (randomized)
 r_matrix(4,trials_risky) = ones(1, X.RN*X.steps);                         % line 04 - trial type (1 = risky, 2 = ambigious)
-r_matrix(4,trials_ambigous) = ones(1, X.AN*X.steps)*2;                    % line 04 - trial type (1 = risky, 2 = ambigious)
+r_matrix(4,trials_ambiguous) = ones(1, X.AN*X.steps)*2;                   % line 04 - trial type (1 = risky, 2 = ambigious)
 
 r_matrix(6,trials_risky) = kron(1:X.RN, ones(1,X.steps));                 % line 06 - risk variance level (1-4; low to high variance)
-r_matrix(6,trials_ambigous) = repmat(1:X.RN, 1, X.steps);                 % line 06 - risk variance level (1-4; low to high variance)
+r_matrix(6,trials_ambiguous) = repmat(1:X.RN, 1, X.steps);                % line 06 - risk variance level (1-4; low to high variance)
 r_matrix(7,trials_risky) = repmat(1:X.AN, 1, X.steps);                    % line 07 - ambiguity variance level (1-4; low to high variance)
-r_matrix(7,trials_ambigous) = kron(1:X.AN, ones(1,X.steps));              % line 07 - ambiguity variance level (1-4; low to high variance)
+r_matrix(7,trials_ambiguous) = kron(1:X.AN, ones(1,X.steps));             % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(8,:) = repmat(1:X.steps, 1, X.AN+X.RN);                          % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 
 r_matrix(10,trials_risky) = kron(X.RP, ones(1,X.steps));                  % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
-r_matrix(10,trials_ambigous) = repmat(X.RP, 1, X.steps);                  % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
+r_matrix(10,trials_ambiguous) = repmat(X.RP, 1, X.steps);                 % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
 r_matrix(11,:) = zeros(1, X.RN*X.steps+X.AN*X.steps);                     % line 11 - option 1 - lower value risk [ line 6 ] (always 0 for risk)
 r_matrix(12,trials_risky) = kron(X.RV, ones(1,X.steps));                  % line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
-r_matrix(12,trials_ambigous) = repmat(X.RV, 1, X.steps);                  % line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
+r_matrix(12,trials_ambiguous) = repmat(X.RV, 1, X.steps);                 % line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
 r_matrix(13,trials_risky) = repmat(X.AVL, 1, X.steps);                    % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
-r_matrix(13,trials_ambigous) =  kron(X.AVL, ones(1,X.steps));             % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
+r_matrix(13,trials_ambiguous) =  kron(X.AVL, ones(1,X.steps));            % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
 r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
-r_matrix(14,trials_ambigous) =  kron(X.AVH, ones(1,X.steps));             % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
+r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
 
 % create counteroffers
 counteroffers = [];
@@ -169,8 +175,53 @@ r_matrix(22,:) = randi(2, 1, stim_nr/repeats);                            % line
 if SKIP_DIAG ~= 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
-    % plot(r_matrix(6,trials_risky); r_matrix(15, risky_trials);
-   
+    % plot trials and funtcions
+    figs.fig2 = figure('Color', [1 1 1]);
+    set(figs.fig2,'units','normalized','outerposition',[0 .6 .5 .6]);
+    
+    subplot(1,2,1);
+    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)); box off; hold on;
+    plot(sv.mvar(1,:)./20, 'k-', 'linewidth', 2);
+    plot(sv.hyp(1,:)./20, 'r-', 'linewidth', 2);
+    plot(sv.pros(1,:)./20, 'b-', 'linewidth', 2);
+    
+    legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
+    axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
+    set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'80%','60%', '40%', '20%'});
+    
+    subplot(1,2,2);
+    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)); box off; hold on;
+    plot(sv.mvar(2,:)./20, 'k--', 'linewidth', 2);
+    plot(sv.hyp(2,:)./20, 'r--', 'linewidth', 2);
+    plot(sv.pros(2,:)./20, 'b--', 'linewidth', 2);
+    
+    legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
+    axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
+    set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'15 vs 25', '10 vs 30', '5 vs 35', '0 vs 40'});
+    
+    % display total trials
+    disp(['total trials: ' num2str(stim_nr) ' | will take ' num2str(stim_nr*2/60) ' minutes per session']);
+    
+    %%% EXPECTED RESULTS
+    neutral = [1 1 1 1];
+    risky = [.8 .82 .83 .87];
+    ambigous_controll = [.6 .61 .61 .62];
+    ambigous = [.58 .57 .72 .79];
+    
+    figs.fig3 = figure('Color', [1 1 1]);
+    set(figs.fig3,'units','normalized','outerposition',[0 .4 .3 .4]);
+    
+    plot(1:4, neutral, 'k', 'linewidth', 2); hold on; box off;
+    plot([1 2], risky(1,1:2), 'b-*', 'linewidth', 2);
+    plot([3 4], risky(1,3:4), 'b-*', 'linewidth', 2);
+    plot([1 2], ambigous_controll(1,1:2), 'r-*', 'linewidth', 2);
+    plot([3 4], ambigous_controll(1,3:4), 'r-*', 'linewidth', 2);   
+    plot([1 2], ambigous(1,1:2), 'r--*', 'linewidth', 2);
+    plot([3 4], ambigous(1,3:4), 'r--*', 'linewidth', 2);
+    
+    axis([.5 4.5 0 1.1]); xlabel('time'); ylabel('risk preference');
+    set(gca, 'XTick', 1.5:2:3.5); set(gca, 'XTickLabel', {'sesion 1 (base)', 'sesion 2 (experimental)'})
+    legend('neutral', 'risk pre', 'risk post', 'ambiguity pre', 'ambiguity post', 'ambiguity pre', 'ambigutiy resolved', 'location', 'southwest');  
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
@@ -196,4 +247,4 @@ matrix(16:19,:) = NaN(4,stim_nr);
 keyboard;
 
 %% end function code
-end
+%end
