@@ -22,11 +22,13 @@ if max(probabilities) > 1;
 end
 
 % calculate expected value and mean variance
+ev_vector = NaN(1,nargin/2);
 for i = 1:nargin/2
     ev_vector(i) = values(i)*probabilities(i);
 end
 ev = sum(ev_vector);
 
+mvar_vector = NaN(1,nargin/2);
 for i = 1:nargin/2
     mvar_vector(i) = ( values(i)-ev )^2 * probabilities(i);
 end
