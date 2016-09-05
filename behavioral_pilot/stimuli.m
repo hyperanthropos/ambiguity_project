@@ -1,5 +1,4 @@
-%function [matrix, stim_nr] = stimuli( reveal_ambiguity )
-clear; close all; clc;
+function [matrix, stim_nr] = stimuli( reveal_ambiguity )
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
 % can be fed into a task-presentation script pu
@@ -26,7 +25,7 @@ clear; close all; clc;
 %
 % line 20 - ISI (time until next decision)
 % line 21 - position of counteroffer (left, right)
-% line 22 - position of lower level (up or down)
+% line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 %
 % --- further notes:
 % - expected value (EV) of all trials is fixed to 20 value units
@@ -36,7 +35,6 @@ clear; close all; clc;
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
 SKIP_DIAG = 0; % skip diagnostics of stimuli range
-
 
 repeats = 3;
 isi = 1;
@@ -128,7 +126,6 @@ end
 
 %% CREATE MATRIX TO REPEAT
 
-% create one repeat
 trials_risky = 1:X.RN*X.steps;
 trials_ambigous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
 
@@ -163,23 +160,40 @@ end
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
 
+r_matrix(20,:) = ones(1,stim_nr/repeats)*isi;                             % line 20 - ISI (time until next decision)
+r_matrix(21,:) = randi(2, 1, stim_nr/repeats);                            % line 21 - position of counteroffer (left, right)
+r_matrix(22,:) = randi(2, 1, stim_nr/repeats);                            % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
+
 %% DIAGNOSTIC: PLOT STIMULUS MATRIX
 
-
+if SKIP_DIAG ~= 1;
+    % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
+    
+    % plot(r_matrix(6,trials_risky); r_matrix(15, risky_trials);
+   
+    
+    % --- --- --- END SKIP THIS SECTION --- --- --- %
+end
 
 %% RANDOMIZE AND REPEAT MATRIX 
 
+%%% INSERT RANDOMISATION
 
+matrix(1,:) = 1:stim_nr;                                                  % line 01 - presentation number (sequential)
+matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line 02 - repeat number
 
 if reveal_ambiguity == 1;
-    % code
+    matrix(5,:) = ones(1, stim_nr);                                       % line 05 - resolve ambiguity (1 = yes, 2 = no)
+else
+    matrix(5,:) = ones(1, stim_nr)*2;                                     % line 05 - resolve ambiguity (1 = yes, 2 = no) 
 end
 
+% fill unused lines with NaN for security
+matrix(9,:) = NaN(1,stim_nr);
+matrix(16:19,:) = NaN(4,stim_nr);
 
-% lines to do after repeated
-% 1 2 5
-
+%% DEBUG
 keyboard;
 
 %% end function code
-%end
+end
