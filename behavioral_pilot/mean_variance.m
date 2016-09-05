@@ -1,6 +1,6 @@
 function [ mvar, ev ] = mean_variance( varargin )
 % function to calculate mean variance and expected value
-%   calculates the variance and expected value of probabilistic offers 
+%   calculates the variance and expected value of probabilistic offers
 %   for multiple probablities and values
 %   input = p1, v1, p2, v2, ... pn, vn (probabilities first)
 
@@ -20,8 +20,8 @@ values = varargin(1, 2:2:nargin);
 if max(probabilities) > 1;
     error('some probabilities are above 1 - entered values numbers in worng order?');
 end
-      
-% calculate expected value and mean variance      
+
+% calculate expected value and mean variance
 for i = 1:nargin/2
     ev_vector(i) = values(i)*probabilities(i);
 end
