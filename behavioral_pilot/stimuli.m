@@ -8,7 +8,7 @@ function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag )
 % line 02 - repeat number
 % line 03 - stimulus number (randomized)
 % line 04 - trial type (1 = risky, 2 = ambigious)
-% line 05 - resolve ambiguity (1 = yes, 2 = no)
+% line 05 - resolve ambiguity (1 = yes, 0 = no)
 %
 % line 06 - risk variance level (1-4; low to high variance)
 %               for risk: 25 at 80%, 33 at 60%, 50 at 40%, 100 at 20%
@@ -238,9 +238,9 @@ matrix(1,:) = 1:stim_nr;                                                  % line
 matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line 02 - repeat number
 
 if reveal_ambiguity == 1;
-    matrix(5,:) = ones(1, stim_nr);                                       % line 05 - resolve ambiguity (1 = yes, 2 = no)
+    matrix(5,:) = ones(1, stim_nr);                                       % line 05 - resolve ambiguity (1 = yes, 0 = no)
 else
-    matrix(5,:) = ones(1, stim_nr)*2;                                     % line 05 - resolve ambiguity (1 = yes, 2 = no) 
+    matrix(5,:) = zeros(1, stim_nr);                                      % line 05 - resolve ambiguity (1 = yes, 0 = no) 
 end
 
 % fill unused lines with NaN for security
