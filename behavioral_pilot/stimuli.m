@@ -202,7 +202,8 @@ if DIAG == 1;
     %%% EXPECTED RESULTS
     neutral = [1 1 1 1];
     risky = [.8 .82 .83 .87];
-    ambigous_controll = [.6 .61 .61 .62];
+    risky_control = [.81 .8 .81 .84];
+    ambigous_control = [.6 .61 .61 .62];
     ambigous = [.58 .57 .72 .79];
     
     figs.fig3 = figure('Color', [1 1 1]);
@@ -210,15 +211,17 @@ if DIAG == 1;
     
     plot(1:4, neutral, 'k', 'linewidth', 2); hold on; box off;
     plot([1 2], risky(1,1:2), 'b-*', 'linewidth', 2);
+    plot([1 2], risky_control(1,1:2), 'b--*', 'linewidth', 2);
+    plot([1 2], ambigous(1,1:2), 'r-*', 'linewidth', 2);
+    plot([1 2], ambigous_control(1,1:2), 'r--*', 'linewidth', 2);    
     plot([3 4], risky(1,3:4), 'b-*', 'linewidth', 2);
-    plot([1 2], ambigous_controll(1,1:2), 'r-*', 'linewidth', 2);
-    plot([3 4], ambigous_controll(1,3:4), 'r-*', 'linewidth', 2);   
-    plot([1 2], ambigous(1,1:2), 'r--*', 'linewidth', 2);
+    plot([3 4], risky_control(1,3:4), 'b--*', 'linewidth', 2);   
+    plot([3 4], ambigous_control(1,3:4), 'r-*', 'linewidth', 2);   
     plot([3 4], ambigous(1,3:4), 'r--*', 'linewidth', 2);
     
     axis([.5 4.5 0 1.1]); xlabel('time'); ylabel('risk preference');
     set(gca, 'XTick', 1.5:2:3.5); set(gca, 'XTickLabel', {'sesion 1 (base)', 'sesion 2 (experimental)'})
-    legend('neutral', 'risk pre', 'risk post', 'ambiguity pre', 'ambiguity post', 'ambiguity pre', 'ambigutiy resolved', 'location', 'southwest');  
+    legend('neutral', 'risk experimental', 'risk control', 'ambiguity experimental', 'ambiguity control', 'location', 'southwest');  
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
