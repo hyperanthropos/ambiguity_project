@@ -221,7 +221,7 @@ if DIAG == 1;
     
     axis([.5 4.5 0 1.1]); xlabel('time'); ylabel('risk preference');
     set(gca, 'XTick', 1.5:2:3.5); set(gca, 'XTickLabel', {'sesion 1 (base)', 'sesion 2 (experimental)'})
-    legend('neutral', 'risk experimental', 'risk control', 'ambiguity experimental', 'ambiguity control', 'location', 'southwest');  
+    legend('neutral', 'risk control', 'risk experimental', 'ambiguity control', 'ambiguity experimental', 'location', 'southwest');  
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
