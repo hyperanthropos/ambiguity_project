@@ -1,8 +1,7 @@
-%function [matrix, stim_nr] = stimuli( reveal_ambiguity )
-clear; close all; clc;
+function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag )
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
-% can be fed into a task-presentation script pu
+% can be fed into a task-presentation script
 %
 % --- stim_matrix description
 % line 01 - presentation number (sequential)
@@ -29,30 +28,33 @@ clear; close all; clc;
 % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 %
 % --- further notes:
-% - expected value (EV) of all trials is fixed to 20 value units
+% - expected value (EV) of all trials is fixed to one value
 % - this funtion does not set up propper randomization - this has to be
 % initialized before in a wrapper / presentation script
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
-SKIP_DIAG = 0; % skip diagnostics of stimuli range
+SKIP_DIAG = diag;      % skip diagnostics of stimuli range
 
-repeats = 2;
-isi = 1;
+isi = 1;                    % mean ISI between trials (for future fMRI optimisation)
+repeats = repeat;                % how many times should one set be repeated
 
-X.steps = 14;           % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
-                        % maximum counteroffer (risk vs. ambiguity): 25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
-X.var{1} = [0.50 1.25];     % for variance level 1: 75% - 125%
-X.var{2} = [0.25 1.50];     % for variance level 2: 50% - 150%
-X.var{3} = [0.00 1.75];     % for variance level 3: 25% - 175%
+X.steps = steps;               % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
+                                % maximum counteroffer (risk vs. ambiguity): 25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
+                                % minimum counteroffer (risk vs. ambiguity): 0 vs 15, 0 vs 10, 0 vs 5, 0 vs 0
+X.var{1} = [0.75 1.25];     % for variance level 1: 75% - 125%
+X.var{2} = [0.50 1.50];     % for variance level 2: 50% - 150%
+X.var{3} = [0.25 1.75];     % for variance level 3: 25% - 175%
 X.var{4} = [0.00 2.00];     % for variance level 4: 0% - 200% 
 
-X.RP = [.8 .6 .4 .2]; % risky probability levels
-X.RV = [25 100/3 50 100]; % risky value levels
-X.RN = 4; % number of risky levels
-X.AVL = [15 10 5 0]; % ambiguitly levels low
-X.AVH = [25 30 35 40]; % ambiguitly levels high
-X.AN = 4; % number of ambiguous levels
+X.RP = [.8 .6 .4 .2];       % risky probability levels
+X.RV = [25 100/3 50 100];   % risky value levels
+X.RN = 4;                   % number of risky levels
+X.AVL = [15 10 5 0];        % ambiguitly levels low
+X.AVH = [25 30 35 40];      % ambiguitly levels high
+X.AN = 4;                   % number of ambiguous levels
+
+X.EV = 20;                  % expected value (has to matched to X.RP, X.RV, X.AVL, X.AVH
 
 stim_nr = (length(X.RP)+length(X.AVL))*X.steps*repeats;
 
@@ -62,15 +64,10 @@ if SKIP_DIAG ~= 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % set risk parameters for
-%     K.mvar = -1/180;        % mean variance (<0 is risk averse)
-%     K.hyp = 1.5;            % hyperbolic discounting (>1 is risk averse)
-%     K.pros = 0.95;          % prospect theory (<1 is risk averse)
-%     scale = [12 20];        % axis scale
-    
     K.mvar = -1/080;        % mean variance (<0 is risk averse)
-    K.hyp = 2.5;            % hyperbolic discounting (>1 is risk averse)
-    K.pros = 0.85;          % prospect theory (<1 is risk averse)
-    scale = [0 20];        % axis scale
+    K.hyp = 2.0;            % hyperbolic discounting (>1 is risk averse)
+    K.pros = 0.90;          % prospect theory (<1 is risk averse)
+    scale = [00 20];        % axis scale
     
     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
     % mean variance of risky trials
@@ -83,47 +80,47 @@ if SKIP_DIAG ~= 1;
         [mvar(2, i)] = mean_variance( .5, X.AVL(i), .5, X.AVH(i) );
     end
     % subjective value according to k parameter
-    sv.mvar = ones(2,4)*20 + mvar * K.mvar;
+    SV.mvar = ones(2,4)*20 + mvar * K.mvar;
     
     % SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
     odds = (1-X.RP)./X.RP;                                          % transform p to odds
-    sv.hyp(1,:) = X.RV./(1+K.hyp.*odds);                            % subjective value of risky offers
+    SV.hyp(1,:) = X.RV./(1+K.hyp.*odds);                            % subjective value of risky offers
     odds = [1 1 1 1];                                               % odds are equal for ambiguous offers
-    sv.hyp(2,:) = X.AVL./(1+K.hyp.*odds) + X.AVH./(1+K.hyp.*odds);  % subjective value of ambiguous offers
+    SV.hyp(2,:) = X.AVL./(1+K.hyp.*odds) + X.AVH./(1+K.hyp.*odds);  % subjective value of ambiguous offers
     
     % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
-    sv.pros(1,:) = X.RP.*X.RV.^K.pros;
-    sv.pros(2,:) = .5.*X.AVL.^K.pros + .5.*X.AVH.^K.pros;
+    SV.pros(1,:) = X.RP.*X.RV.^K.pros;
+    SV.pros(2,:) = .5.*X.AVL.^K.pros + .5.*X.AVH.^K.pros;
     
     % PLOT AND COMPARE SV
     figs.fig1 = figure('Color', [1 1 1]);
     set(figs.fig1,'units','normalized','outerposition',[0 .6 .5 .6]);
     subplot(2,2,1);
-    plot(sv.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
-    plot(sv.hyp(1,:), 'r-', 'linewidth', 2);
-    plot(sv.pros(1,:), 'b-', 'linewidth', 2);
+    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
+    plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
+    plot(SV.pros(1,:), 'b-', 'linewidth', 2);
     axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
     legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'southwest');
     subplot(2,2,2);
-    plot(sv.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
-    plot(sv.hyp(2,:), 'r--', 'linewidth', 2);
-    plot(sv.pros(2,:), 'b--', 'linewidth', 2);
+    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
+    plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
+    plot(SV.pros(2,:), 'b--', 'linewidth', 2);
     axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
     legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'southwest');
     subplot(2,3,4);
-    plot(sv.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(sv.mvar(2,:), 'k--', 'linewidth', 2); box('off');
+    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('mean variance'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
     subplot(2,3,5);
-    plot(sv.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(sv.hyp(2,:), 'r--', 'linewidth', 2); box('off');
+    plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('hyperbolic'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
     axis([.5 4.5 scale]);
     subplot(2,3,6);
-    plot(sv.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(sv.pros(2,:), 'b--', 'linewidth', 2); box('off');
+    plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('prospect theory'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
     
@@ -158,10 +155,10 @@ r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line
 % create counteroffers
 counteroffers = [];
 for i = 1:X.RN;
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps));
+counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
 end
 for i = 1:X.AN;
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps));
+counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
 end
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
@@ -180,20 +177,20 @@ if SKIP_DIAG ~= 1;
     set(figs.fig2,'units','normalized','outerposition',[0 .6 .5 .6]);
     
     subplot(1,2,1);
-    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)); box off; hold on;
-    plot(sv.mvar(1,:)./20, 'k-', 'linewidth', 2);
-    plot(sv.hyp(1,:)./20, 'r-', 'linewidth', 2);
-    plot(sv.pros(1,:)./20, 'b-', 'linewidth', 2);
+    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)/X.EV); box off; hold on;
+    plot(SV.mvar(1,:)./20, 'k-', 'linewidth', 2);
+    plot(SV.hyp(1,:)./20, 'r-', 'linewidth', 2);
+    plot(SV.pros(1,:)./20, 'b-', 'linewidth', 2);
     
     legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
     axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
     set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'80%','60%', '40%', '20%'});
     
     subplot(1,2,2);
-    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)); box off; hold on;
-    plot(sv.mvar(2,:)./20, 'k--', 'linewidth', 2);
-    plot(sv.hyp(2,:)./20, 'r--', 'linewidth', 2);
-    plot(sv.pros(2,:)./20, 'b--', 'linewidth', 2);
+    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)/X.EV); box off; hold on;
+    plot(SV.mvar(2,:)./20, 'k--', 'linewidth', 2);
+    plot(SV.hyp(2,:)./20, 'r--', 'linewidth', 2);
+    plot(SV.pros(2,:)./20, 'b--', 'linewidth', 2);
     
     legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
     axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
@@ -228,8 +225,15 @@ end
 
 %% RANDOMIZE AND REPEAT MATRIX 
 
-%%% INSERT RANDOMISATION
+% randomize and repeat r_matrix
+repeat_size = length(r_matrix);
 
+matrix = [];
+for i = 1:repeats;
+    matrix = cat(2, matrix, r_matrix(:,randperm(repeat_size)) );    
+end
+
+% complete matrix
 matrix(1,:) = 1:stim_nr;                                                  % line 01 - presentation number (sequential)
 matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line 02 - repeat number
 
@@ -243,8 +247,8 @@ end
 matrix(9,:) = NaN(1,stim_nr);
 matrix(16:19,:) = NaN(4,stim_nr);
 
-%% DEBUG
-keyboard;
+% derandomize
+% sorted_matrix = sortrows(matrix', [2 3])';
 
 %% end function code
-%end
+end
