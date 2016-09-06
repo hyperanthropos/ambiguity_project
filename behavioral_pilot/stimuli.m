@@ -34,7 +34,7 @@ function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag )
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
-SKIP_DIAG = diag;      % skip diagnostics of stimuli range
+DIAG = diag;      % run diagnostics of stimuli range
 
 isi = 1;                    % mean ISI between trials (for future fMRI optimisation)
 repeats = repeat;                % how many times should one set be repeated
@@ -60,7 +60,7 @@ stim_nr = (length(X.RP)+length(X.AVL))*X.steps*repeats;
 
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
-if SKIP_DIAG ~= 1;
+if DIAG == 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % set risk parameters for
@@ -169,7 +169,7 @@ r_matrix(22,:) = randi(2, 1, stim_nr/repeats);                            % line
 
 %% DIAGNOSTIC: PLOT STIMULUS MATRIX
 
-if SKIP_DIAG ~= 1;
+if DIAG == 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % plot trials and funtcions
