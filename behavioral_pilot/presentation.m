@@ -10,8 +10,8 @@ session = 1;
 
 STIMS.reveal_amb = 0;                           % 1 = yes, 0 = no
 STIMS.steps = 18;
-STIMS.repeats = 3;
-STIMS.diagnostic_graphs = 0;
+STIMS.repeats = 2;
+STIMS.diagnostic_graphs = 1;
 
 [stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs);
 
