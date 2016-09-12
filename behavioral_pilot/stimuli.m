@@ -134,30 +134,30 @@ if DIAG == 1;
     subplot(3,5,11);
     COMP.ev = ones(2,4)*20;
     bar(COMP.ev');
-    title('expected value');
+    title('expected value'); xlabel('variance');
     % variance
     subplot(3,5,12);
     COMP.var = mvar;
     bar(COMP.var');
-    title('variance');
+    title('variance'); xlabel('variance');
     % absolute value
     subplot(3,5,13);
     COMP.av(1,:) = X.RVH + X.RVL;
     COMP.av(2,:) = X.AVH + X.AVL;
     bar(COMP.av');
-    title('abs. value');
+    title('abs. value'); xlabel('variance');
     % difference value
     subplot(3,5,14);
     COMP.dv(1,:) = X.RVH - X.RVL;
     COMP.dv(2,:) = X.AVH - X.AVL;
     bar(COMP.dv');
-    title('diff. value');
+    title('diff. value'); xlabel('variance');
     % exp. val difference
     subplot(3,5,15);
     COMP.dv(1,:) = X.RVH.*X.RPH - X.RVL.*X.RPL;
     COMP.dv(2,:) = X.AVH*.5 - X.AVL*.5;
     bar(COMP.dv');
-    title('exp. val. diff');
+    title('exp. val. diff'); xlabel('variance');
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
