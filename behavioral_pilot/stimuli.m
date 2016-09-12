@@ -99,7 +99,7 @@ if DIAG == 1;
     
     % PLOT AND COMPARE SV
     figs.fig1 = figure('Color', [1 1 1]);
-    set(figs.fig1,'units','normalized','outerposition',[0 .6 .5 .6]);
+    set(figs.fig1,'units','normalized','outerposition',[0 .8 .5 .8]);
     subplot(3,2,1);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
