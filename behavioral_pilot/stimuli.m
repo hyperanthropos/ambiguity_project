@@ -17,9 +17,8 @@ function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag )
 % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 %
 % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
-% line 11 - option 1 - lower value risk [ line 6 ] (always 0 for risk)
-% line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
-warning('adjust description');
+% line 11 - option 1 - lower value risk [ line 6 ] (10.00 07.75 07.75 10.00 for risk)
+% line 12 - option 1 - upper value risk [ line 6 ] (22.50 28.17 38.37 60.00 for risk)
 % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
 % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
 % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
@@ -35,29 +34,31 @@ warning('adjust description');
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
-DIAG = diag;      % run diagnostics of stimuli range
+DIAG = diag;                % run diagnostics of stimuli range
 
-isi = 1;                    % mean ISI between trials (for future fMRI optimisation)
-repeats = repeat;                % how many times should one set be repeated
+isi = 1;                        % mean ISI between trials (for future fMRI optimisation)
+repeats = repeat;               % how many times should one set be repeated
 
-X.steps = steps;               % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
-                                % maximum counteroffer (risk vs. ambiguity): 25 vs 25, 33 vs 30, 50 vs 35, 100 vs 40
-                                % minimum counteroffer (risk vs. ambiguity): 0 vs 15, 0 vs 10, 0 vs 5, 0 vs 0
-X.var{1} = [0.75 1.25];     % for variance level 1: 75% - 125%
-X.var{2} = [0.50 1.50];     % for variance level 2: 50% - 150%
-X.var{3} = [0.25 1.75];     % for variance level 3: 25% - 175%
-X.var{4} = [0.00 2.00];     % for variance level 4: 0% - 200% 
+X.steps = steps;                % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
+                                    % maximum counteroffer (risk vs. ambiguity): 22.5 vs 25, 28.2 vs 30, 38.4 vs 35, 60 vs 40
+                                    % minimum counteroffer (risk vs. ambiguity): 10 vs 15, 7.8 vs 10, 7.8 vs 5, 10 vs 0
+                                    % combined: 15 - 22.5; 10 - 28.2; 7.8 - 35; 10 - 40; 
+                                    % in % [0.750 1.125]; [0.500 1.410]; [0.390 1.750]; [0.500 2.000];
+X.var{1} = [0.750 1.125];                                         % for variance level 1: 75% - 125% (15 - 25)
+X.var{2} = [0.500 1.330];                                         % for variance level 2: 50% - 150% (10 - 30)
+X.var{3} = [0.390 1.540];                                         % for variance level 3: 25% - 175% (5 - 35)
+X.var{4} = [0.500 1.750];                                         % for variance level 4: 0% - 200% (0 - 40)
 
-X.RPH = [.8 .6 .4 .2];      % risky probabilities for high offer
-X.RVH = [25 100/3 50 100];  % risky value levels high
-X.RPL = 1-X.RPH;            % risky probabilities for low offers
-X.RVL = [0 0 0 0];          % risky value levels low
-X.RN = 4;                   % number of risky levels
-X.AVL = [15 10 5 0];        % ambiguitly levels low
-X.AVH = [25 30 35 40];      % ambiguitly levels high
-X.AN = 4;                   % number of ambiguous levels
+X.RPH = [.8 .6 .4 .2];                                          % risky probabilities for high offer
+X.RVH = [22.5 , (10*6^(1/2))/3+20 , (15*6^(1/2))/2+20 , 60];    % risky value levels high
+X.RPL = 1-X.RPH;                                                % risky probabilities for low offers
+X.RVL = [10 , 20-5*6^(1/2) , 20-5*6^(1/2) , 10];                % risky value levels low
+X.RN = 4;                                                       % number of risky levels
+X.AVL = [15 10 5 0];                                            % ambiguitly levels low
+X.AVH = [25 30 35 40];                                          % ambiguitly levels high
+X.AN = 4;                                                       % number of ambiguous levels
 
-X.EV = 20;                  % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH
+X.EV = 20;                                                      % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH
 
 stim_nr = (length(X.RPH)+length(X.AVL))*X.steps*repeats;
 
@@ -67,9 +68,9 @@ if DIAG == 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % set risk parameters for
-    K.mvar = -1/100;        % mean variance (<0 is risk averse)
-    K.hyp = 2.0;            % hyperbolic discounting (>1 is risk averse)
-    K.pros = 0.90;          % prospect theory (<1 is risk averse)
+    K.mvar = -1/60;        % mean variance (<0 is risk averse)
+    K.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
+    K.pros = 0.92;          % prospect theory (<1 is risk averse)
     scale = [00 20];        % axis scale
     
     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
@@ -127,6 +128,9 @@ if DIAG == 1;
     plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('prospect theory'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
+   
+    % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
+    warning('add this');
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
