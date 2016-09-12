@@ -100,37 +100,64 @@ if DIAG == 1;
     % PLOT AND COMPARE SV
     figs.fig1 = figure('Color', [1 1 1]);
     set(figs.fig1,'units','normalized','outerposition',[0 .6 .5 .6]);
-    subplot(2,2,1);
+    subplot(3,2,1);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2);
     axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
     legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'southwest');
-    subplot(2,2,2);
+    subplot(3,2,2);
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
     plot(SV.pros(2,:), 'b--', 'linewidth', 2);
     axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
     legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'southwest');
-    subplot(2,3,4);
+    subplot(3,3,4);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('mean variance'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
-    subplot(2,3,5);
+    subplot(3,3,5);
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('hyperbolic'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
     axis([.5 4.5 scale]);
-    subplot(2,3,6);
+    subplot(3,3,6);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
     axis([.5 4.5 scale]); title('prospect theory'); xlabel('variance'); ylabel('expected value');
     legend('risk', 'ambiguity', 'location', 'southwest');
    
     % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
-    warning('add this');
+    % expected value
+    subplot(3,5,11);
+    COMP.ev = ones(2,4)*20;
+    bar(COMP.ev');
+    title('expected value');
+    % variance
+    subplot(3,5,12);
+    COMP.var = mvar;
+    bar(COMP.var');
+    title('variance');
+    % absolute value
+    subplot(3,5,13);
+    COMP.av(1,:) = X.RVH + X.RVL;
+    COMP.av(2,:) = X.AVH + X.AVL;
+    bar(COMP.av');
+    title('abs. value');
+    % difference value
+    subplot(3,5,14);
+    COMP.dv(1,:) = X.RVH - X.RVL;
+    COMP.dv(2,:) = X.AVH - X.AVL;
+    bar(COMP.dv');
+    title('diff. value');
+    % exp. val difference
+    subplot(3,5,15);
+    COMP.dv(1,:) = X.RVH.*X.RPH - X.RVL.*X.RPL;
+    COMP.dv(2,:) = X.AVH*.5 - X.AVL*.5;
+    bar(COMP.dv');
+    title('exp. val. diff');
     
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
