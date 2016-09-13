@@ -1,19 +1,48 @@
 %% code to present the experiment
+% written by Sebastian Weissengruber
 % dependencies: stimuli.m, mean_variance.m
 clear; close all; clc;
 
+% USER MANUAL
+
+% ...
+
 %% SET PARAMETERS
 
-session = 1;
+PARTICIPANT_NR = 1;     % which participant
+SESSION = 1;            % which session (1 or 2)
+AMBIGUITY = 0;          % 1 = yes, 0 = no
+
+%% PREPARE PRESENTATION
+
+% prepare file structure and save file
+home = pwd;
+save_directory = [];
+save_file = [];
+
+
+
+%%% USE RISK_PRESENTATION REDUCE
 
 %% CREATE STIMULI MATRIX
 
-STIMS.reveal_amb = 0;                           % 1 = yes, 0 = no
-STIMS.steps = 18;
-STIMS.repeats = 2;
-STIMS.diagnostic_graphs = 1;
+% current design: 14 steps of variation with 2 repeats; 224 trials, ca. 7.5min (x 2 sessions)
+% alternative: 18 steps of variation with 3 repeats; 432 trials, ca. 15min (x 1 sessions)
 
+STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
+STIMS.steps = 14;
+STIMS.repeats = 2;
+STIMS.diagnostic_graphs = 0;
+
+% create replicable randomization 
+randomisation = RandStream('mt19937ar', 'Seed', PARTICIPANT_NR + 1000*SESSION + 10000*AMBIGUITY);
+RandStream.setGlobalStream(randomisation);
+
+% create matrix
 [stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs);
+
+% derandomize
+sorted_matrix = sortrows(stim_mat', [2 3])';
 
 %% PRESENT STIMULI
 
@@ -28,17 +57,38 @@ for i = 1:stim_nr;
     
     if stim_mat(4,i) == 1; % risky trial
         
-        disp(' ');
-        disp([ num2str(counteroffer) ' CHF or ' num2str(probablity) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(risk_low) 'CHF' ]);
+        if stim_mat(21,i) == 1 % counteroffer left
+            
+            disp(' ');
+            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(probablity) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(risk_low) 'CHF' ]);
+            
+        elseif stim_mat(21,i) == 2 % counteroffer right
+            
+            disp(' ');
+            disp([ num2str(probablity) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(risk_low) ' | OR | ' num2str(counteroffer) ' CHF'  ]);
+            
+        end
         
     elseif stim_mat(4,i) == 2; % ambigious trial
         
-        disp(' ');
-        disp([ num2str(counteroffer) ' CHF or ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-        disp([ 'turns out to be: ' num2str(probablity) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+        if stim_mat(21,i) == 1 % counteroffer left
+            
+            disp(' ');
+            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
+            disp([ 'turns out to be: ' num2str(probablity) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            
+        elseif stim_mat(21,i) == 2 % counteroffer right
+            
+            disp(' ');
+            disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
+            disp([ 'turns out to be: ' num2str(probablity) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            
+        end
         
-    else
-        error('problem with stimuli matrix specificaton');
     end
+    
+    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer;
+    
+    % pause;
     
 end
