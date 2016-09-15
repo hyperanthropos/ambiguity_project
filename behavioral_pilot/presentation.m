@@ -17,10 +17,11 @@ AMBIGUITY = 0;          % 1 = yes, 0 = no
 
 % prepare file structure and save file
 home = pwd;
-save_directory = [];
-save_file = [];
+savedir = fullfile(home, 'logfiles');
+if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
+save_file = fullfile(save_directory, ['x.mat']);
 
-
+% make savefile containing VP, SESSION
 
 %%% USE RISK_PRESENTATION REDUCE
 
