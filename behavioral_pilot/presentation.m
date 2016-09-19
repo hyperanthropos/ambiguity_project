@@ -1,29 +1,27 @@
 %% code to present the experiment
-% written by Sebastian Weissengruber
 % dependencies: stimuli.m, mean_variance.m
-clear; close all; clc;
 
 % USER MANUAL
 
 % ...
 
-%% SET PARAMETERS
+%% SET PARAMETERS (these will be fed to the function directly later on...)
 
-PARTICIPANT_NR = 1;     % which participant
-SESSION = 1;            % which session (1 or 2)
-AMBIGUITY = 0;          % 1 = yes, 0 = no
+clear; close all; clc;
 
-%% PREPARE PRESENTATION
+SESSION = 1;                % which session (1 or 2)
+AMBIGUITY = 0;              % 1 = yes, 0 = no
+SAVE_FILE = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat';    % where to save
 
-% prepare file structure and save file
-home = pwd;
-savedir = fullfile(home, 'logfiles');
-if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
-save_file = fullfile(save_directory, ['x.mat']);
+% --- --- --- %
 
-% make savefile containing VP, SESSION
+SCREEN_NR = 0;              % set screen to use 
+                            % run Screen('Screens') to check what is available on your machine
 
-%%% USE RISK_PRESENTATION REDUCE
+LINUX_MODE = 1;             % set button mapping for linux system
+BUTTON_BOX = 0;             % set button mapping for fMRI button box
+
+DEBUG_MODE = 1;             % set full screen or window for testing
 
 %% CREATE STIMULI MATRIX
 
@@ -35,15 +33,43 @@ STIMS.steps = 14;
 STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 
-% create replicable randomization 
-randomisation = RandStream('mt19937ar', 'Seed', PARTICIPANT_NR + 1000*SESSION + 10000*AMBIGUITY);
-RandStream.setGlobalStream(randomisation);
-
 % create matrix
 [stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs);
 
 % derandomize
 sorted_matrix = sortrows(stim_mat', [2 3])';
+
+%% PREPARE PRESENTATION
+
+% --> code
+
+
+%% PREPARE PSYCHTOOLBOX
+
+addpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox');
+
+% set used keys
+if LINUX_MODE == 1;
+    rightkey = 115; leftkey = 114;
+else
+    rightkey = 39; leftkey = 37;
+end
+
+if BUTTON_BOX == 1;
+    rightkey = 49; leftkey = 51;
+end
+
+
+
+% open a screen to start presentation (can be closed with "sca" command)
+if DEBUG_MODE == 1;
+    disp(' '); disp('press enter to open the screen...');
+    pause;
+    window = Screen('OpenWindow', SCREEN_NR, [], [0 0 1280 768]);
+else
+    window = Screen('OpenWindow', SCREEN_NR);
+end
+
 
 %% PRESENT STIMULI
 
@@ -93,3 +119,7 @@ for i = 1:stim_nr;
     % pause;
     
 end
+
+%% SAVE RESULTS
+
+save(SAVE_FILE);
