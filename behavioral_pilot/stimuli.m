@@ -278,6 +278,8 @@ else
     matrix(5,:) = zeros(1, stim_nr);                                      % line 05 - resolve ambiguity (1 = yes, 0 = no) 
 end
 
+warning('1st repeat of first session should never be revealed - add this!');
+
 % fill unused lines with NaN for security
 matrix(9,:) = NaN(1,stim_nr);
 matrix(16:19,:) = NaN(4,stim_nr);
