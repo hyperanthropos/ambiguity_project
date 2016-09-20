@@ -95,7 +95,7 @@ warning('optimized preallocation with actual log size');
 for i = 1:stim_nr;
     
     % sort elements that will be used for each trial
-    probablity = stim_mat(10,i)*100;
+    probablity = stim_mat(10,i);
     risk_low = stim_mat(11,i);
     risk_high = stim_mat(12,i);
     ambiguity_low = stim_mat(13,i);
@@ -115,11 +115,11 @@ for i = 1:stim_nr;
         if stim_mat(21,i) == 1;
             typus = 1; position = 1; % risky trial, counteroffer left
             disp(' ');
-            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(probablity) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(risk_low) 'CHF' ]);
+            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) 'CHF' ]);
         elseif stim_mat(21,i) == 2;
             typus = 1; position = 2; % risky trial, counteroffer right
             disp(' ');
-            disp([ num2str(probablity) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(risk_low) ' | OR | ' num2str(counteroffer) ' CHF'  ]);
+            disp([ num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' | OR | ' num2str(counteroffer) ' CHF'  ]);
         end
         
     elseif stim_mat(4,i) == 2;
@@ -127,12 +127,12 @@ for i = 1:stim_nr;
             typus = 2; position = 1; % ambigious trial, counteroffer left
             disp(' ');
             disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ])
         elseif stim_mat(21,i) == 2;
             typus = 2; position = 2; % ambigious trial, counteroffer right
             disp(' ');
             disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ])
         end
         
     end
