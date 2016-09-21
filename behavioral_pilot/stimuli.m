@@ -1,4 +1,4 @@
-function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag )
+function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag, session )
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
 % can be fed into a task-presentation script
@@ -272,13 +272,16 @@ end
 matrix(1,:) = 1:stim_nr;                                                  % line 01 - presentation number (sequential)
 matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line 02 - repeat number
 
+% set if ambiguity is resolved 
 if reveal_ambiguity == 1;
     matrix(5,:) = ones(1, stim_nr);                                       % line 05 - resolve ambiguity (1 = yes, 0 = no)
 else
     matrix(5,:) = zeros(1, stim_nr);                                      % line 05 - resolve ambiguity (1 = yes, 0 = no) 
 end
-
-warning('1st repeat of first session should never be revealed - add this!');
+% first repeat in first session is never revealed
+if session == 1; 
+    matrix(5,1:repeat_size) = ones(1, repeat_size);
+end
 
 % fill unused lines with NaN for security
 matrix(9,:) = NaN(1,stim_nr);
