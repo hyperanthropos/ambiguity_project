@@ -280,7 +280,7 @@ else
 end
 % first repeat in first session is never revealed
 if session == 1; 
-    matrix(5,1:repeat_size) = ones(1, repeat_size);
+    matrix(5,1:repeat_size) = zeros(1, repeat_size);
 end
 
 % fill unused lines with NaN for security
