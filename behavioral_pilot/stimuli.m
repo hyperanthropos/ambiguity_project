@@ -261,7 +261,7 @@ end
 %% RANDOMIZE AND REPEAT MATRIX 
 
 % randomize and repeat r_matrix
-repeat_size = length(r_matrix);
+repeat_size = size(r_matrix, 2);
 
 matrix = [];
 for i = 1:repeats;
