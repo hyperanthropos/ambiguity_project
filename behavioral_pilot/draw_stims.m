@@ -1,4 +1,4 @@
-function [ ] = draw_stims( window, adjust, probability, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, resolve )
+function [ ] = draw_stims( window, screen_resolution, probability, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, resolve )
 % function to draw the stimuli on the screen with Psychtoolbox
 % typus: 1 = risky; 2 ambiguous;
 % position: 1 = counteroffer left; 2 = counteroffer right;
@@ -21,29 +21,51 @@ switch color_scheme
         problinecolor = 0; % black                          for probability line
 end
 
+% use Swiss Francs abbreviation "Fr."
+use_abbreviation = 1; % 1 = use; 2 = do not use
+switch use_abbreviation
+    case 1
+        abbrev_add = ' Fr.';
+    case 0
+        abbrev_add = [];
+end    
+
 % define positions for text (left)
-POSITION.upper =    [-215, 230];
-POSITION.high =     [-215, 160];
+POSITION.upper =    [-215, -230];
+POSITION.high =     [-215, -160];
 POSITION.mid =      [-215, 0];
-POSITION.low =      [-215, -160];
-POSITION.under =    [-215, -230];
+POSITION.low =      [-215, 160];
+POSITION.under =    [-215, 230];
 
 % define nested function to draw text
+    screenres = screen_resolution/2;
+
     function [ ] = draw_text( coords, side )
         
+        % some text functions do not work correctly after screen translation
+        % setting screen back to default and later back to origin again
+        Screen('glTranslate', window, -screenres(1), -screenres(2), 0);
+
         offset = Screen(window, 'TextBounds', disp_text)/2;
-        
-        if strcmp(disp_text(end), '%');
+ 
+        if strcmp(disp_text(end), '%'); % user a different color for % values
             textcolor = color3;
         else
             textcolor = 0;
         end
         
         if strcmp(side, 'left')
-            Screen(window, 'DrawText', disp_text, coords(1)-offset(3), adjust-coords(2)-offset(4), textcolor);
+            Screen(window, 'DrawText', disp_text, screenres(1)+coords(1)-offset(3), screenres(2)+coords(2)-offset(4), textcolor);
+            % same outcomem preserved to use in case of compatibility issues
+            % DrawFormattedText(window, disp_text, screenres(1)+coords(1)-offset(3), screenres(2)+coords(2)+offset(4), textcolor);
         elseif strcmp(side, 'right')
-            Screen(window, 'DrawText', disp_text, coords(1)*-1-offset(3), adjust-coords(2)-offset(4), textcolor);
+            Screen(window, 'DrawText', disp_text, screenres(1)+coords(1)*-1-offset(3), screenres(2)+coords(2)-offset(4), textcolor);
+            % same outcomem preserved to use in case of compatibility issues
+            % DrawFormattedText(window, disp_text, screenres(1)+coords(1)-offset(3), screenres(2)+coords(2)+offset(4), textcolor);
         end
+        
+        % going back to origin
+        Screen('glTranslate', window, screenres(1), screenres(2), 0);
        
     end
 
@@ -114,7 +136,7 @@ switch position
         rect_c = [color1; color2]; % colors
         Screen(window, 'FillRect', rect_c', rect');
         % display counteroffer
-        disp_text = sprintf('%.1f', counteroffer);
+        disp_text = [ sprintf('%.1f', counteroffer) abbrev_add ];
         draw_text(POSITION.mid, 'left');
         
         side = 'right';
@@ -124,7 +146,7 @@ switch position
         rect_c = [color2; color1]; % colors
         Screen(window, 'FillRect', rect_c', rect');
         % display counteroffer
-        disp_text = sprintf('%.1f', counteroffer);
+        disp_text = [ sprintf('%.1f', counteroffer) abbrev_add ];
         draw_text(POSITION.mid, 'right')
         
         side = 'left';
@@ -134,10 +156,10 @@ end
 switch typus
     case 1 % riky trial
         % display risk value of probability
-        disp_text = sprintf('%.1f', risk_high);
+        disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
         draw_text(POSITION.under, side);
         % display risk value of inverse probability
-        disp_text = sprintf('%.1f', risk_low);
+        disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
         draw_text(POSITION.upper, side);
         % add probability line
         if position == 1; % counteroffer left
@@ -147,11 +169,11 @@ switch typus
         end
         
     case 2 % ambiguous trial
-        % display low ambiguity
-        disp_text = sprintf('%.1f', ambiguity_low);
-        draw_text(POSITION.under, side);
         % display high ambiguity
-        disp_text = sprintf('%.1f', ambiguity_high);
+        disp_text = [ sprintf('%.1f', ambiguity_high) abbrev_add ];
+        draw_text(POSITION.under, side);
+        % display low ambiguity
+        disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
         draw_text(POSITION.upper, side);
         if resolve ~= 1; % display ambiguity marker only before choice
             disp_text = '???';
