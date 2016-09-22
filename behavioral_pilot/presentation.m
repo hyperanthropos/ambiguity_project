@@ -91,14 +91,14 @@ Screen('TextSize', window, 36);
 
 % set origion to middle of the screen
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
-text_adjust = SETTINGS.SCREEN_RES(2); % pixels which y-coords have to be adjusted by for text, because PTB is broken
 
 % launch a start screen, set background color
 background_color = [224, 224, 224];
 Screen(window, 'FillRect', background_color);
 Screen(window, 'Flip');
 offset = Screen(window, 'TextBounds', 'BITTE WARTEN...')/2;
-Screen(window, 'DrawText', 'bitte warten...', 0-offset(3), text_adjust-offset(4), 0);
+Screen(window, 'DrawText', 'bitte warten...', 0-offset(3), SETTINGS.SCREEN_RES(2)-offset(4), 0); % *
+% * --> y-coords have to be adjusted for screen_res, because PTB is broken for text after screen translation
 Screen(window, 'Flip');
 clear offset background_color;
 
@@ -165,7 +165,7 @@ for i = 1:stim_nr;
     %%% USE FUNCTION TO DRAW THE STIMULI
     
     % (1) DRAW THE STIMULUS (before response)
-    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (X) GET THE RESPONSE
     % --> CODE
@@ -174,11 +174,11 @@ for i = 1:stim_nr;
     response = randi(2); % 1 left, 2 = right
     
     % (2) DRAW THE RESPONSE
-    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (3) REVEAL AMBIGUITY (or visual control) (last input of function)
     WaitSecs(TIMING.selection); % shortly wait before revealing ambiguity
-    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
+    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
     
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
     % WaitSecs(TIMING.outcome); % present final choice
