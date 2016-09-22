@@ -25,15 +25,15 @@ SETTINGS.LINUX_MODE = 1;             % set button mapping for linux or windows s
 SETTINGS.BUTTON_BOX = 0;             % set button mapping for fMRI button box ( has to be set on "12345" )
 
 SETTINGS.SCREEN_NR = 0;              % set screen to use
-% run Screen('Screens') to check what is available on your machine
+                                     % run Screen('Screens') to check what is available on your machine
 SETTINGS.SCREEN_RES = [1440 900];    % set screen resolution (centered according to this input)
 
 % TIMING SETTINGS
 
-TIMING.time = [];
-
-
-
+TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
+TIMING.selection = .5;      % time to show selected choice before revealing (not revealing) probabilities
+TIMING.outcome = 3;         % time to shwo the actual outcome (resolved probabilities or control)
+TIMING.isi = .5;             % time to wait before starting next trial with preparatory fixation cross
 
 %% CREATE STIMULI MATRIX
 
@@ -44,14 +44,21 @@ STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
 STIMS.steps = 14;
 STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
+STIMS.session = SESSION;
+
+% for testing
+warning('remove this (only testing)');
+STIMS.steps = 1;
+STIMS.reveal_amb = 1;   
 
 % create matrix
-[stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs);
+[stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs, STIMS.session);
 
 % derandomize
 sorted_matrix = sortrows(stim_mat', [2 3])';
 
 %% PREPARE PRESENTATION AND PSYCHTOOLBOX
+% help for PTB Screen commands can be displayed with "Screen [command]?" 
 
 addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 
@@ -66,21 +73,39 @@ if SETTINGS.BUTTON_BOX == 1;
     rightkey = 49; leftkey = 51;    % button box has to be set on "12345"
 end
 
+% supress warnings to see diagnostic output of stimuli
+warning('PTB warings are currently suppressed');
+Screen('Preference', 'SuppressAllWarnings', 1);
+
 % open a screen to start presentation (can be closed with "sca" command)
 if SETTINGS.DEBUG_MODE == 1;
-    disp(' '); disp('press enter to open the screen...');
-    pause;
     window = Screen('OpenWindow', SETTINGS.SCREEN_NR, [], [0 0 SETTINGS.SCREEN_RES]);
 else
     window = Screen('OpenWindow', SETTINGS.SCREEN_NR);   % open screen
     HideCursor;                                 % and hide cursor
 end
 
+% set font and size
+Screen('TextFont', window, 'Calibri');
+Screen('TextSize', window, 36);
+
 % set origion to middle of the screen
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
+text_adjust = SETTINGS.SCREEN_RES(2); % pixels which y-coords have to be adjusted by for text, because PTB is broken
 
-% synchronise with fMRI machine
+% launch a start screen, set background color
+background_color = [224, 224, 224];
+Screen(window, 'FillRect', background_color);
+Screen(window, 'Flip');
+offset = Screen(window, 'TextBounds', 'BITTE WARTEN...')/2;
+Screen(window, 'DrawText', 'bitte warten...', 0-offset(3), text_adjust-offset(4), 0);
+Screen(window, 'Flip');
+clear offset background_color;
+
+% wait to start experiment (later synchronise with fMRI machine)
 % ---> insert code when changing to scanner design
+disp('press a button to continue...');
+pause; 
 
 % start timer
 start_time = GetSecs;
@@ -89,7 +114,7 @@ start_time = GetSecs;
 
 % prepare an preallocate log
 logrec = NaN(1,stim_nr);
-warning('optimized preallocation with actual log size');
+warning('optimize preallocation with actual log size!');
 
 % loop over all trials
 for i = 1:stim_nr;
@@ -108,7 +133,7 @@ for i = 1:stim_nr;
     Screen('DrawLine', window, [0 128 0], -10, 0, 10, 0, 5);
     Screen('DrawLine', window, [0 128 0], 0, -10, 0, 10, 5);
     Screen(window, 'Flip');
-    WaitSecs(0.4);
+    WaitSecs(TIMING.pre_time);
     
     % select what to draw
     if stim_mat(4,i) == 1;
@@ -140,7 +165,7 @@ for i = 1:stim_nr;
     %%% USE FUNCTION TO DRAW THE STIMULI
     
     % (1) DRAW THE STIMULUS (before response)
-    draw_stims(window, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (X) GET THE RESPONSE
     % --> CODE
@@ -149,17 +174,21 @@ for i = 1:stim_nr;
     response = randi(2); % 1 left, 2 = right
     
     % (2) DRAW THE RESPONSE
-    draw_stims(window, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (3) REVEAL AMBIGUITY (or visual control) (last input of function)
-    WaitSecs(0.5); % shortly wait before revealing ambiguity
-    draw_stims(window, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
+    WaitSecs(TIMING.selection); % shortly wait before revealing ambiguity
+    draw_stims(window, text_adjust, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
     
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
-    WaitSecs(2); % present final choice
+    % WaitSecs(TIMING.outcome); % present final choice
+    
+    warning('artificial pause - press button'); pause;
+    
     Screen('DrawLine', window, 0, -10, 0, 10, 0, 5);
     Screen('DrawLine', window, 0, 0, -10, 0, 10, 5);   
     Screen(window, 'Flip');
+    
     
     %%% END OF STIMULI PRESENTATION
     
@@ -170,12 +199,13 @@ for i = 1:stim_nr;
     
     clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response;
     
-    WaitSecs(3); % wait before next trial (later ISI)    
-    
-    % pause;
+    WaitSecs(TIMING.isi); % wait before next trial (insert variable ISI for fMRI here)
     
 end
 
+Screen('CloseAll');
+
 %% SAVE RESULTS
 
+disp(' '); disp('saving data...');
 save(SAVE_FILE);
