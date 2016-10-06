@@ -4,10 +4,17 @@ function [ ] = draw_stims( window, screen_resolution, probability, risk_low, ris
 % position: 1 = counteroffer left; 2 = counteroffer right;
 % response: 0 = before response; 1 = left; 2 = right;
 
-%% START STIMULUS CREATION
+%% SETUP STIMULUS CREATION
+
+% this creates a version without color changes...
+% create an additional version with color changes (build from alt_2)
+    % --> never color at the selection --> always color, after selection
+
+% set if risky trials also have a visual control when selected
+visual_risky = 0;
 
 % set colors used
-color_scheme = 1;
+color_scheme = 2;
 switch color_scheme
     case 1
         color1 = [244, 244, 244]; % light gray              for fixed offers
@@ -29,6 +36,8 @@ switch use_abbreviation
     case 0
         abbrev_add = [];
 end    
+
+%% PREPARING TO DRAW
 
 % define positions for text (left)
 POSITION.upper =    [-215, -230];
@@ -161,11 +170,24 @@ switch typus
         % display risk value of inverse probability
         disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
         draw_text(POSITION.upper, side);
+        
         % add probability line
         if position == 1; % counteroffer left
             Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line right
         elseif position == 2; % counteroffer right
             Screen('DrawLine', window, problinecolor, -300+1, prob_coord, -130-2, prob_coord, 5); % probability line left
+        end
+        
+        % display probabities before choice
+        if visual_risky ~= 1;
+            if resolve ~= 1;
+                % display probabilities in %
+                disp_text = [num2str(probability*100) '%'];
+                draw_text(POSITION.low, side);
+                % display risk value of inverse probability
+                disp_text = [num2str(100-probability*100) '%'];
+                draw_text(POSITION.high, side);
+            end
         end
         
     case 2 % ambiguous trial
@@ -175,9 +197,19 @@ switch typus
         % display low ambiguity
         disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
         draw_text(POSITION.upper, side);
+        
         if resolve ~= 1; % display ambiguity marker only before choice
             disp_text = '???';
             draw_text(POSITION.mid, side);
+        end
+        
+        % display hidden (pseudo) probabilities before choice
+        if visual_risky ~= 1;
+            if resolscave ~= 1;
+                disp_text = '??%';
+                draw_text(POSITION.low, side);
+                draw_text(POSITION.high, side);
+            end
         end
         
 end
