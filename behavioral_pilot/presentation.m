@@ -4,36 +4,54 @@
 
 % input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
 
+% % % ...these will be fed to the function directly later on...)
+% % clear; close all; clc;
+% % 
+% % addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
+% % 
+% % SESSION_IN = 0;
+% % 
+% % AMBIGUITY_IN = 1;
+% % 
+% % SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
+% % 
+% % SETTINGS_IN.TEST_FLAG = 1; 
+% % SETTINGS_IN.LINUX_MODE = 1; 
+
+% OPEN TO DO
+% - 
+
+
+function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
+
 % USER MANUAL
 
 % ...
 
 %% SET PARAMETERS
 
-% ...these will be fed to the function directly later on...)
-clear; close all; clc;
-
-SESSION = 1;                % which session (1 or 2)
-AMBIGUITY = 0;              % 1 = yes, 0 = no
-SAVE_FILE = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat';    % where to save
+SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
+AMBIGUITY = AMBIGUITY_IN;           % resolve ambiguity, 1 = yes, 0 = no
+SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;             % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 1;                            % set full screen or window for testing
+SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
-SETTINGS.LINUX_MODE = 1;             % set button mapping for linux or windows system
-SETTINGS.BUTTON_BOX = 0;             % set button mapping for fMRI button box ( has to be set on "12345" )
+SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
+SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMRI button box ( has to be set on "12345" )
 
-SETTINGS.SCREEN_NR = 0;              % set screen to use
-                                     % run Screen('Screens') to check what is available on your machine
-SETTINGS.SCREEN_RES = [1440 900];    % set screen resolution (centered according to this input)
+SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
+                                                    % run Screen('Screens') to check what is available on your machine
+SETTINGS.SCREEN_RES = [1440 900];                   % set screen resolution (centered according to this input)
 
 % TIMING SETTINGS
 
 TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
 TIMING.selection = .5;      % time to show selected choice before revealing (not revealing) probabilities
 TIMING.outcome = 3;         % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.isi = .5;             % time to wait before starting next trial with preparatory fixation cross
+TIMING.isi = .5;            % time to wait before starting next trial with preparatory fixation cross
 
 %% CREATE STIMULI MATRIX
 
@@ -46,10 +64,18 @@ STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
-% for testing
-warning('remove this (only testing)');
-STIMS.steps = 1;
-STIMS.reveal_amb = 1;   
+% show reduced number of trials in training test_mode
+if SETTINGS.TEST_MODE == 1;
+    STIMS.steps = 1;
+    STIMS.repeats = 2;
+end
+
+% never reveal ambiguity in training (session = 0) + shorten trial number
+if SESSION == 0;
+    STIMS.steps = 1;
+    STIMS.repeats = 1;
+    STIMS.reveal_amb = 0;
+end
 
 % create matrix
 [stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs, STIMS.session);
@@ -59,8 +85,7 @@ sorted_matrix = sortrows(stim_mat', [2 3])';
 
 %% PREPARE PRESENTATION AND PSYCHTOOLBOX
 % help for PTB Screen commands can be displayed with "Screen [command]?" 
-
-addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
+% help with keycodes with KbName('KeyNames') and affiliates
 
 % set used keys
 if SETTINGS.LINUX_MODE == 1;
@@ -74,8 +99,10 @@ if SETTINGS.BUTTON_BOX == 1;
 end
 
 % supress warnings to see diagnostic output of stimuli
+% you can run "ScreenTest" to check the current machine
 warning('PTB warings are currently suppressed');
 Screen('Preference', 'SuppressAllWarnings', 1);
+Screen('Preference', 'VisualDebugLevel', 0);
 
 % open a screen to start presentation (can be closed with "sca" command)
 if SETTINGS.DEBUG_MODE == 1;
