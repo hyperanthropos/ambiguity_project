@@ -38,8 +38,9 @@ end
 clear overwrite;
 
 % security check for settings
-disp(' '); disp('SETTINGS ARE:');
-disp(['participant number: ' num2str(PARTICIPANT_NR)]);
+disp(' '); disp('SETTINGS ARE:'); disp(' ');
+disp(SETTINGS);
+disp(['participant number: ' num2str(PARTICIPANT_NR)]);  disp(' ');
 if AMBIGUITY == 1;
     disp('ambiguity resolved for this subject: YES');
 else
@@ -59,8 +60,18 @@ clear randomisation;
 
 % wait together for session 1 (press F)
 fprintf('\nthank you, the training is now finished. please have a short break.');
-continue_key = 70; % this is key 'F'
+if SETTINGS.LINUX_MODE == 1; % set key to 'F'
+    continue_key = 42;
+else
+    continue_key = 70;
+end
 press = 0;
+while press == 0;
+    [~, ~, kb_keycode] = KbCheck;
+    if find(kb_keycode)==continue_key;
+        press = 1;
+    end
+end
 clear continue_key kb_keycode;
 
 % present session 1
@@ -68,8 +79,18 @@ clear continue_key kb_keycode;
 
 % wait together for session 2 (press G)
 fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
-continue_key = 71; % this is key 'G'
+if SETTINGS.LINUX_MODE == 1; % set key to 'G'
+    continue_key = 43;
+else
+    continue_key= 71;
+end
 press = 0;
+while press == 0;
+    [~, ~, kb_keycode] = KbCheck;
+    if find(kb_keycode)==continue_key;
+        press = 1;
+    end
+end
 clear continue_key kb_keycode;
 
 % present session 2
