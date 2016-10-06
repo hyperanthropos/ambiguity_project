@@ -56,7 +56,7 @@ clear randomisation;
 %% START PRESENTATION SESSIONS
 
 % present training session
-% presentation(0, 0, save_file_0, SETTINGS); % session, ambiguity, save destination
+presentation(0, 0, save_file_0, SETTINGS); % session, ambiguity, save destination
 
 % wait together for session 1 (press F)
 fprintf('\nthank you, the training is now finished. please have a short break.');
@@ -75,7 +75,7 @@ end
 clear continue_key kb_keycode;
 
 % present session 1
-% presentation(1, AMBIGUITY, save_file_1, SETTINGS); % session, ambiguity, save destination
+presentation(1, AMBIGUITY, save_file_1, SETTINGS); % session, ambiguity, save destination
 
 % wait together for session 2 (press G)
 fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
@@ -94,7 +94,7 @@ end
 clear continue_key kb_keycode;
 
 % present session 2
-% presentation(2, AMBIGUITY, save_file_2, SETTINGS); % session, ambiguity, save destination
+presentation(2, AMBIGUITY, save_file_2, SETTINGS); % session, ambiguity, save destination
 
 %% FINISH AND COPY LOGFILES
 
