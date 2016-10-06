@@ -205,7 +205,7 @@ switch typus
         
         % display hidden (pseudo) probabilities before choice
         if visual_risky ~= 1;
-            if resolscave ~= 1;
+            if resolve ~= 1;
                 disp_text = '??%';
                 draw_text(POSITION.low, side);
                 draw_text(POSITION.high, side);
