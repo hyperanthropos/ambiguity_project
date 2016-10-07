@@ -1,6 +1,9 @@
 function [ ] = presentation_wrapper( sub_nr )
 % wrapper function to be called from mother pc to control the experiment
-% on clients
+% on clients.
+% dependencies: presentation.m, stimuli.m, mean_variance.m, draw_stims.m
+% this function should be started remotely and sets basic settings to
+% control the presentation.m function (see this file for further details)
 
 %% SETTINGS
 
@@ -78,8 +81,8 @@ fprintf('\nselecting random trial for reward...');
 
 warning('insert code');
 
-disp(' done.');
-fprintf('\nTHANK YOU, THE EXPERIMENT IS FINISHED NOW.');
+disp(' done.'); disp(' ');
+fprintf('THANK YOU, THE EXPERIMENT IS FINISHED NOW.');
 
 %% end function
 end
