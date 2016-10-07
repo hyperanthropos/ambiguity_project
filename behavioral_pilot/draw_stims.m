@@ -11,7 +11,7 @@ function [ ] = draw_stims( window, screen_resolution, probability, risk_low, ris
     % --> never color at the selection --> always color, after selection
 
 % set if risky trials also have a visual control when selected
-visual_risky = 1;
+visual_risky = 0;
 
 % set colors used
 color_scheme = 2;
