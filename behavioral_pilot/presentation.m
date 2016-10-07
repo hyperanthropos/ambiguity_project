@@ -112,11 +112,13 @@ Screen('Preference', 'SuppressAllWarnings', 1);
 Screen('Preference', 'VisualDebugLevel', 0);
 
 % open a screen to start presentation (can be closed with "sca" command)
-if SETTINGS.DEBUG_MODE == 1;
-    window = Screen('OpenWindow', SETTINGS.SCREEN_NR, [], [0 0 SETTINGS.SCREEN_RES]);
-else
-    window = Screen('OpenWindow', SETTINGS.SCREEN_NR);   % open screen
-    HideCursor;                                 % and hide cursor
+if SESSION == 0;
+    if SETTINGS.DEBUG_MODE == 1;
+        window = Screen('OpenWindow', SETTINGS.SCREEN_NR, [], [0 0 SETTINGS.SCREEN_RES]);
+    else
+        window = Screen('OpenWindow', SETTINGS.SCREEN_NR);   % open screen
+        HideCursor; % and hide cursor
+    end
 end
 
 % set font and size
@@ -130,11 +132,7 @@ Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2
 background_color = [224, 224, 224];
 Screen(window, 'FillRect', background_color);
 Screen(window, 'Flip');
-offset = Screen(window, 'TextBounds', 'BITTE WARTEN...')/2;
-Screen(window, 'DrawText', 'bitte warten...', 0-offset(3), SETTINGS.SCREEN_RES(2)-offset(4), 0); % *
-% * --> y-coords have to be adjusted for screen_res, because PTB is broken for text after screen translation
-Screen(window, 'Flip');
-clear offset background_color;
+clear background_color;
 
 % wait to start experiment (later synchronise with fMRI machine)
 % ---> insert code when changing to scanner design
@@ -234,7 +232,9 @@ for i = 1:stim_nr;
     
 end
 
-Screen('CloseAll');
+if SESSION == 2;
+    Screen('CloseAll');
+end
 
 %% SAVE RESULTS
 
