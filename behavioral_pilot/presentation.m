@@ -2,29 +2,29 @@ function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN
 %% code to present the experiment
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
-
 % input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
 
-% % % ...these will be fed to the function directly later on...)
-% % clear; close all; clc;
-% % 
-% % addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
-% % 
-% % SESSION_IN = 1;
-% % 
-% % AMBIGUITY_IN = 1;
-% % 
-% % SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
-% % 
-% % SETTINGS_IN.TEST_FLAG = 0; 
-% % SETTINGS_IN.LINUX_MODE = 1; 
-
-% OPEN TO DO
-% - 
-
 % USER MANUAL
+% this function creates stimuli via stimuli.mat ("stim_mat") presents it to
+% the subject via draw_stims.m and records the repsonse. results are
+% collected in the "logrec" variable, which gets saved in wd/logfiles and
+% is ordered like this:
 
-% ...
+% LINE 01 - trial number
+% LINE 02 - trial presentation time
+% LINE 03 - reaction time
+% LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
+% LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
+% LINE 06 - choice: 1 = left, 2 = right
+% LINE 07 - 
+% LINE 08 - 
+% LINE 09 - 
+% LINE 10 - 
+
+% stimuli.m has more information about the stimuli created
+% (matching, diagnostics, ...)
+% draw_stims.m features additional settings for visual presentation
+% (colors, visual control variants, ...)
 
 %% SET PARAMETERS
 
@@ -34,7 +34,7 @@ SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % set full screen or window for testing and display trials in command window
+SETTINGS.DEBUG_MODE = 1;                            % set full screen or window for testing and display trials in command window and some diagnotcis
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
@@ -47,10 +47,11 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
 
 % TIMING SETTINGS
 
-TIMING.pre_time = .3;       % time to show recolored fixation cross to prepare action
+TIMING.pre_time = .2;       % time to show recolored fixation cross to prepare action
 TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
 TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
+TIMING.isi = .2;            % time to wait before starting next trial with preparatory fixation cross
+                            % put within the stim_nr loop, for variable ITI
 
 %% CREATE STIMULI MATRIX
 
@@ -88,6 +89,10 @@ end
 
 % derandomize
 sorted_matrix = sortrows(stim_mat', [2 3])';
+
+% prepare and preallocate log
+logrec = NaN(1,stim_nr);
+warning('optimize preallocation with actual log size!');
 
 %% PREPARE PRESENTATION AND PSYCHTOOLBOX
 % help for PTB Screen commands can be displayed with "Screen [command]?" 
@@ -174,18 +179,18 @@ else
     clear continue_key kb_keycode;
 end
 
-% start timer
-start_time = GetSecs;
-
 %% PRESENT STIMULI
 
-% prepare an preallocate log
-logrec = NaN(1,stim_nr);
-warning('optimize preallocation with actual log size!');
+% start timer
+start_time = GetSecs;
 
 % loop over all trials
 for i = 1:stim_nr;
     
+    %%% WRITE LOG %%%
+    logrec(1,i) = i; % trial number
+    %%% WRITE LOG %%%
+      
     % sort elements that will be used for each trial
     probablity = stim_mat(10,i);
     risk_low = stim_mat(11,i);
@@ -239,14 +244,61 @@ for i = 1:stim_nr;
     
     %%% USE FUNCTION TO DRAW THE STIMULI
     
+    %%% WRITE LOG %%%
+    logrec(2,i) = GetSecs-start_time; % time of presention of trial
+    ref_time = GetSecs; % get time to meassure response
+    if SETTINGS.DEBUG_MODE == 1;
+        disp([ 'time: ' num2str(logrec(2,i)) ]);
+        if i > 1;
+        disp([ 'total stimulus lenght (last): ' num2str(logrec(2,i)-logrec(2,i-1)) ]);
+        disp([ 'total stimulus lenght (last) without RT: ' num2str(logrec(2,i)-logrec(2,i-1)-logrec(3,i-1)) ]);
+        end
+    end
+    %%% WRITE LOG %%%
+    
     % (1) DRAW THE STIMULUS (before response)
     draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (X) GET THE RESPONSE
-    % --> CODE
-    disp('waiting for response...');
-    pause;
-    response = randi(2); % 1 left, 2 = right
+    while response == 0;                    % wait for respsonse
+        [~, ~, kb_keycode] = KbCheck;
+        
+        if find(kb_keycode)==leftkey        % --- left / LINUX: 114 / WIN: 37
+            response = 1;
+            
+            
+            %             if S(6,i)==0;                   %fixed amount right
+            %                 LOG(1,i) = 1;               %choice was fixed amount
+            %             elseif S(6,i)==1;               %fixed amount left
+            %                 LOG(1,i) = 2;               %choice was probabilistic option
+            %             else
+            %                 Screen('CloseALL');
+            %                 error('your stimulus matrix (S) seems  to be corrupt!');
+            %             end
+            %             LOG(2,i)=GetSecs-ref_time;  %write LOG RT
+            
+            
+        elseif find(kb_keycode)==rightkey   % --- right / LINUX: 115 / WIN: 39
+            response = 2;
+            
+            %             if S(6,i)==0;                   %fixed amount right
+            %                 LOG(1,i) = 2;               %choice was probabilistic option
+            %             elseif S(6,i)==1;               %fixed amount left
+            %                 LOG(1,i) = 1;               %choice was fixed amount
+            %             else
+            %                 Screen('CloseALL');
+            %                 error('your stimulus matrix (S) seems  to be corrupt!');
+            %             end
+            %             LOG(2,i)=GetSecs-ref_time;  %write LOG RT
+            
+        end
+    end
+    
+    %%% WRITE LOG %%%
+    logrec(3,i) = GetSecs-ref_time; % reaction time
+    logrec(6,i) = response; % response (1 = left, 2 = right);
+    if SETTINGS.DEBUG_MODE == 1; disp([ 'RT: ' num2str(logrec(3,i)) ]); end
+    %%% WRITE LOG %%%
     
     % (2) DRAW THE RESPONSE
     draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
@@ -265,7 +317,8 @@ for i = 1:stim_nr;
     %%% END OF STIMULI PRESENTATION
     
     % log everything relevant that happened this trial
-    logrec(1,i) = probablity;
+    % (this is done independend of stim_mat for security reason (can be validated later on))
+    % logrec(1,i) = probablity;
     % --> CODE
     
     
