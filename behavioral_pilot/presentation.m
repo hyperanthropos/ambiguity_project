@@ -1,28 +1,26 @@
+function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
 %% code to present the experiment
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
 
 % input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
 
-% ...these will be fed to the function directly later on...)
-clear; close all; clc;
-
-addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
-
-SESSION_IN = 1;
-
-AMBIGUITY_IN = 1;
-
-SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
-
-SETTINGS_IN.TEST_FLAG = 0; 
-SETTINGS_IN.LINUX_MODE = 1; 
+% % % ...these will be fed to the function directly later on...)
+% % clear; close all; clc;
+% % 
+% % addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
+% % 
+% % SESSION_IN = 1;
+% % 
+% % AMBIGUITY_IN = 1;
+% % 
+% % SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
+% % 
+% % SETTINGS_IN.TEST_FLAG = 0; 
+% % SETTINGS_IN.LINUX_MODE = 1; 
 
 % OPEN TO DO
 % - 
-
-
-% function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
 
 % USER MANUAL
 
@@ -36,7 +34,7 @@ SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 1;                            % set full screen or window for testing and display trials in command window
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
@@ -44,7 +42,8 @@ SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMR
 
 SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
                                                     % run Screen('Screens') to check what is available on your machine
-SETTINGS.SCREEN_RES = [1440 900];                   % set screen resolution (centered according to this input)
+SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (centered according to this input)
+                                                    % test with Screen('Resolution', SETTINGS.SCREEN_NR)
 
 % TIMING SETTINGS
 
@@ -112,13 +111,11 @@ Screen('Preference', 'SuppressAllWarnings', 1);
 Screen('Preference', 'VisualDebugLevel', 0);
 
 % open a screen to start presentation (can be closed with "sca" command)
-if SESSION == 0;
-    if SETTINGS.DEBUG_MODE == 1;
-        window = Screen('OpenWindow', SETTINGS.SCREEN_NR, [], [0 0 SETTINGS.SCREEN_RES]);
-    else
-        window = Screen('OpenWindow', SETTINGS.SCREEN_NR);   % open screen
-        HideCursor; % and hide cursor
-    end
+if SETTINGS.DEBUG_MODE == 1;
+    window = Screen('OpenWindow', SETTINGS.SCREEN_NR, [], [0 0 SETTINGS.SCREEN_RES]);
+else
+    window = Screen('OpenWindow', SETTINGS.SCREEN_NR); % open screen
+    HideCursor;  % and hide cursor
 end
 
 % set font and size
@@ -128,16 +125,54 @@ Screen('TextSize', window, 36);
 % set origion to middle of the screen
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 
-% launch a start screen, set background color
+% set background color
 background_color = [224, 224, 224];
 Screen(window, 'FillRect', background_color);
 Screen(window, 'Flip');
 clear background_color;
 
+% launch a start screen (setting screen back to default to draw text and later back to origin again *)
+% * this  double transformation is necessary for compatibility with different PTB versions
+Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
+offset = Screen(window, 'TextBounds', 'PLEASE WAIT...')/2;
+Screen(window, 'DrawText', 'PLEASE WAIT...', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+Screen(window, 'Flip');
+Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
+clear offset;
+
 % wait to start experiment (later synchronise with fMRI machine)
 % ---> insert code when changing to scanner design
-disp('press a button to continue...');
-pause; 
+if SESSION == 0;
+    disp('press a button to continue...');
+    pause;
+else
+    switch SESSION
+        case 1
+            % WAIT TOGETHER FOT SESSION 1 (press F)
+            fprintf('\nthank you, the training is now finished. please have a short break.');
+            if SETTINGS.LINUX_MODE == 1; % set key to 'F'
+                continue_key = 42;
+            else
+                continue_key = 70;
+            end
+        case 2
+            % WAIT TOGETHER FOT SESSION 2 (press G)
+            fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
+            if SETTINGS.LINUX_MODE == 1; % set key to 'G'
+                continue_key = 43;
+            else
+                continue_key= 71;
+            end
+    end
+    press = 0;
+    while press == 0;
+        [~, ~, kb_keycode] = KbCheck;
+        if find(kb_keycode)==continue_key;
+            press = 1;
+        end
+    end
+    clear continue_key kb_keycode;
+end
 
 % start timer
 start_time = GetSecs;
@@ -171,25 +206,33 @@ for i = 1:stim_nr;
     if stim_mat(4,i) == 1;
         if stim_mat(21,i) == 1;
             typus = 1; position = 1; % risky trial, counteroffer left
+            if SETTINGS.DEBUG_MODE == 1;
             disp(' ');
             disp([ num2str(counteroffer) ' CHF | OR | ' num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) 'CHF' ]);
+            end
         elseif stim_mat(21,i) == 2;
             typus = 1; position = 2; % risky trial, counteroffer right
+            if SETTINGS.DEBUG_MODE == 1;
             disp(' ');
             disp([ num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' | OR | ' num2str(counteroffer) ' CHF'  ]);
+            end
         end
         
     elseif stim_mat(4,i) == 2;
         if stim_mat(21,i) == 1;
             typus = 2; position = 1; % ambigious trial, counteroffer left
+            if SETTINGS.DEBUG_MODE == 1;
             disp(' ');
             disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
+            end
         elseif stim_mat(21,i) == 2;
             typus = 2; position = 2; % ambigious trial, counteroffer right
+            if SETTINGS.DEBUG_MODE == 1;
             disp(' ');
             disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ])
+            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
+            end
         end
         
     end
@@ -226,15 +269,14 @@ for i = 1:stim_nr;
     % --> CODE
     
     
-    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response;
+    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus;
     
     WaitSecs(TIMING.isi); % wait before next trial (insert variable ISI for fMRI here)
     
 end
+clear i;
 
-if SESSION == 2;
-    Screen('CloseAll');
-end
+Screen('CloseAll');
 
 %% SAVE RESULTS
 
