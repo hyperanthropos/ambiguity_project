@@ -316,19 +316,22 @@ for i = 1:stim_nr;
 
     %%% END OF STIMULI PRESENTATION
     
+    warning('insert logfile creation code');
     % log everything relevant that happened this trial
     % (this is done independend of stim_mat for security reason (can be validated later on))
     % logrec(1,i) = probablity;
     % --> CODE
     
+    % clear all used variables for security
+    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
     
-    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus;
-    
-    WaitSecs(TIMING.isi); % wait before next trial (insert variable ISI for fMRI here)
+    % wait before next trial (insert variable ISI for fMRI here)
+    WaitSecs(TIMING.isi);
     
 end
-clear i;
+clear i leftkey rightkey;
 
+% close the screen
 Screen('CloseAll');
 
 %% SAVE RESULTS
