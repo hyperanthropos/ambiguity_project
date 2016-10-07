@@ -62,6 +62,11 @@ X.EV = 20;                                                      % expected value
 
 stim_nr = (length(X.RPH)+length(X.AVL))*X.steps*repeats;
 
+% check parameters for balanced design
+if mod(X.steps, X.RN);
+    error('you number of steps for the counteroffer is unbalanced given the steps of variation in risk');
+end
+
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
 if DIAG == 1;
