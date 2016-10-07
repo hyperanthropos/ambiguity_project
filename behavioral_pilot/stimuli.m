@@ -64,7 +64,7 @@ stim_nr = (length(X.RPH)+length(X.AVL))*X.steps*repeats;
 
 % check parameters for balanced design
 if mod(X.steps, X.RN);
-    error('you number of steps for the counteroffer is unbalanced given the steps of variation in risk');
+    error('your number of steps for the counteroffer is unbalanced given the steps of variation in probabilities');
 end
 
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
