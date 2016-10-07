@@ -28,9 +28,9 @@ function [matrix, stim_nr] = stimuli( reveal_ambiguity, steps, repeat, diag, ses
 % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 %
 % --- further notes:
-% - expected value (EV) of all trials is fixed to one value
-% - this funtion does not set up propper randomization - this has to be
-% initialized before in a wrapper / presentation script
+%   -   expected value (EV) of all trials is fixed to one value
+%   -   this funtion does not set up propper randomization - this has to be
+%       initialized before in a wrapper / presentation script
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
