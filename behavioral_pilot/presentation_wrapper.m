@@ -55,45 +55,17 @@ clear randomisation;
 
 %% START PRESENTATION SESSIONS
 
-% present training session
+% PRESENT TRAINING
 presentation(0, 0, save_file_0, SETTINGS); % session, ambiguity, save destination
 
-% wait together for session 1 (press F)
-fprintf('\nthank you, the training is now finished. please have a short break.');
-if SETTINGS.LINUX_MODE == 1; % set key to 'F'
-    continue_key = 42;
-else
-    continue_key = 70;
-end
-press = 0;
-while press == 0;
-    [~, ~, kb_keycode] = KbCheck;
-    if find(kb_keycode)==continue_key;
-        press = 1;
-    end
-end
-clear continue_key kb_keycode;
+% WAIT TOGETHER FOT SESSION 1 (press F)
 
-% present session 1
+% PRESENT SESSION 1
 presentation(1, AMBIGUITY, save_file_1, SETTINGS); % session, ambiguity, save destination
 
-% wait together for session 2 (press G)
-fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
-if SETTINGS.LINUX_MODE == 1; % set key to 'G'
-    continue_key = 43;
-else
-    continue_key= 71;
-end
-press = 0;
-while press == 0;
-    [~, ~, kb_keycode] = KbCheck;
-    if find(kb_keycode)==continue_key;
-        press = 1;
-    end
-end
-clear continue_key kb_keycode;
+% WAIT TOGETHER FOT SESSION 2 (press G)
 
-% present session 2
+% PRESENT SESSION 2
 presentation(2, AMBIGUITY, save_file_2, SETTINGS); % session, ambiguity, save destination
 
 %% FINISH AND COPY LOGFILES
