@@ -4,25 +4,25 @@
 
 % input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
 
-% % % ...these will be fed to the function directly later on...)
-% % clear; close all; clc;
-% % 
-% % addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
-% % 
-% % SESSION_IN = 0;
-% % 
-% % AMBIGUITY_IN = 1;
-% % 
-% % SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
-% % 
-% % SETTINGS_IN.TEST_FLAG = 1; 
-% % SETTINGS_IN.LINUX_MODE = 1; 
+% ...these will be fed to the function directly later on...)
+clear; close all; clc;
+
+addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
+
+SESSION_IN = 1;
+
+AMBIGUITY_IN = 1;
+
+SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/behavioral_pilot/logfiles/part_001_sess_1_ambiguity_1.mat'; 
+
+SETTINGS_IN.TEST_FLAG = 0; 
+SETTINGS_IN.LINUX_MODE = 1; 
 
 % OPEN TO DO
 % - 
 
 
-function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
+% function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
 
 % USER MANUAL
 
@@ -48,18 +48,18 @@ SETTINGS.SCREEN_RES = [1440 900];                   % set screen resolution (cen
 
 % TIMING SETTINGS
 
-TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
-TIMING.selection = .5;      % time to show selected choice before revealing (not revealing) probabilities
-TIMING.outcome = 3;         % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.isi = .5;            % time to wait before starting next trial with preparatory fixation cross
+TIMING.pre_time = .3;       % time to show recolored fixation cross to prepare action
+TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
+TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
+TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
 
 %% CREATE STIMULI MATRIX
 
-% current design: 14 steps of variation with 2 repeats; 224 trials, ca. 7.5min (x 2 sessions)
-% alternative: 18 steps of variation with 3 repeats; 432 trials, ca. 15min (x 1 sessions)
+% current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
+% alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
 
 STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
-STIMS.steps = 14;
+STIMS.steps = 12;
 STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
@@ -79,6 +79,13 @@ end
 
 % create matrix
 [stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs, STIMS.session);
+
+% display time calulations
+if STIMS.diagnostic_graphs == 1;
+    reaction_time = 2;
+    disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
+        num2str( (TIMING.pre_time + reaction_time + TIMING.selection + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
+end
 
 % derandomize
 sorted_matrix = sortrows(stim_mat', [2 3])';
@@ -208,15 +215,12 @@ for i = 1:stim_nr;
     draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
     
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
-    % WaitSecs(TIMING.outcome); % present final choice
-    
-    warning('artificial pause - press button'); pause;
+    WaitSecs(TIMING.outcome); % present final choice
     
     Screen('DrawLine', window, 0, -10, 0, 10, 0, 5);
     Screen('DrawLine', window, 0, 0, -10, 0, 10, 5);   
     Screen(window, 'Flip');
-    
-    
+
     %%% END OF STIMULI PRESENTATION
     
     % log everything relevant that happened this trial
