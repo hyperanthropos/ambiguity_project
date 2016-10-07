@@ -238,9 +238,6 @@ if DIAG == 1;
     axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
     set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'15 vs 25', '10 vs 30', '5 vs 35', '0 vs 40'});
     
-    % display total trials
-    disp(['total trials: ' num2str(stim_nr) ' | will take ' num2str(stim_nr*2/60) ' minutes per session']);
-    
     %%% EXPECTED RESULTS
     neutral = ones(1,9);
     risky_experimental = [.8 .82 .83 .87];
