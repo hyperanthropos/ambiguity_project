@@ -11,7 +11,7 @@ function [ ] = draw_stims( window, screen_resolution, probability, risk_low, ris
     % --> never color at the selection --> always color, after selection
 
 % set if risky trials also have a visual control when selected
-visual_risky = 0;
+visual_risky = 1;
 
 % set colors used
 color_scheme = 2;
@@ -201,15 +201,6 @@ switch typus
         if resolve ~= 1; % display ambiguity marker only before choice
             disp_text = '???';
             draw_text(POSITION.mid, side);
-        end
-        
-        % display hidden (pseudo) probabilities before choice
-        if visual_risky ~= 1;
-            if resolve ~= 1;
-                disp_text = '??%';
-                draw_text(POSITION.low, side);
-                draw_text(POSITION.high, side);
-            end
         end
         
 end
