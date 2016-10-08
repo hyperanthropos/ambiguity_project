@@ -6,10 +6,6 @@ function [ ] = draw_stims( window, screen_resolution, probability, risk_low, ris
 
 %% SETUP STIMULUS CREATION
 
-% this creates a version without color changes...
-% create an additional version with color changes (build from alt_2)
-    % --> never color at the selection --> always color, after selection
-
 % set if risky trials also have a visual control when selected
 visual_risky = 0;
 
