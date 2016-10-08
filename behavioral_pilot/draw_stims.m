@@ -76,8 +76,6 @@ POSITION.under =    [-215, 230];
 
 %% (0) DRAW THE BASE TRIAL STRUCTURE
 
-%%% BASIC STRUCTURE
-
 % fixation cross
 Screen('DrawLine', window, [0 128 0], -10, 0, 10, 0, 5);
 Screen('DrawLine', window, [0 128 0], 0, -10, 0, 10, 5);
@@ -92,38 +90,6 @@ Screen('DrawLine', window, 0, 300+2, 200, 130-3, 200, 5);
 Screen('DrawLine', window, 0, 300, 200, 300, -200, 5);
 Screen('DrawLine', window, 0, 130-3, -200, 300+2, -200, 5);
 Screen('DrawLine', window, 0, 130, -200, 130, 200, 5);
-
-% draw markers at 20% intervals
-markers = 0;
-if markers == 1;
-    Screen('DrawLine', window, [0 0 0], -310, 200, -300, 200, 5);
-    Screen('DrawLine', window, [0 0 0], -310, 120, -300, 120, 5);
-    Screen('DrawLine', window, [0 0 0], -310, 40, -300, 40, 5);
-    Screen('DrawLine', window, [0 0 0], -310, -40, -300, -40, 5);
-    Screen('DrawLine', window, [0 0 0], -310, -120, -300, -120, 5);
-    Screen('DrawLine', window, [0 0 0], -310, -200, -300, -200, 5);
-    
-    Screen('DrawLine', window, [0 0 0], -130, 200, -120, 200, 5);
-    Screen('DrawLine', window, [0 0 0], -130, 120, -120, 120, 5);
-    Screen('DrawLine', window, [0 0 0], -130, 40, -120, 40, 5);
-    Screen('DrawLine', window, [0 0 0], -130, -40, -120, -40, 5);
-    Screen('DrawLine', window, [0 0 0], -130, -120, -120, -120, 5);
-    Screen('DrawLine', window, [0 0 0], -130, -200, -120, -200, 5);
-    
-    Screen('DrawLine', window, [0 0 0], 310, 200, 300, 200, 5);
-    Screen('DrawLine', window, [0 0 0], 310, 120, 300, 120, 5);
-    Screen('DrawLine', window, [0 0 0], 310, 40, 300, 40, 5);
-    Screen('DrawLine', window, [0 0 0], 310, -40, 300, -40, 5);
-    Screen('DrawLine', window, [0 0 0], 310, -120, 300, -120, 5);
-    Screen('DrawLine', window, [0 0 0], 310, -200, 300, -200, 5);
-    
-    Screen('DrawLine', window, [0 0 0], 130, 200, 120, 200, 5);
-    Screen('DrawLine', window, [0 0 0], 130, 120, 120, 120, 5);
-    Screen('DrawLine', window, [0 0 0], 130, 40, 120, 40, 5);
-    Screen('DrawLine', window, [0 0 0], 130, -40, 120, -40, 5);
-    Screen('DrawLine', window, [0 0 0], 130, -120, 120, -120, 5);
-    Screen('DrawLine', window, [0 0 0], 130, -200, 120, -200, 5);
-end
 
 %% (1) DRAW SPECIFIC TRIAL
 
