@@ -79,7 +79,31 @@ copyfile(fullfile(savedir, '*'), fullfile(TARGET_PATH));
 disp('done.');
 fprintf('\nselecting random trial for reward...');
 
+
+
+
+
+
 warning('insert code');
+
+% SOME OLD CODE TO ADAPT
+% % transform logfile to rewardfile
+% reward = S_LOG;
+% reward(5,:) = reward(12,:);
+% reward(2:6,:) = reward(1:5,:);
+% reward(1,:) = 1:size(reward, 2);
+% reward = reward(1:6,:);
+% 
+% diary(['logfiles/reward_' num2str(sprintf('%03d', VP_NR)) '_' num2str(VP_TIME)  '_' num2str(VP_SESSION) '.txt']);
+% diary on;
+% display([num2str(VP_NR) '_' num2str(VP_SESSION)]);
+% display(reward);
+% diary off;
+
+
+
+
+
 
 disp(' done.'); disp(' ');
 fprintf('THANK YOU, THE EXPERIMENT IS FINISHED NOW.');
