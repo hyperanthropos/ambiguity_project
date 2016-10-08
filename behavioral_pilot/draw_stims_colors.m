@@ -132,6 +132,16 @@ switch typus
         disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
         draw_text(POSITION.upper, side);
         
+        % display probabities before choice
+        if resolve ~= 1;
+            % display probabilities in %
+            disp_text = [num2str(probability*100) '%'];
+            draw_text(POSITION.low, side);
+            % display risk value of inverse probability
+            disp_text = [num2str(100-probability*100) '%'];
+            draw_text(POSITION.high, side);
+        end
+        
         % add probability line
         if position == 1; % counteroffer left
             Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line right
