@@ -131,7 +131,7 @@ Screen('TextSize', window, 36);
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 
 % set background color
-background_color = [224, 224, 224];
+background_color = ones(1,3)*220;
 Screen(window, 'FillRect', background_color);
 Screen(window, 'Flip');
 clear background_color;
@@ -242,8 +242,6 @@ for i = 1:stim_nr;
         
     end
     
-    %%% USE FUNCTION TO DRAW THE STIMULI
-    
     %%% WRITE LOG %%%
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
     ref_time = GetSecs; % get time to meassure response
@@ -256,8 +254,13 @@ for i = 1:stim_nr;
     end
     %%% WRITE LOG %%%
     
+    %%% USE FUNCTION TO DRAW THE STIMULI
+    
+    % select function to draw stimuli
+    draw_function = @draw_stims_colors;
+    
     % (1) DRAW THE STIMULUS (before response)
-    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (X) GET THE RESPONSE
     while response == 0;                    % wait for respsonse
@@ -301,11 +304,11 @@ for i = 1:stim_nr;
     %%% WRITE LOG %%%
     
     % (2) DRAW THE RESPONSE
-    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
     
     % (3) REVEAL AMBIGUITY (or visual control) (last input of function)
     WaitSecs(TIMING.selection); % shortly wait before revealing ambiguity
-    draw_stims(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
     
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
     WaitSecs(TIMING.outcome); % present final choice
