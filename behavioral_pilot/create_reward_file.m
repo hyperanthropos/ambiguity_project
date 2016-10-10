@@ -34,7 +34,7 @@ elseif logrec(7,reward_trial) == 2; % ambiguous trial
     disp([ 'an ambiguous amount of either ' num2str( logrec(14,reward_trial) ) 'CHF or ' num2str(logrec(15,reward_trial)) 'CHF' ]);
 end
 disp(' ');
-if logrec(5,reward_trial) == 1 || 3; % fixed amount
+if logrec(5,reward_trial) == 1 || logrec(5,reward_trial) == 3; % fixed amount
     disp([ 'you decided for the ' num2str(logrec(16,reward_trial)) 'CHF for sure.']);
 elseif logrec(5,reward_trial) == 2; % risky amount
     disp('you decided for:');
