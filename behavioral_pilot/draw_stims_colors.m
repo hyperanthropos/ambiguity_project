@@ -9,7 +9,7 @@ function [ ] = draw_stims_colors( window, screen_resolution, probability, risk_l
 % set colors used
 color1 = ones(1,3)*180*255; % white                 for fixed offers and before choice
 color2 = ones(1,3)*120; % dark gray                 for probabilistic offer part 1
-color3 = ones(1,3)*190; % light gray                for probabilistic offer 2
+color3 = ones(1,3)*200; % light gray                for probabilistic offer 2
 color4 = (color2+color3)/2; % inbetween gray        for ambiguous offers
 probtextcolor = [150 0 0]; % something red          for probability numbers text
 problinecolor = [0 0 0]; % black                    for probability line
@@ -21,7 +21,11 @@ switch use_abbreviation
         abbrev_add = ' Fr.';
     case 0
         abbrev_add = [];
-end    
+end
+
+% display probabilities (in fact, with colors the probability is
+% represented well without numbers too)
+disp_prob = 1;
 
 %% PREPARING TO DRAW
 
@@ -43,7 +47,7 @@ POSITION.under =    [-215, 230];
 
         offset = Screen(window, 'TextBounds', disp_text)/2;
  
-        if strcmp(disp_text(end), '%') || strcmp(disp_text(end), '?'); % user a different color for % values
+        if strcmp(disp_text(end), '%') || strcmp(disp_text(end), '?') && disp_prob == 1; % user a different color for % values
             textcolor = probtextcolor;
         else
             textcolor = 0;
@@ -125,22 +129,24 @@ end
 
 switch typus
     case 1 % riky trial
-        % display risk value of probability
-        disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
-        draw_text(POSITION.under, side);
-        % display risk value of inverse probability
-        disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
-        draw_text(POSITION.upper, side);
-        
-        % display probabities before choice
-        if resolve ~= 1;
-            % display probabilities in %
-            disp_text = [num2str(probability*100) '%'];
-            draw_text(POSITION.low, side);
+            % display risk value of probability
+            disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
+            draw_text(POSITION.under, side);
             % display risk value of inverse probability
-            disp_text = [num2str(100-probability*100) '%'];
-            draw_text(POSITION.high, side);
-        end
+            disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
+            draw_text(POSITION.upper, side);
+            
+            if disp_prob == 1;
+                % display probabities before choice
+                if resolve ~= 1;
+                    % display probabilities in %
+                    disp_text = [num2str(probability*100) '%'];
+                    draw_text(POSITION.low, side);
+                    % display risk value of inverse probability
+                    disp_text = [num2str(100-probability*100) '%'];
+                    draw_text(POSITION.high, side);
+                end
+            end
         
         % add probability line
         if position == 1; % counteroffer left
@@ -220,12 +226,14 @@ if resolve == 1;
     % draw the revelation
     if typus == 1 || ambiguity_resolve == 1 % if risky trial or resolved ambiguous trial
         
-        % display probabilities in %
-        disp_text = [num2str(probability*100) '%'];
-        draw_text(POSITION.low, side);
-        % display risk value of inverse probability
-        disp_text = [num2str(100-probability*100) '%'];
-        draw_text(POSITION.high, side);
+        if disp_prob == 1;
+            % display probabilities in %
+            disp_text = [num2str(probability*100) '%'];
+            draw_text(POSITION.low, side);
+            % display risk value of inverse probability
+            disp_text = [num2str(100-probability*100) '%'];
+            draw_text(POSITION.high, side);
+        end
         
         % add probability line
         if position == 1; % counteroffer left
@@ -236,10 +244,12 @@ if resolve == 1;
         
     elseif typus == 2 && ambiguity_resolve == 0 % if unresolved ambiguous trial
         
-        % display unkwon probabilities in (pseudo) %
-        disp_text = '??%';
-        draw_text(POSITION.low, side);
-        draw_text(POSITION.high, side);
+        if disp_prob == 1;
+            % display unkwon probabilities in (pseudo) %
+            disp_text = '??%';
+            draw_text(POSITION.low, side);
+            draw_text(POSITION.high, side);
+        end
         
     end
     
