@@ -49,8 +49,8 @@ VISUAL_PRESET = 1;                  % set visual presentation of stimuli matchin
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
+SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
