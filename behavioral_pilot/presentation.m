@@ -63,10 +63,10 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
                                                    
 % TIMING SETTINGS
 
-TIMING.pre_time = .2;       % time to show recolored fixation cross to prepare action
+TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
 TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
 TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.isi = .2;            % time to wait before starting next trial with preparatory fixation cross
+TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
                             % put within the stim_nr loop, for variable ITI
 
 %% CREATE STIMULI MATRIX
@@ -143,7 +143,7 @@ Screen('TextSize', window, 36);
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 
 % set background color
-background_color = ones(1,3)*220;
+background_color = ones(1,3)*230;
 Screen(window, 'FillRect', background_color);
 Screen(window, 'Flip');
 clear background_color;
