@@ -1,7 +1,8 @@
 function [ ] = presentation_wrapper( sub_nr )
 % wrapper function to be called from mother pc to control the experiment
 % on clients.
-% dependencies: presentation.m, stimuli.m, mean_variance.m, draw_stims.m
+% dependencies: presentation.m, stimuli.m, mean_variance.m, draw_stims.m,
+% create_reward_file.m
 % this function should be started remotely and sets basic settings to
 % control the presentation.m function (see this file for further details)
 
@@ -33,11 +34,11 @@ if exist(save_file_1, 'file')==2 || exist(save_file_2, 'file')==2; % check if sa
     overwrite = input('enter = no / ''yes'' = yes : ');
     if strcmp(overwrite, 'yes');
         display(' '); display('will continue and overwrite...');
-        delete(fullfile(savedir, '*'));
     else
         error('security shutdown initiated! - check logfiles or choose annother participant number or session!');
     end
 end
+delete(fullfile(savedir, '*'));
 clear overwrite;
 
 % security check for settings
@@ -77,36 +78,13 @@ fprintf('\nthe experiment is finished, please wait for files to by copied...');
 mkdir(TARGET_PATH);
 copyfile(fullfile(savedir, '*'), fullfile(TARGET_PATH));
 disp('done.');
+
+% create reward file
 fprintf('\nselecting random trial for reward...');
-
-
-
-
-
-
-warning('insert code');
-
-% SOME OLD CODE TO ADAPT
-% % transform logfile to rewardfile
-% reward = S_LOG;
-% reward(5,:) = reward(12,:);
-% reward(2:6,:) = reward(1:5,:);
-% reward(1,:) = 1:size(reward, 2);
-% reward = reward(1:6,:);
-% 
-% diary(['logfiles/reward_' num2str(sprintf('%03d', VP_NR)) '_' num2str(VP_TIME)  '_' num2str(VP_SESSION) '.txt']);
-% diary on;
-% display([num2str(VP_NR) '_' num2str(VP_SESSION)]);
-% display(reward);
-% diary off;
-
-
-
-
-
-
+% run function to create and copy the reward info txt
+create_reward_file(savedir, save_file_1, save_file_2, TARGET_PATH, PARTICIPANT_NR, AMBIGUITY);
 disp(' done.'); disp(' ');
-fprintf('THANK YOU, THE EXPERIMENT IS FINISHED NOW.');
+disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW.');
 
 %% end function
 end
