@@ -60,7 +60,7 @@ SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
                                                     % run Screen('Screens') to check what is available on your machine
 SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (centered according to this input)
                                                     % test with Screen('Resolution', SETTINGS.SCREEN_NR)
-                                                   
+
 % TIMING SETTINGS
 
 TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
@@ -68,6 +68,14 @@ TIMING.selection = .3;      % time to show selected choice before revealing (not
 TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
 TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
                             % put within the stim_nr loop, for variable ITI
+
+% create zero timing for test mode                            
+if SETTINGS.TEST_MODE == 1;
+    TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
+    TIMING.selection = .0;      % time to show selected choice before revealing (not revealing) probabilities
+    TIMING.outcome = 0;         % time to shwo the actual outcome (resolved probabilities or control)
+    TIMING.isi = .0;            % time to wait before starting next trial with preparatory fixation cross
+end
 
 %% CREATE STIMULI MATRIX
 
@@ -79,12 +87,6 @@ STIMS.steps = 12;
 STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
-
-% show reduced number of trials in training test_mode
-if SETTINGS.TEST_MODE == 1;
-    STIMS.steps = 1;
-    STIMS.repeats = 2;
-end
 
 % never reveal ambiguity in training (session = 0) + shorten trial number
 if SESSION == 0;
