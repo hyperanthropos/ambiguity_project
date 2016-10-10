@@ -9,12 +9,12 @@ function [ ] = presentation_wrapper( sub_nr )
 %% SETTINGS
 
 % most important setting: is ambiguity going to be resolved?
-AMBIGUITY = 1;
+AMBIGUITY = 0;
 
 % if activated this reduces the trial number to training lenghts in all sessions for testing purposes
-SETTINGS.TEST_FLAG = 1; 
+SETTINGS.TEST_FLAG = 0; 
 % if activated button mappings for linux (not windows, as default) are used
-SETTINGS.LINUX_MODE = 1; 
+SETTINGS.LINUX_MODE = 0; 
 
 %%% fixed settings
 TARGET_PATH = 'N:\client_write\SFW_ambiguity\results'; % copies to a windows machine
