@@ -77,14 +77,14 @@ presentation(2, AMBIGUITY, save_file_2, SETTINGS); % session, ambiguity, save de
 fprintf('\nthe experiment is finished, please wait for files to by copied...');
 mkdir(TARGET_PATH);
 copyfile(fullfile(savedir, '*'), fullfile(TARGET_PATH));
-disp('done.');
+disp('done.'); disp(' ');
 
 % create reward file
-fprintf('\nselecting random trial for reward...');
+disp('selecting random trial for reward...');
 % run function to create and copy the reward info txt
 create_reward_file(savedir, save_file_1, save_file_2, TARGET_PATH, PARTICIPANT_NR, AMBIGUITY);
-disp(' done.'); disp(' ');
-disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW.');
+disp(' ');
+disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW!');
 
 %% end function
 end
