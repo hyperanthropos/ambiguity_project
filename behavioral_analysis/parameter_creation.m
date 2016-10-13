@@ -37,11 +37,15 @@
 clear; close('all'); clc;
 
 % set subjects to analyse
-part_ambi = 1:21;        % subjects where ambiguity was resolved
-part_control = 1:23;     % subjects where ambiguity was not resolved
+PART{1} = 1:23; % subjects where ambiguity was not resolved
+PART{2} = 1:21; % subjects where ambiguity was resolved
+
+% design specification
+REPEATS_NR = 4; % how many times was one cycle repeated
+TRIAL_NR = 96; % how many trials was one cycle
 
 % skip loading of individual files
-skip_load = 1;
+SKIP_LOAD = 0;
 
 %% DATA HANDLING
 
@@ -52,19 +56,13 @@ DIR.output = fullfile(DIR.home, 'analysis_results');
 DIR.temp = fullfile(DIR.home, 'temp_data');
 
 % load data
-if skip_load ~= 1;
+if SKIP_LOAD ~= 1;
     
     % for both groups (0 = unresolved; 1 = resolved);
     for ambiguity = 0:1;
         
-        if ambiguity == 0;
-            partloop = part_control;
-        elseif ambiguity == 1;
-            partloop = part_ambi;
-        end
-        
         % run for every participant in the group
-        for part = partloop;
+        for part = PART{1+ambiguity};
             
             % combine 4 repeats of both sessions into one file
             temp_logrec_full = [];
@@ -87,7 +85,7 @@ if skip_load ~= 1;
     if exist(DIR.temp, 'dir') ~= 7; mkdir(DIR.temp); end
     save(fullfile(DIR.temp, 'temp.mat'), 'RESULT_SEQ', 'RESULT_SORT');
     
-    clear load_file part ambiguity sess partloop logrec sorted_logrec temp_logrec_full temp_logrec_sorted_full;
+    clear load_file part ambiguity sess logrec sorted_logrec temp_logrec_full temp_logrec_sorted_full;
     
 else
     
@@ -95,7 +93,7 @@ else
     load(fullfile(DIR.temp, 'temp.mat'));
     
 end
-clear skip_load;
+clear SKIP_LOAD;
 
 % create result directory if it doesn't exist
 if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
@@ -107,10 +105,52 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% PARAMETER 1: CHOICES OF RISKY AND AMBIGUOUS TRIALS
 
-A = RESULT_SORT.ambi{1}.part{1}.mat
+% necessary lines fot this parameter
+% LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
+% LINE 07 - trial type: 1 = risky, 2 = ambiguous
+
+for resolved = 1:2; % 2 = resolved
+    
+    % run subloop
+    for sub = PART{resolved}
+        
+        
+        
+        
+        warning(' ');
+        % PUT THIS INTO PREPROCESSING
+        
+        x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
+        y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
+        
+        
+        
+        % get response for risky and ambiguous trials
+        risk_choices = NaN(REPEATS_NR, sum(y{1}(7,:) == 1));
+        ambi_choices = NaN(REPEATS_NR, sum(y{1}(7,:) == 2));
+        for i = 1:REPEATS_NR;
+            risk_choices(i,:) = y{i}(4, y{i}(7,:) == 1);
+            ambi_choices(i,:) = y{i}(4, y{i}(7,:) == 2);
+        end
+        
+        % calculate nr. of risky/ambiguous choices
+        if resolved == 1;
+            PARAM.abs_gambles.control(1,:,sub) = sum(risk_choices == 2, 2);
+            PARAM.abs_gambles.control(2,:,sub) = sum(ambi_choices == 2, 2);
+        elseif resolved == 2;
+            PARAM.abs_gambles.resolved(1,:,sub) = sum(risk_choices == 2, 2);
+            PARAM.abs_gambles.resolved(2,:,sub) = sum(ambi_choices == 2, 2);
+        end
+        
+    end
+end
+
+clear x y i sub resolved subloop risk_choices ambi_choices;
 
 
 
+%% SAVE CALCULATED PARAMETERS
 
+save(fullfile(DIR.output, 'parameters.mat'), 'PARAM');
 
 
