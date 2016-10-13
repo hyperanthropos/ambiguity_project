@@ -145,7 +145,7 @@ for resolved = 1:2; % 2 = resolved
     end
 end
 
-clear x y i sub resolved subloop risk_choices ambi_choices;
+clear x y i sub resolved risk_choices ambi_choices;
 
 
 
