@@ -4,7 +4,7 @@
 
 using matlab with internal as well es external toolboxes, notably ["Statistical Parametric Mapping"] (http://www.fil.ion.ucl.ac.uk/spm/software/) and ["Psychtoolbox"] (http://psychtoolbox.org)
 
-this repository contains code:
+### this repository contains code:
 - [x] for a behavioral pilot task
 
   which can be started with the [presentation_wrapper.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_pilot/presentation_wrapper.m)
