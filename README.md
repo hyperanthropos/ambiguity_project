@@ -2,7 +2,7 @@
 
 ### cognitive neuroscience project
 
-using matlab with internal as well es external toolboxes, notably "Statistical Parametric Mapping" and "Psychtoolbox"
+using matlab with internal as well es external toolboxes, notably ["Statistical Parametric Mapping"] (http://www.fil.ion.ucl.ac.uk/spm/software/) and ["Psychtoolbox"] (http://psychtoolbox.org)
 
 this repository contains code:
 - [x] for a behavioral pilot task
