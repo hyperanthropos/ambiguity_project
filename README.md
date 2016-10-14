@@ -1,6 +1,7 @@
 # madleine
 
-cognitive neuroscience project
+### cognitive neuroscience project
+
 using matlab with internal as well es external toolboxes, notably "Statistical Parametric Mapping" and "Psychtoolbox"
 
 this repository contains code:
