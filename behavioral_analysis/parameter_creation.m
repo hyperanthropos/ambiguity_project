@@ -100,8 +100,7 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% DATA PREPROCESSING
 
-% sort risky and ambiguous trials
-
+% --> put parts that get used for multiple parameters into preprocessing
 
 %% PARAMETER 1: CHOICES OF RISKY AND AMBIGUOUS TRIALS
 
@@ -114,16 +113,8 @@ for resolved = 1:2; % 2 = resolved
     % run subloop
     for sub = PART{resolved}
         
-        
-        
-        
-        warning(' ');
-        % PUT THIS INTO PREPROCESSING
-        
         x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
         y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
-        
-        
         
         % get response for risky and ambiguous trials
         risk_choices = NaN(REPEATS_NR, sum(y{1}(7,:) == 1));
@@ -147,10 +138,11 @@ end
 
 clear x y i sub resolved risk_choices ambi_choices;
 
-
-
 %% SAVE CALCULATED PARAMETERS
 
 save(fullfile(DIR.output, 'parameters.mat'), 'PARAM');
+
+% END OF SCRIPT
+disp('thank you, come again!');
 
 
