@@ -5,8 +5,10 @@
 using matlab with internal as well es external toolboxes, notably "Statistical Parametric Mapping" and "Psychtoolbox"
 
 this repository contains code:
-* for a behavioral pilot task [done]
-* to analyse pilot data [under construction]
-* for a fMRI task to evoke and collect neural data [to be implemented]
-* behavioral analysis of fMRI task data [to be implemented]
-* neural analysis of fMRI data [to be implemented]
+- [x] for a behavioral pilot task
+
+  which can be started with the [presentation_wrapper] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_pilot/presentation_wrapper.m)
+- [ ] to analyse pilot data
+- [ ] for a fMRI task to evoke and collect neural data
+- [ ] behavioral analysis of fMRI task data
+- [ ] neural analysis of fMRI data
