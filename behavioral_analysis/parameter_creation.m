@@ -36,6 +36,9 @@
 %% SETUP
 clear; close('all'); clc;
 
+% pause after each subject to see output
+PAUSE = 0;
+
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
 PART{2} = 1:21; % subjects where ambiguity was resolved
@@ -43,6 +46,7 @@ PART{2} = 1:21; % subjects where ambiguity was resolved
 % design specification
 REPEATS_NR = 4; % how many times was one cycle repeated
 TRIAL_NR = 96; % how many trials was one cycle
+EV = 20; % what is the expected value of all gambles
 
 % skip loading of individual files
 SKIP_LOAD = 0;
@@ -100,43 +104,95 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% DATA PREPROCESSING
 
-% --> put parts that get used for multiple parameters into preprocessing
+%%% create sub matrices for each repeat
+for resolved = 1:2; % 2 = resolved
+    for sub = PART{resolved}
+        for repeat = 1:REPEATS_NR;
+            x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
+            y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
+            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.all = y{repeat};
+            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.risk = y{repeat}(:, y{repeat}(7,:) == 1);
+            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.ambi = y{repeat}(:, y{repeat}(7,:) == 2);
+        end
+    end
+end
 
-%% PARAMETER 1: CHOICES OF RISKY AND AMBIGUOUS TRIALS
+clear x y sub resolved repeat;
 
-% necessary lines fot this parameter
-% LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
-% LINE 07 - trial type: 1 = risky, 2 = ambiguous
+%% START LOOP OVER SUBJECTS AND CREATE A FIGURE
 
 for resolved = 1:2; % 2 = resolved
-    
-    % run subloop
     for sub = PART{resolved}
         
-        x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
-        y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
+        % print outpout and create figure
+        fprintf(['analysing subject condition ' num2str(resolved) ' - subject ' num2str(sub) ' ... ']);
+        FIGS.fig1 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
         
-        % get response for risky and ambiguous trials
-        risk_choices = NaN(REPEATS_NR, sum(y{1}(7,:) == 1));
-        ambi_choices = NaN(REPEATS_NR, sum(y{1}(7,:) == 2));
-        for i = 1:REPEATS_NR;
-            risk_choices(i,:) = y{i}(4, y{i}(7,:) == 1);
-            ambi_choices(i,:) = y{i}(4, y{i}(7,:) == 2);
+        %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
+        
+        % necessary lines fot this parameter
+        % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
+        % LINE 07 - trial type: 1 = risky, 2 = ambiguous
+        % LINE 16 - counteroffer amount
+        % LINE 19 - risk variance level (1-4; low to high variance)
+        % LINE 20 - ambiguity variance level (1-4; low to high variance  
+
+        for repeat = 1:REPEATS_NR;
+            
+            %%% create parameters
+            risk_trials = RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.risk;
+            ambi_trials = RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.ambi;
+            risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
+            ambi_choices = ambi_trials(4,:)==2; % at which trials ambiguous offer was chosen
+            
+            if resolved == 1;
+                PARAM.premiums.abs_gambles.control(:,repeat,1,sub) = sum(risk_choices);
+                PARAM.premiums.abs_gambles.control(:,repeat,2,sub) = sum(ambi_choices);
+
+            elseif resolved == 2;
+                PARAM.premiums.abs_gambles.resolved(:,repeat,1,sub) = sum(risk_choices);
+                PARAM.premiums.abs_gambles.resolved(:,repeat,2,sub) = sum(ambi_choices);
+                 
+            end
+
+            %%% plot parameter
+            subplot(2,5,repeat); % risky trials
+            scatter(risk_trials(19,:), risk_trials(16,:)./EV, 'b'); box off; hold on;
+            scatter(risk_trials(19,risk_trials(4,:)==1), risk_trials(16,risk_choices==0)./EV, 'xk');
+            axis([.5 4.5 .2 2]);
+            subplot(2,5,5);
+            bar(repeat, sum(risk_choices), 'b' ); box off; hold on;
+            
+            subplot(2,5,repeat+5); % ambiguous trials
+            scatter(ambi_trials(20,:), ambi_trials(16,:)./EV, 'r'); box off; hold on;
+            scatter(ambi_trials(20,ambi_trials(4,:)==1), ambi_trials(16,ambi_choices==0)./EV, 'xk');
+            axis([.5 4.5 .2 2]);
+            subplot(2,5,10);
+            bar(repeat, sum(ambi_choices), 'r' ); box off; hold on;
+            
         end
         
-        % calculate nr. of risky/ambiguous choices
-        if resolved == 1;
-            PARAM.abs_gambles.control(1,:,sub) = sum(risk_choices == 2, 2);
-            PARAM.abs_gambles.control(2,:,sub) = sum(ambi_choices == 2, 2);
-        elseif resolved == 2;
-            PARAM.abs_gambles.resolved(1,:,sub) = sum(risk_choices == 2, 2);
-            PARAM.abs_gambles.resolved(2,:,sub) = sum(ambi_choices == 2, 2);
+        
+        
+        clear repeat risk_trials ambi_trials risk_choices ambi_choices;
+        
+        %% PARAMTER SECTION 3: ---
+        
+        
+        %% END LOOP OVER SUBJECTS
+        
+        %%% UPDATE FIGURE AND CLOSE
+        disp('done.');
+        if PAUSE == 1;
+            drawnow;
+            pause;
         end
+        close all;
         
     end
 end
 
-clear x y i sub resolved risk_choices ambi_choices;
+clear sub resolved;
 
 %% SAVE CALCULATED PARAMETERS
 
