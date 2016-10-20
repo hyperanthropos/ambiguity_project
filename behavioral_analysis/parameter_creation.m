@@ -37,7 +37,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = 0;
+PAUSE = 1;
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
@@ -45,11 +45,13 @@ PART{2} = 1:21; % subjects where ambiguity was resolved
 
 % design specification
 REPEATS_NR = 4; % how many times was one cycle repeated
+VAR_NR = 4; % how many steps of variance variation
+COUNTER_NR = 12; % how many steps of counteroffer variation
 TRIAL_NR = 96; % how many trials was one cycle
 EV = 20; % what is the expected value of all gambles
 
 % skip loading of individual files
-SKIP_LOAD = 0;
+SKIP_LOAD = 1;
 
 %% DATA HANDLING
 
@@ -104,10 +106,12 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% DATA PREPROCESSING
 
-%%% create sub matrices for each repeat
 for resolved = 1:2; % 2 = resolved
     for sub = PART{resolved}
         for repeat = 1:REPEATS_NR;
+            %%% add repeats from 1 to 4
+            RESULT_SORT.ambi{resolved}.part{sub}.mat(18,:) = kron(1:REPEATS_NR, ones(1,TRIAL_NR));
+            %%% create sub matrices for each repeat
             x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
             y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
             RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.all = y{repeat};
@@ -126,7 +130,7 @@ for resolved = 1:2; % 2 = resolved
         
         % print outpout and create figure
         fprintf(['analysing subject condition ' num2str(resolved) ' - subject ' num2str(sub) ' ... ']);
-        FIGS.fig1 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+        FIGS.fig1 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
         
         %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
         
@@ -145,36 +149,184 @@ for resolved = 1:2; % 2 = resolved
             risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
             ambi_choices = ambi_trials(4,:)==2; % at which trials ambiguous offer was chosen
             
+            risk_trials_var = mat2cell(risk_trials, size(risk_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
+            ambi_trials_var = mat2cell(ambi_trials, size(ambi_trials, 1), ones(1, VAR_NR)*COUNTER_NR ); 
+            
             if resolved == 1;
                 PARAM.premiums.abs_gambles.control(:,repeat,1,sub) = sum(risk_choices);
                 PARAM.premiums.abs_gambles.control(:,repeat,2,sub) = sum(ambi_choices);
 
+                for var_level = 1:VAR_NR;
+                    x = sum(risk_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
+                    % caclulate certainty equivalent
+                    if x == 0; % no risky/ambiguous trials were chosen
+                        ce = risk_trials_var{var_level}(16,1); % take lowest value
+                    elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
+                        ce = risk_trials_var{var_level}(16,COUNTER_NR); % take highest value
+                    else
+                        ce =(risk_trials_var{var_level}(16,x)+risk_trials_var{var_level}(16,x+1))/2;
+                    end
+                    PARAM.premiums.ce.control(var_level,repeat,1,sub) = ce;
+                end
+                
+                for var_level = 1:VAR_NR;
+                    x = sum(ambi_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
+                    % caclulate certainty equivalent
+                    if x == 0; % no risky/ambiguous trials were chosen
+                        ce = ambi_trials_var{var_level}(16,1); % take lowest value
+                    elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
+                        ce = ambi_trials_var{var_level}(16,COUNTER_NR); % take highest value
+                    else
+                        ce =(ambi_trials_var{var_level}(16,x)+ambi_trials_var{var_level}(16,x+1))/2;
+                    end
+                    PARAM.premiums.ce.control(var_level,repeat,2,sub) = ce;
+                end
+
             elseif resolved == 2;
                 PARAM.premiums.abs_gambles.resolved(:,repeat,1,sub) = sum(risk_choices);
                 PARAM.premiums.abs_gambles.resolved(:,repeat,2,sub) = sum(ambi_choices);
+                
+                for var_level = 1:VAR_NR;
+                    x = sum(risk_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
+                    % caclulate certainty equivalent
+                    if x == 0; % no risky/ambiguous trials were chosen
+                        ce = risk_trials_var{var_level}(16,1); % take lowest value
+                    elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
+                        ce = risk_trials_var{var_level}(16,COUNTER_NR); % take highest value
+                    else
+                        ce =(risk_trials_var{var_level}(16,x)+risk_trials_var{var_level}(16,x+1))/2;
+                    end
+                    PARAM.premiums.ce.resolved(var_level,repeat,1,sub) = ce;
+                end
+                
+                for var_level = 1:VAR_NR;
+                    x = sum(ambi_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
+                    % caclulate certainty equivalent
+                    if x == 0; % no risky/ambiguous trials were chosen
+                        ce = ambi_trials_var{var_level}(16,1); % take lowest value
+                    elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
+                        ce = ambi_trials_var{var_level}(16,COUNTER_NR); % take highest value
+                    else
+                        ce =(ambi_trials_var{var_level}(16,x)+ambi_trials_var{var_level}(16,x+1))/2;
+                    end
+                    PARAM.premiums.ce.resolved(var_level,repeat,2,sub) = ce;
+                end
                  
             end
 
             %%% plot parameter
-            subplot(2,5,repeat); % risky trials
+            % risky trials
+            subplot(2,5,repeat);
             scatter(risk_trials(19,:), risk_trials(16,:)./EV, 'b'); box off; hold on;
             scatter(risk_trials(19,risk_trials(4,:)==1), risk_trials(16,risk_choices==0)./EV, 'xk');
+            if resolved == 1;
+                plot( PARAM.premiums.ce.control(:,repeat,1,sub)./EV, '--b', 'LineWidth', 3); box off; hold on;
+            elseif resolved == 2;
+                plot( PARAM.premiums.ce.resolved(:,repeat,1,sub)./EV, '--b', 'LineWidth', 3); box off; hold on;
+            end
             axis([.5 4.5 .2 2]);
-            subplot(2,5,5);
-            bar(repeat, sum(risk_choices), 'b' ); box off; hold on;
+
             
-            subplot(2,5,repeat+5); % ambiguous trials
+            % ambiguous trials
+            subplot(2,5,repeat+5);
             scatter(ambi_trials(20,:), ambi_trials(16,:)./EV, 'r'); box off; hold on;
             scatter(ambi_trials(20,ambi_trials(4,:)==1), ambi_trials(16,ambi_choices==0)./EV, 'xk');
+            if resolved == 1;
+                plot( PARAM.premiums.ce.control(:,repeat,2,sub)./EV, '--r', 'LineWidth', 3); box off; hold on;
+            elseif resolved == 2;
+                plot( PARAM.premiums.ce.resolved(:,repeat,2,sub)./EV, '--r', 'LineWidth', 3); box off; hold on;
+            end
             axis([.5 4.5 .2 2]);
-            subplot(2,5,10);
-            bar(repeat, sum(ambi_choices), 'r' ); box off; hold on;
+ 
+        end
+        
+        %%% plot parameter
+        subplot(2,5,5);
+        if resolved == 1;
+            plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 1)/VAR_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 1)/VAR_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, REPEATS_NR)*EV, '-k', 'LineWidth', 3);
+        elseif resolved == 2;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 1)/VAR_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 1)/VAR_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, REPEATS_NR)*EV, '-k', 'LineWidth', 3);
+        end
+        axis([.5 4.5 5 25]);
+        
+        subplot(2,5,10);
+        if resolved == 1;
+            plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 1)/VAR_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 1)/VAR_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, REPEATS_NR)*EV, '-k', 'LineWidth', 3);
+        elseif resolved == 2;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 1)/VAR_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 1)/VAR_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, REPEATS_NR)*EV, '-k', 'LineWidth', 3);
+        end
+        axis([.5 4.5 5 25]);
+
+        clear repeat risk_trials ambi_trials risk_choices ambi_choices;
+        
+        %% make an additional plot sorting data by variance / rather then repeats
+        
+        FIGS.fig2 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [.5 .5 .5 1]);
+        
+        x = RESULT_SORT.ambi{resolved}.part{sub}.mat;
+        for varlevel = 1:VAR_NR;
+            %%% create data to plot
+            selector = x(7,:)==1 & x(19,:)==varlevel;
+            varmat_risk = x(:,selector);
+            selector = x(7,:)==2 & x(20,:)==varlevel;
+            varmat_ambi = x(:,selector);
+            
+            %%% plot parameter
+            % risky trials
+            subplot(2,5,varlevel);
+            scatter(varmat_risk(18,:), varmat_risk(16,:)./EV, 'b'); box off; hold on;
+            scatter(varmat_risk(18,varmat_risk(4,:)==1), varmat_risk(16,varmat_risk(4,:)==1)./EV, 'xk'); 
+            if resolved == 1;
+                plot( PARAM.premiums.ce.control(varlevel,:,1,sub)./EV, '--b', 'LineWidth', 3); box off; hold on;
+            elseif resolved == 2;
+                plot( PARAM.premiums.ce.resolved(varlevel,:,1,sub)./EV, '--b', 'LineWidth', 3); box off; hold on;
+            end
+            axis([.5 4.5 .2 2]);
+            
+            % ambiguous trials
+            subplot(2,5,varlevel+5);
+            scatter(varmat_ambi(18,:), varmat_ambi(16,:)./EV, 'r'); box off; hold on;
+            scatter(varmat_ambi(18,varmat_ambi(4,:)==1), varmat_ambi(16,varmat_ambi(4,:)==1)./EV, 'xk');
+            if resolved == 1;
+                plot( PARAM.premiums.ce.control(varlevel,:,2,sub)./EV, '--r', 'LineWidth', 3); box off; hold on;
+            elseif resolved == 2;
+                plot( PARAM.premiums.ce.resolved(varlevel,:,2,sub)./EV, '--r', 'LineWidth', 3); box off; hold on;
+            end
+            axis([.5 4.5 .2 2]);
             
         end
         
+        subplot(2,5,5);
+        if resolved == 1;
+            plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, VAR_NR)*EV, '-k', 'LineWidth', 3);
+        elseif resolved == 2;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, VAR_NR)*EV, '-k', 'LineWidth', 3);
+        end
+        axis([.5 4.5 5 25]);
         
-        
-        clear repeat risk_trials ambi_trials risk_choices ambi_choices;
+        subplot(2,5,10);
+        if resolved == 1;
+            plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, VAR_NR)*EV, '-k', 'LineWidth', 3);
+        elseif resolved == 2;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
+            plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
+            plot( ones(1, VAR_NR)*EV, '-k', 'LineWidth', 3);
+        end
+        axis([.5 4.5 5 25]);
         
         %% PARAMTER SECTION 3: ---
         
