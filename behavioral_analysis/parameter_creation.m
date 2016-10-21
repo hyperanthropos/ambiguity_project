@@ -132,6 +132,11 @@ for resolved = 1:2; % 2 = resolved
         fprintf(['analysing subject condition ' num2str(resolved) ' - subject ' num2str(sub) ' ... ']);
         FIGS.fig1 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
         
+        %% PARAMETER SECTION 0: REACTION TIME
+        
+        % ...
+        
+        
         %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
         
         % necessary lines fot this parameter
