@@ -83,83 +83,155 @@ load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
 
 %% OTHER HACKED IN STUFF
 
-axis_scale_1 = [.5 4.5 10 22];
-axis_scale_2 = [.5 4.5 10 22];
+% % % axis_scale_1 = [.5 4.5 10 22];
+% % % axis_scale_2 = [.5 4.5 10 22];
+% % % 
+% % % figure('Color', 'w');
+% % % for sub = PART{1};
+% % %     subplot(10,5,sub);
+% % %     plot( squeeze( sum(PARAM.premiums.ce.control(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
+% % %     plot( [20, 20, 20, 20], '--k' );
+% % %     axis(axis_scale_1);
+% % %     %legend('R', 'A', 'R-A');
+% % % end
+% % % 
+% % % for sub = PART{2};
+% % %     subplot(10,5,sub+25);
+% % %     plot( squeeze( sum(PARAM.premiums.ce.resolved(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
+% % %     plot( [20, 20, 20, 20], '--k' );
+% % %     axis(axis_scale_1);
+% % %     %legend('R', 'A', 'R-A');
+% % % end
+% % % 
+% % % figure('Name', ' ','Color', 'w');
+% % % 
+% % % data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
+% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
+% % % x = squeeze( sum( data,4 )./size(PART{1},2) );
+% % % x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
+% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
+% % % subplot(2,2,1);
+% % % plot( x, 'LineWidth', 3 ); box off; hold on;
+% % % errorbar(x, x_se);
+% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
+% % % axis(axis_scale_2);
+% % % legend('R', 'A');
+% % % title('control');
+% % % 
+% % % data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
+% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
+% % % x = squeeze( sum( data,4 )./size(PART{2},2) );
+% % % x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
+% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
+% % % subplot(2,2,2);
+% % % plot( x, 'LineWidth', 3 ); box off; hold on;
+% % % errorbar(x, x_se);
+% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
+% % % axis(axis_scale_2);
+% % % legend('R', 'A');
+% % % title('resolved');
+% % % 
+% % % for varanal = 1:4;
+% % %     
+% % % data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
+% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
+% % % x = squeeze( mean( data,4 ) );
+% % % x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
+% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
+% % % subplot(2,8,8+varanal);
+% % % plot( x, 'LineWidth', 3 ); box off; hold on;
+% % % errorbar(x, x_se);
+% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
+% % % axis(axis_scale_2);
+% % % legend('R', 'A');
+% % % title('control');
+% % % 
+% % % data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
+% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
+% % % x = squeeze( sum( data,4 )./size(PART{2},2) );
+% % % x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
+% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
+% % % subplot(2,8,12+varanal);
+% % % plot( x, 'LineWidth', 3 ); box off; hold on;
+% % % errorbar(x, x_se);
+% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
+% % % axis(axis_scale_2);
+% % % legend('R', 'A');
+% % % title('resolved');
+% % % 
+% % % end
+
+%% NEXT FIGURE CORRELATIONS
+
+% (var,repeat,type,sub)
+addpath('/home/fridolin/DATA/MATLAB/downloaded_functions');
 
 figure('Color', 'w');
-for sub = PART{1};
-    subplot(10,5,sub);
-    plot( squeeze( sum(PARAM.premiums.ce.control(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
-    plot( [20, 20, 20, 20], '--k' );
-    axis(axis_scale_1);
-    %legend('R', 'A', 'R-A');
-end
 
-for sub = PART{2};
-    subplot(10,5,sub+25);
-    plot( squeeze( sum(PARAM.premiums.ce.resolved(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
-    plot( [20, 20, 20, 20], '--k' );
-    axis(axis_scale_1);
-    %legend('R', 'A', 'R-A');
-end
+axis_scale_1 = [.5 4.5 10 22];
 
-figure('Name', ' ','Color', 'w');
+data = PARAM.premiums.ce.resolved;
 
-data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
-%data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-x = squeeze( sum( data,4 )./size(PART{1},2) );
-x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
-y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
-subplot(2,2,1);
-plot( x, 'LineWidth', 3 ); box off; hold on;
-errorbar(x, x_se);
+% overall preference risk / ambiguity
+data_persub = mean(mean(data, 1),2);
+X = squeeze(data_persub);
+
+subplot(1,3,1);
+barwitherr(std(X, 1, 2)./23^.5, mean(X, 2)); hold on; box off;
+plot( [20 20], '--k' , 'LineWidth', 3 );
+axis(axis_scale_1); axis('auto x');
+
+% preference for variance levels
+data_allrep = mean(data, 2);
+X = squeeze(data_allrep);
+
+subplot(1,3,3);
+barwitherr(std(X, 1, 3)./23^.5, mean(X, 3)); hold on; box off;
 plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-axis(axis_scale_2);
-legend('R', 'A');
-title('control');
+axis(axis_scale_1); axis('auto x');
+legend('risk', 'ambiguity');
 
-data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
-%data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-x = squeeze( sum( data,4 )./size(PART{2},2) );
-x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
-y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
-subplot(2,2,2);
-plot( x, 'LineWidth', 3 ); box off; hold on;
-errorbar(x, x_se);
-plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-axis(axis_scale_2);
-legend('R', 'A');
-title('resolved');
+% overall correlation risk / ambiguity
+data_persub = mean(mean(data, 1),2);
+X = squeeze(data_persub);
 
-for varanal = 1:4;
-    
-data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
-%data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-x = squeeze( mean( data,4 ) );
-x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
-y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
-subplot(2,8,8+varanal);
-plot( x, 'LineWidth', 3 ); box off; hold on;
-errorbar(x, x_se);
-plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-axis(axis_scale_2);
-legend('R', 'A');
-title('control');
+subplot(1,3,2);
+scatter(X(1,:), X(2,:));
+xlabel('risk'); ylabel('ambiguity');
+lsline;
 
-data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
-%data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-x = squeeze( sum( data,4 )./size(PART{2},2) );
-x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
-y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
-subplot(2,8,12+varanal);
-plot( x, 'LineWidth', 3 ); box off; hold on;
-errorbar(x, x_se);
-plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-axis(axis_scale_2);
-legend('R', 'A');
-title('resolved');
+% % correlation over all variance levels
+% for varlevel = 1:4;
+%     
+% data_persub = mean(mean(data(varlevel,:,:,:), 1),2);  
+% X = squeeze(data_persub);
+%     
+% subplot(2,4,4+varlevel);
+% scatter(X(1,:), X(2,:));
+% xlabel('risk'); ylabel('ambiguity');
+% lsline;
+%     
+% end
 
-end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data_allrep = mean(data, 1);
+mean(data,4)
+std(data, 1, 4)
+
     
 
 
