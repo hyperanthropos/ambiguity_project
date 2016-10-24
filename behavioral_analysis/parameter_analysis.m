@@ -1,7 +1,9 @@
 %% SCRIPT TO ANALYSE PARAMTERS
 % this script analyses parameters on the group level, creates figures and
 % runs statistical tests
+% reads data from parameter_creation script
 
+% clean the field
 clear; close all; clc;
 
 %% SETUP
@@ -10,14 +12,19 @@ clear; close all; clc;
 PART{1} = 1:23; % subjects where ambiguity was not resolved
 PART{2} = 1:21; % subjects where ambiguity was resolved
 
-% excluding subjects with extreme values
-% PART{1} = [1:21 23]; % subjects where ambiguity was not resolved
-% PART{2} = [1:3 5:10 12:21]; % subjects where ambiguity was resolved
+% exclude subjects for certain reasons
+EXCLUDE_SUBS = 1;
+% unresolved exclude candidates
+% #4 = obvious maladaptive strategie at varlevel 4
+% #22 = extremly risk averse
+exclude{1} = [];
+% resolved exclude candidates
+% #1 very risk seeking
+% #11 very risk averse (but still a pattern)
+exclude{2} = [];
 
 % variance_levels to analyse
 varanal = [1 2 3 4];
-
-% VERY INTERESTING INTERACTION OF RISK / AMBIGUTIY IN VAR LEVEL 1 AND 4
 
 % design specification
 REPEATS_NR = 4; % how many times was one cycle repeated
@@ -30,6 +37,14 @@ DIR.input = fullfile(DIR.home, 'analysis_results');
 
 % load data
 load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
+
+% exclude subjects from subject vector
+if EXCLUDE_SUBS == 1;
+    for i = 1:2;
+    PART{1}(exclude{1}) = [];
+    end
+end
+clear i exclude;
 
 %% GROUPS ANALYSIS OF PARAMETERS
 
