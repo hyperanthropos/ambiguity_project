@@ -37,7 +37,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = 2; % 1 = pause; 2 = 3 seconds delay
+PAUSE = 1; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
@@ -312,7 +312,7 @@ for resolved = 1:2; % 2 = resolved
             if resolved == 1;
                 plot( PARAM.premiums.ce.control(varlevel,:,1,sub), '--k', 'LineWidth', 3); box off; hold on;
             elseif resolved == 2;
-                plot( PARAM.premiums.ce.resolved(varlevel,:,1,sub), '--b', 'LineWidth', 3); box off; hold on;
+                plot( PARAM.premiums.ce.resolved(varlevel,:,1,sub), '--k', 'LineWidth', 3); box off; hold on;
             end
             axis(axisscale);
             xlabel('timepoints'); title([' variance ' num2str(varlevel)  ' (risk)' ]);
