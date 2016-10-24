@@ -37,7 +37,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = 1;
+PAUSE = 2; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
@@ -377,6 +377,9 @@ for resolved = 1:2; % 2 = resolved
         if PAUSE == 1;
             drawnow;
             pause;
+        elseif PAUSE == 2;
+            drawnow;
+            pause(3);
         end
         close all;
         
