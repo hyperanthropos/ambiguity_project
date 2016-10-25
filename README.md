@@ -10,10 +10,10 @@ using matlab with internal as well es external toolboxes, notably ["Statistical 
 
     - can be started with the [presentation_wrapper.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_pilot/presentation_wrapper.m)
   
-- [ ] code to analyse pilot data
+- [x] code to analyse pilot data
 
-    - create parameters of individual subjects analysing the logfiles of behavioral data
-    - create groups level graph and statistics out of individual parameters
+    - create parameters of individual subjects analysing the logfiles of behavioral data [link] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_analysis/parameter_creation.m)
+    - create groups level graph and statistics out of individual parameters [link] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_analysis/parameter_analysis.m)
 
 - [ ] an fMRI task to evoke and collect neural data
 - [ ] code for behavioral analysis of fMRI task data
