@@ -10,14 +10,14 @@ clear; close all; clc;
 
 % set figures you want to draw
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
-DRAW = [1 2 3 4];
+DRAW = [1 2 3];
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
 PART{2} = 1:21; % subjects where ambiguity was resolved
 
 % set group to analyze
-GROUP = 2; % 1 = ambiguity not resolved; 2 = ambiguity resolved
+GROUP = 1; % 1 = ambiguity not resolved; 2 = ambiguity resolved
 
 % exclude subjects for certain reasons
 EXCLUDE_SUBS = 0;
@@ -59,7 +59,7 @@ clear i exclude;
 
 if sum(DRAW == 1);
     
-    figure('Name', 'single subject per timepoint and variance', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+    figure('Name', 'F1: single subject per timepoint and variance', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
     for sub = PART{GROUP};
         
         if GROUP == 1;
@@ -70,16 +70,18 @@ if sum(DRAW == 1);
             y = squeeze(mean(PARAM.premiums.ce.resolved(:,:,:,sub),2)); % over variance
         end
         
+        % plot single subjects over time
         subplot(10,5,sub);
         plot( x, 'LineWidth', 2 ); hold on; box off;
-        plot( ones(1,VAR_NR)*EV, 'k', 'LineWidth', 2 );
+        plot( ones(1,VAR_NR)*EV, '--k', 'LineWidth', 2 );
         legend('R', 'A', 'N', 'Location', 'westoutside');
         axis([1 VAR_NR 0 1]); axis('auto y');
         xlabel('time');
         
+        % plot single subjects over variance
         subplot(10,5,sub+25);
         plot( y, 'LineWidth', 2 ); hold on; box off;
-        plot( ones(1,VAR_NR)*EV, 'k', 'LineWidth', 2 );
+        plot( ones(1,VAR_NR)*EV, '--k', 'LineWidth', 2 );
         legend('R', 'A', 'N', 'Location', 'westoutside');
         axis([1 VAR_NR 0 1]); axis('auto y');
         xlabel('variance');
@@ -90,142 +92,128 @@ if sum(DRAW == 1);
     
 end
 
-%% OTHER HACKED IN STUFF
+%% FIGURE 2: COMPARISON OF RESOLVED / UNRESOLVED GROUPS
 
-% % variance_levels to analyse
-% varanal = [1 2 3 4];
+% 4D matrix of premium paramters:
+% (var,repeat,type,sub)
 
-% % % axis_scale_1 = [.5 4.5 10 22];
-% % % axis_scale_2 = [.5 4.5 10 22];
-% % % 
-% % % figure('Color', 'w');
-% % % for sub = PART{1};
-% % %     subplot(10,5,sub);
-% % %     plot( squeeze( sum(PARAM.premiums.ce.control(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
-% % %     plot( [20, 20, 20, 20], '--k' );
-% % %     axis(axis_scale_1);
-% % %     %legend('R', 'A', 'R-A');
-% % % end
-% % % 
-% % % for sub = PART{2};
-% % %     subplot(10,5,sub+25);
-% % %     plot( squeeze( sum(PARAM.premiums.ce.resolved(varanal,:,:,sub),1)./size(varanal,2) ), 'LineWidth', 2 ); hold on; box off;
-% % %     plot( [20, 20, 20, 20], '--k' );
-% % %     axis(axis_scale_1);
-% % %     %legend('R', 'A', 'R-A');
-% % % end
-% % % 
-% % % figure('Name', ' ','Color', 'w');
-% % % 
-% % % data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
-% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-% % % x = squeeze( sum( data,4 )./size(PART{1},2) );
-% % % x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
-% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
-% % % subplot(2,2,1);
-% % % plot( x, 'LineWidth', 3 ); box off; hold on;
-% % % errorbar(x, x_se);
-% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-% % % axis(axis_scale_2);
-% % % legend('R', 'A');
-% % % title('control');
-% % % 
-% % % data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
-% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-% % % x = squeeze( sum( data,4 )./size(PART{2},2) );
-% % % x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
-% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
-% % % subplot(2,2,2);
-% % % plot( x, 'LineWidth', 3 ); box off; hold on;
-% % % errorbar(x, x_se);
-% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-% % % axis(axis_scale_2);
-% % % legend('R', 'A');
-% % % title('resolved');
-% % % 
-% % % for varanal = 1:4;
-% % %     
-% % % data = sum(PARAM.premiums.ce.control(varanal,:,:,:), 1)./size(varanal,2);
-% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-% % % x = squeeze( mean( data,4 ) );
-% % % x_se = squeeze( std( data,1,4 )./(size(PART{1},2))^.5 );
-% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{1}(end);
-% % % subplot(2,8,8+varanal);
-% % % plot( x, 'LineWidth', 3 ); box off; hold on;
-% % % errorbar(x, x_se);
-% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-% % % axis(axis_scale_2);
-% % % legend('R', 'A');
-% % % title('control');
-% % % 
-% % % data = sum(PARAM.premiums.ce.resolved(varanal,:,:,:), 1)./size(varanal,2);
-% % % %data = data-repmat(data(:,1,1,:), 1, REPEATS_NR, 2); % center all data to repeat 1 risk preference
-% % % x = squeeze( sum( data,4 )./size(PART{2},2) );
-% % % x_se = squeeze( std( data,1,4 )./(size(PART{2},2))^.5 );
-% % % y = sum( data(:,:,1,:)-data(:,:,2,:), 4)./PART{2}(end);
-% % % subplot(2,8,12+varanal);
-% % % plot( x, 'LineWidth', 3 ); box off; hold on;
-% % % errorbar(x, x_se);
-% % % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-% % % axis(axis_scale_2);
-% % % legend('R', 'A');
-% % % title('resolved');
-% % % 
-% % % end
+if sum(DRAW == 2);
+    
+    % setup for figure 2
+    axis_scale = [.5 4.5 10 22]; % scale fot axis
+    
+    figure('Name', 'F2: mean over time for variance levels between groups', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+    
+    % plot for both groups independend of "GROUPS" setting (control left, resolved right)
+    for group = 1:2;
+        
+        if group == 1;
+            data = mean(PARAM.premiums.ce.control(:,:,:,:), 1);
+        elseif group == 2;
+            data = mean(PARAM.premiums.ce.resolved(:,:,:,:), 1);
+        end
+        
+        % plot mean preference over time
+        x = squeeze( mean( data,4 ) ); % calulate mean over subs
+        x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5 ); % calculate se
+        
+        subplot(2,2,group);
+        plot( x, 'LineWidth', 3 ); box off; hold on;
+        errorbar(x, x_se);
+        plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
+        axis(axis_scale); legend('R', 'A'); xlabel('time');
+        if group == 1;
+            title('control');
+        elseif group == 2;
+            title('resolved');
+        end
+        
+        % plot mean preference over time for each variance level
+        for varlevel = 1:VAR_NR;
+            
+            if group == 1;
+                data = mean(PARAM.premiums.ce.control(varlevel,:,:,:), 1);
+                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+varlevel);
+            elseif group == 2;
+                data = mean(PARAM.premiums.ce.resolved(varlevel,:,:,:), 1);
+                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+VAR_NR+1+varlevel);
+            end
+            
+            x = squeeze( mean( data,4 ) ); % calulate mean over subs
+            x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5 ); % calculate se
+            
+            plot( x, 'LineWidth', 3 ); box off; hold on;
+            errorbar(x, x_se);
+            plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
+            axis(axis_scale); legend('R', 'A'); xlabel('time');
+            if group == 1;
+                title(['control var: ' num2str(varlevel)]);
+            elseif group == 2;
+                title(['resolved var: ' num2str(varlevel)]);
+            end
+            
+        end
+  
+    end
+    
+    clear group data x x_se varlevel axis_scale;
+    
+end
 
-%% NEXT FIGURE CORRELATIONS
+%% FIGURE 3: ...
 
-% % variance_levels to analyse
-% varanal = [1 2 3 4];
-
-% % % (var,repeat,type,sub)
-% % addpath('/home/fridolin/DATA/MATLAB/downloaded_functions');
-% % 
-% % figure('Color', 'w');
-% % 
-% % axis_scale_1 = [.5 4.5 10 22];
-% % 
-% % data = PARAM.premiums.ce.resolved(:,:,:,PART{2});
-% % % data = PARAM.premiums.ce.control(:,:,:,PART{1});
-% % 
-% % % overall preference risk / ambiguity
-% % data_persub = mean(mean(data, 1),2);
-% % X = squeeze(data_persub);
-% % 
-% % subplot(1,3,1);
-% % barwitherr(std(X, 1, 2)./23^.5, mean(X, 2)); hold on; box off;
-% % plot( [20 20], '--k' , 'LineWidth', 3 );
-% % axis(axis_scale_1); axis('auto x');
-% % 
-% % % preference for variance levels
-% % data_allrep = mean(data, 2);
-% % X = squeeze(data_allrep);
-% % 
-% % subplot(1,3,3);
-% % barwitherr(std(X, 1, 3)./23^.5, mean(X, 3)); hold on; box off;
-% % plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-% % axis(axis_scale_1); axis('auto x');
-% % legend('risk', 'ambiguity');
-% % 
-% % % overall correlation risk / ambiguity
-% % data_persub = mean(mean(data, 1),2);
-% % X = squeeze(data_persub);
-% % 
-% % subplot(1,3,2);
-% % scatter(X(1,:), X(2,:));
-% % xlabel('risk'); ylabel('ambiguity');
-% % lsline;
-% % 
-% % % % correlation over all variance levels
-% % % for varlevel = 1:4;
-% % %     
-% % % data_persub = mean(mean(data(varlevel,:,:,:), 1),2);  
-% % % X = squeeze(data_persub);
-% % %     
-% % % subplot(2,4,4+varlevel);
-% % % scatter(X(1,:), X(2,:));
-% % % xlabel('risk'); ylabel('ambiguity');
-% % % lsline;
-% % %     
-% % % end
+if sum(DRAW == 3);
+    
+    % (var,repeat,type,sub)
+    addpath('/home/fridolin/DATA/MATLAB/downloaded_functions');
+    
+    figure('Color', 'w');
+    
+    axis_scale_1 = [.5 4.5 10 22];
+    
+    data = PARAM.premiums.ce.resolved(:,:,:,PART{2});
+    % data = PARAM.premiums.ce.control(:,:,:,PART{1});
+    
+    % overall preference risk / ambiguity
+    data_persub = mean(mean(data, 1),2);
+    X = squeeze(data_persub);
+    
+    subplot(1,3,1);
+    barwitherr(std(X, 1, 2)./23^.5, mean(X, 2)); hold on; box off;
+    plot( [20 20], '--k' , 'LineWidth', 3 );
+    axis(axis_scale_1); axis('auto x');
+    
+    % preference for variance levels
+    data_allrep = mean(data, 2);
+    X = squeeze(data_allrep);
+    
+    subplot(1,3,3);
+    barwitherr(std(X, 1, 3)./23^.5, mean(X, 3)); hold on; box off;
+    plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
+    axis(axis_scale_1); axis('auto x');
+    legend('risk', 'ambiguity');
+    
+    % overall correlation risk / ambiguity
+    data_persub = mean(mean(data, 1),2);
+    X = squeeze(data_persub);
+    
+    subplot(1,3,2);
+    scatter(X(1,:), X(2,:));
+    xlabel('risk'); ylabel('ambiguity');
+    lsline;
+    
+    % % correlation over all variance levels
+    % for varlevel = 1:4;
+    %
+    % data_persub = mean(mean(data(varlevel,:,:,:), 1),2);
+    % X = squeeze(data_persub);
+    %
+    % subplot(2,4,4+varlevel);
+    % scatter(X(1,:), X(2,:));
+    % xlabel('risk'); ylabel('ambiguity');
+    % lsline;
+    %
+    % end
+    
+end
 
