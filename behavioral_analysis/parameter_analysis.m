@@ -6,11 +6,17 @@
 % clean the field
 clear; close all; clc;
 
+% this script needs the function "barwitherr", which makes ploting error
+% bars easier:
+SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
+
 %% SETUP
 
 % set figures you want to draw
-% 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 DRAW = [1 2 3];
+% 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
+% 02 | COMPARISON OF RESOLVED / UNRESOLVED GROUPS
+% 03 | COMPOSITE GROUP SUMMARY
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
@@ -115,7 +121,7 @@ if sum(DRAW == 2);
         
         % plot mean preference over time
         x = squeeze( mean( data,4 ) ); % calulate mean over subs
-        x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5 ); % calculate se
+        x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5); % calculate se
         
         subplot(2,2,group);
         plot( x, 'LineWidth', 3 ); box off; hold on;
@@ -160,60 +166,74 @@ if sum(DRAW == 2);
     
 end
 
-%% FIGURE 3: ...
+%% FIGURE 3: COMPOSITE GROUP SUMMARY
+
+% 4D matrix of premium paramters:
+% (var,repeat,type,sub)
 
 if sum(DRAW == 3);
     
-    % (var,repeat,type,sub)
-    addpath('/home/fridolin/DATA/MATLAB/downloaded_functions');
+    % add function for "barrwitherr"
+    addpath(SUBFUNCTIONS_PATH);
+    axis_scale = [.5 4.5 10 22];
     
-    figure('Color', 'w');
+    figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
     
-    axis_scale_1 = [.5 4.5 10 22];
+    % prepare data to plot
+    if GROUP == 1;
+        data = PARAM.premiums.ce.control(:,:,:,PART{GROUP});
+    elseif GROUP == 2;
+        data = PARAM.premiums.ce.resolved(:,:,:,PART{GROUP});
+    end
     
-    data = PARAM.premiums.ce.resolved(:,:,:,PART{2});
-    % data = PARAM.premiums.ce.control(:,:,:,PART{1});
-    
-    % overall preference risk / ambiguity
+    % data for all subjects
     data_persub = mean(mean(data, 1),2);
-    X = squeeze(data_persub);
+    x = squeeze(data_persub); % x(1,:) = risk; x(2,:) = ambiguity
     
-    subplot(1,3,1);
-    barwitherr(std(X, 1, 2)./23^.5, mean(X, 2)); hold on; box off;
-    plot( [20 20], '--k' , 'LineWidth', 3 );
-    axis(axis_scale_1); axis('auto x');
-    
-    % preference for variance levels
+    % mean data of all repeats (var, risk/ambi, sub)
     data_allrep = mean(data, 2);
-    X = squeeze(data_allrep);
+    y = squeeze(data_allrep);
     
-    subplot(1,3,3);
-    barwitherr(std(X, 1, 3)./23^.5, mean(X, 3)); hold on; box off;
-    plot( [20 20 20 20], '--k' , 'LineWidth', 3 );
-    axis(axis_scale_1); axis('auto x');
-    legend('risk', 'ambiguity');
+    % --- PANEL 1: overall preference for risk / ambiguity
+    subplot(1,3,1);
+    h = barwitherr(std(x, 1, 2)./(size(PART{GROUP},2))^.5, mean(x, 2)); hold on; box off;
+    plot( [EV EV], '--k' , 'LineWidth', 2 );
+    axis(axis_scale); axis('auto x'); ylabel('subjective value');
+    set(gca, 'xtick',[1 2] ); set(gca, 'xticklabels', {'risk','ambiguity'} );
+    set(h(1), 'FaceColor', [.5 .5 .5]);
     
-    % overall correlation risk / ambiguity
-    data_persub = mean(mean(data, 1),2);
-    X = squeeze(data_persub);
-    
+    % --- PANLEL 2: overall correlation of risk & ambiguity
     subplot(1,3,2);
-    scatter(X(1,:), X(2,:));
-    xlabel('risk'); ylabel('ambiguity');
-    lsline;
+    scatter(x(1,:), x(2,:));
+    h = lsline; set(h, 'LineWidth', 2); hold on;
+    scatter(x(1,:), x(2,:), 'k', 'MarkerFaceColor', 'k' );
+    xlabel('SV risk'); ylabel('SV ambiguity');
+ 
+    % --- PANEL 3: preference for different variance levels
+    subplot(1,3,3);
+    h= barwitherr(std(y, 1, 3)./(size(PART{GROUP},2))^.5, mean(y, 3)); hold on; box off;
+    plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
+    axis(axis_scale); axis('auto x'); ylabel('subjective value');
+    legend('risk', 'ambiguity');
+    set(gca, 'xtick',[1:4] ); set(gca, 'xticklabels', {'V1','V2','V3','V4'} );
+    set(h(1), 'FaceColor', [.0 .0 .8]);
+    set(h(2), 'FaceColor', [.8 .0 .0]);
+
+    %%% EXTRA FIGURE 3.1: correlation over all variance levels
+    figure('Name', 'F3.1: correlation for different variance levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .6 .4]);
+    for varlevel = 1:4;
+        % reselect data for ceratin variance level only
+        data_persub = mean(mean(data(varlevel,:,:,:), 1),2);
+        x = squeeze(data_persub);
+        % plot
+        subplot(1,4,varlevel);
+        scatter(x(1,:), x(2,:));
+        h = lsline; set(h, 'LineWidth', 2); hold on;
+        scatter(x(1,:), x(2,:), 'k', 'MarkerFaceColor', 'k' );
+        xlabel('SV risk'); ylabel('SV ambiguity');
+    end
     
-    % % correlation over all variance levels
-    % for varlevel = 1:4;
-    %
-    % data_persub = mean(mean(data(varlevel,:,:,:), 1),2);
-    % X = squeeze(data_persub);
-    %
-    % subplot(2,4,4+varlevel);
-    % scatter(X(1,:), X(2,:));
-    % xlabel('risk'); ylabel('ambiguity');
-    % lsline;
-    %
-    % end
+    clear data data_persub data_allrep x y varlevel axis_scale h;
     
 end
 
