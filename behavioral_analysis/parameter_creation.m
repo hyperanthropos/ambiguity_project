@@ -95,7 +95,7 @@ if SKIP_LOAD ~= 1;
     
 else
     
-    % if data is already sorted into the structs it can be loaded here
+    % if data is already sorted into the structures it can be loaded here
     load(fullfile(DIR.temp, 'temp.mat'));
     
 end
