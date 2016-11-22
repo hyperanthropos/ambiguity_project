@@ -17,7 +17,7 @@ using matlab with internal as well es external toolboxes, notably ["Statistical 
 - [x] code to analyse behavioral data
 
 * for experiment 1
-    * create parameters of individual subjects analysing the logfiles of behavioral data with [parameter_creation.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral_analysis/parameter_creation.m)
+    * create parameters of individual subjects analysing the logfiles of behavioral data with [parameter_creation.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral/experiment_1/analysis/parameter_creation.m)
     * create group level graph and statistics out of individual parameters with [parameter_analysis.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral/experiment_1/analysis/parameter_analysis.m)
 
 ---
