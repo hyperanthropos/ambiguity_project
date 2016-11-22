@@ -211,14 +211,22 @@ if sum(DRAW == 3);
  
     % --- PANEL 3: preference for different variance levels
     subplot(1,3,3);
-    h= barwitherr(std(y, 1, 3)./(size(PART{GROUP},2))^.5, mean(y, 3)); hold on; box off;
+    bar_or_line = 'line';
+    switch bar_or_line
+        case 'line';
+            h = errorbar(mean(y, 3), std(y, 1, 3)./(size(PART{GROUP},2))^.5, 'LineWidth', 2); hold on; box off;
+            set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
+        case 'bar';
+            h = barwitherr(std(y, 1, 3)./(size(PART{GROUP},2))^.5, mean(y, 3)); hold on; box off;
+            set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
+    end
+    clear bar_or_line;
     plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto x'); ylabel('subjective value');
     legend('risk', 'ambiguity');
-    set(gca, 'xtick',[1:4] ); set(gca, 'xticklabels', {'V1','V2','V3','V4'} );
-    set(h(1), 'FaceColor', [.0 .0 .8]);
-    set(h(2), 'FaceColor', [.8 .0 .0]);
-
+    set(gca, 'xtick', 1:4 );
+    xlabel('variance');
+    
     %%% EXTRA FIGURE 3.1: correlation over all variance levels
     figure('Name', 'F3.1: correlation for different variance levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .6 .4]);
     for varlevel = 1:4;
