@@ -4,7 +4,11 @@
 
 using matlab with internal as well es external toolboxes, notably ["Statistical Parametric Mapping"] (http://www.fil.ion.ucl.ac.uk/spm/software/) and ["Psychtoolbox"] (http://psychtoolbox.org)
 
+---
+
 ### this repository contains
+
+#### code for behavioral data analysis / generation
 
 - [x] code for behavioral experiments
 
@@ -19,8 +23,8 @@ using matlab with internal as well es external toolboxes, notably ["Statistical 
 * for experiment 1
     * create parameters of individual subjects analysing the logfiles of experiment 1 with [parameter_creation.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral/experiment_1/analysis/parameter_creation.m)
     * create group level graphs and statistics out of individual parameters with [parameter_analysis.m] (https://github.com/hyperanthropos/madeleine/blob/master/behavioral/experiment_1/analysis/parameter_analysis.m)
-
----
+    
+#### code for neuronal data analysis / generation
 
 - [ ] an fMRI task to evoke and collect neural data
 
