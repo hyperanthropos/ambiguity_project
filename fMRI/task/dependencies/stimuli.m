@@ -1,4 +1,4 @@
-function [matrix, stim_nr] = stimuli( steps, diag, session, TIMING )
+function [matrix, stim_nr, duration] = stimuli( steps, diag, session, TIMING )
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
 % can be fed into a task-presentation script
@@ -264,36 +264,53 @@ matrix(16:19,:) = NaN(4,stim_nr);
 
 %% CREATE TRIAL ONSET TIMING
 
-% stimdur = TIMING.pre_time + TIMING.duration + TIMING.indication;
-% 
-% gammafactor = 1;
-% gammavec = gamrnd(gammafactor, var_iti/gammafactor, 1, 99);
-% offset = var_iti/mean(gammavec);
-% gammavec = gammavec*offset;
-% 
-% trialstart(1,:) = 0;
-% 
-% % add 10 3s null events
-% x = randperm(99);
-% null_location = x(1:10);
-% for i = 1:99
-%     if find(null_location==i)
-%         trialstart(i+1) = trialstart(i)+prepcross+stimdur+indication+gammavec(i)+3;
-%     else
-%         trialstart(i+1) = trialstart(i)+prepcross+stimdur+indication+gammavec(i);
-%     end
-% end
-% 
-% % % % without null events
-% % % for i = 1:99
-% % % trialstart(i+1) = trialstart(i)+prepcross+stimdur+indication+gammavec(i);
-% % % end
-% 
-% duration = trialstart(end)+prepcross+stimdur+indication;
-% 
-% disp(duration)
+% calculte duration of 1 trial without jittered ITI
+stimdur = TIMING.pre_time + TIMING.duration + TIMING.indication;
 
-matrix(20,:) = ones(1,stim_nr)*ITI;                             % line 20 - ITI (time until next decision)
+% create jitter
+shape_parameter = 1;
+jitternumber = stim_nr-1; % number of jittered ITIs
+% create ITIs .1 seconds shorter than desired
+gammavec = gamrnd(shape_parameter, (ITI-.1)/shape_parameter, 1, jitternumber);
+% add the .1 second again to have a minimal ITI of .1
+gammavec = gammavec+.1;
+offset = ITI/mean(gammavec); % calculate offset from mean ITI
+gammavec = gammavec*offset; % ...and correct for it
+
+% create trial onset vector
+null_events = 'no';
+trialstart(1,:) = 1; % start first trial after 1 second
+switch null_events
+    case 'no'
+        % create vector of trial onsets without null events
+        for i = 1:jitternumber
+            trialstart(i+1) = trialstart(i)+stimdur+gammavec(i);
+        end
+        
+    case 'yes'
+        % alternative onset vector with 20 "3 second" null events
+        possible_trials = randperm(jitternumber); % create a vector of all possible trials for null events
+        null_location = possible_trials(1:20); % select the first 20
+        for i = 1:jitternumber
+            if find(null_location==i)
+                trialstart(i+1) = trialstart(i)+stimdur+gammavec(i)+3;
+            else
+                trialstart(i+1) = trialstart(i)+stimdur+gammavec(i);
+            end
+        end
+        
+end
+
+% calculate duration of experiment in seconds
+duration = trialstart(end)+stimdur;
+
+% write the vector into the matrix
+matrix(20,:) = trialstart;                             % line 20 - ITI (time until next decision)
+
+% check if temporal space between trials is minimum of trial duration
+if min(diff(trialstart)) < stimdur;
+   error('created onset times are below trial duration');
+end
 
 %% DERANDOMIZE MATRIX
 % sorted_matrix = sortrows(matrix', [2 3])';
