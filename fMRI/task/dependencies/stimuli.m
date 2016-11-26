@@ -312,6 +312,9 @@ if min(diff(trialstart)) < stimdur;
    error('created onset times are below trial duration');
 end
 
+% % show histogram of ITIs
+% hist(diff(trialstart)-stimdur);
+
 %% DERANDOMIZE MATRIX
 % sorted_matrix = sortrows(matrix', [2 3])';
 
