@@ -1,4 +1,5 @@
-function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
+% GOOD TILL HERE
+
 %% code to present the experiment
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
@@ -40,17 +41,36 @@ function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN
 
 %% SET PARAMETERS
 
+
+%%% TEMPORARY CONTROL
+
+%%% IMPLEMENT - XX% as standard
+
+% temp adding of depends
+home = pwd;
+addpath(fullfile(home, 'dependencies'));
+
+% temp start of PTB
+PTB_path = '/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox/';
+addpath(genpath(PTB_path));
+
+% temp settings
+SESSION_IN = 1;
+AMBIGUITY_IN = 0;
+SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/fMRI/task/logfiles/test.mat';
+SETTINGS_IN.TEST_FLAG = 0;
+SETTINGS_IN.LINUX_MODE = 1;
+
+%%% START SCRIPT (REMOVE THIS LINE)
+
 SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
 AMBIGUITY = AMBIGUITY_IN;           % resolve ambiguity, 1 = yes, 0 = no
 SAVE_FILE = SAVE_FILE_IN;           % where to save
 
-VISUAL_PRESET = 1;                  % set visual presentation of stimuli matching (risky and ambiguous offers)        
-                                    % 1 = with colors; 2 = without colors;
-
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
+SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
@@ -63,10 +83,15 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
 
 % TIMING SETTINGS
 
-TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
-TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
-TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
+    % --> total trial time = .5 + 5 + .5 + 1.5 = 7.5;
+TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
+TIMING.duration = 5;        % time to show choice, max RT (based on reaction time of subjects)
+TIMING.indication = .5;     % time to indicate choice
+TIMING.iti = 1;             % variable inter trial interval, optimized to detect convolved bold signal
+
+TIMING.selection = 2;      % time to show selected choice before revealing (not revealing) probabilities
+TIMING.outcome = 2;        % time to shwo the actual outcome (resolved probabilities or control)
+TIMING.iti = 1;             % time to wait before starting next trial with preparatory fixation cross
                             % put within the stim_nr loop, for variable ITI
 
 % create zero timing for test mode                            
@@ -74,7 +99,7 @@ if SETTINGS.TEST_MODE == 1;
     TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
     TIMING.selection = .0;      % time to show selected choice before revealing (not revealing) probabilities
     TIMING.outcome = 0;         % time to shwo the actual outcome (resolved probabilities or control)
-    TIMING.isi = .0;            % time to wait before starting next trial with preparatory fixation cross
+    TIMING.iti = .0;            % time to wait before starting next trial with preparatory fixation cross
 end
 
 %% CREATE STIMULI MATRIX
@@ -88,21 +113,18 @@ STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
-% never reveal ambiguity in training (session = 0) + shorten trial number
-if SESSION == 0;
-    STIMS.steps = 1;
-    STIMS.repeats = 1;
-    STIMS.reveal_amb = 0;
-end
-
 % create matrix
-[stim_mat, stim_nr] = stimuli(STIMS.reveal_amb, STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs, STIMS.session);
+[stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.diagnostic_graphs, SESSION, TIMING);
+
+warning('hacked in stuff');
+stim_mat(5,:) = zeros(1,stim_nr);
+keyboard;
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
     reaction_time = 2;
     disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
-        num2str( (TIMING.pre_time + reaction_time + TIMING.selection + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
+        num2str( (TIMING.pre_time + reaction_time + TIMING.selection + TIMING.outcome + TIMING.iti)*stim_nr/60 ) ' minutes.' ]);
 end
 
 % prepare and preallocate log
@@ -268,14 +290,7 @@ for i = 1:stim_nr;
     %%% USE FUNCTION TO DRAW THE STIMULI
     
     % select function to draw stimuli
-    switch VISUAL_PRESET;
-        case 1
-            draw_function = @draw_stims_colors;
-        case 2
-            draw_function = @draw_stims;
-        otherwise
-            error('invalid visual presentation - change VISUAL_PRESET flag');
-    end
+    draw_function = @draw_stims;
     
     % (1) DRAW THE STIMULUS (before response)
     draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
@@ -389,7 +404,7 @@ for i = 1:stim_nr;
     clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
     
     % wait before next trial (insert variable ISI for fMRI here)
-    WaitSecs(TIMING.isi);
+    WaitSecs(TIMING.iti);
     
 end
 clear i leftkey rightkey;
@@ -413,6 +428,3 @@ sorted_logrec = sortrows(logrec', [18 17])';    %#ok<NASGU> (this is created to 
 % ...and save
 disp(' '); disp('saving data...');
 save(SAVE_FILE);
-
-%% end function
-end
