@@ -1,5 +1,5 @@
 function [ ] = create_reward_file( PARTICIPANT_NR, savedir )
-% function to select a random trials and create a textfile to give to
+% function to select random trials and create a textfile to give to
 % participants for outpayment transparency
 
 %% SELECT TRIAL, CREATE AND COPY TEXT FILE
@@ -8,8 +8,9 @@ nr_of_sessions = 3;
 
 % start diary
 diary_file = fullfile(savedir, [ 'reward_file_part_' sprintf('%03d', PARTICIPANT_NR) '.txt'] );
+delete(diary_file);
 diary(diary_file);
-diary on;
+clc; diary on;
 
 % print content
 disp([ 'this is participant number: ' num2str(PARTICIPANT_NR) ]);
@@ -22,8 +23,8 @@ disp(' ');
 % print on trial per session
 for session = 1:nr_of_sessions;
     
-    reward_trial = randi(size(logrec, 2));
     load(fullfile(savedir, [ 'part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(session) '.mat'] ));
+    reward_trial = randi(size(logrec, 2));
     
     disp([ 'session: ' num2str(session) ' | trial: ' num2str(reward_trial) ]);
     disp(' ');
@@ -50,6 +51,7 @@ for session = 1:nr_of_sessions;
         disp(' ');
         disp('please roll a dice to determine what you will get');
     end
+    
     disp(' ');
     disp('+++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ ');
     disp(' ');
