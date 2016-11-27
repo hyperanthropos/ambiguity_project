@@ -37,12 +37,14 @@
 % draw_stims.m features additional settings for visual presentation
 % (colors, visual control variants, ...)
 
-
+%% PREPARE FOR PRESENTATION
+clear; close all; clc;
 
 %% SHIT CODE
 
 % ----------------------------------------- GOOD TILL HERE
 
+% ADD 20s at the end
 
 % input: SESSION, SAVE_FILE, SETTINGS
 
@@ -57,14 +59,14 @@ PTB_path = '/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox/';
 addpath(genpath(PTB_path));
 
 % temp settings
-SESSION_IN = 1;
-SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/fMRI/task/logfiles/test.mat';
+SESSION = 1;
+SAVE_FILE = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/fMRI/task/logfiles/test.mat';
 
 
 
 
 
-%% SET PARAMETERS
+%% SETTINGS
 
 % SETTINGS GENERAL
 SETTINGS.fMRI = 0;                                  % wait for scanner trigger (else start with button press)
@@ -213,14 +215,9 @@ for i = 1:stim_nr;
     
     response = 0; % first draw stimuli without response
     
-    %%%%%%%%%%% INSERT WAIT UNTIL START
-    
-    WaitSecs(TIMING.indication);
-    
-    %%%%%%%%%% INSERT WAIT UNTIL START
-    
-    
-    
+    % wait for specified trial start
+    WaitSecs('UntilTime', start_time + stim_mat(20,i));
+
     % recolor the fixaton cross shorty befor presenting a new stimulus
     Screen('DrawLine', window, [0 128 0], -10, 0, 10, 0, 5);
     Screen('DrawLine', window, [0 128 0], 0, -10, 0, 10, 5);
@@ -264,16 +261,15 @@ for i = 1:stim_nr;
     logrec(9,i) = position; % position of counteroffer: 1 = left, 2 = right
 
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
-    ref_time = GetSecs; % get time to meassure response
     %%% WRITE LOG %%%
     
     %%% USE FUNCTION TO DRAW THE STIMULI
     
-    % select function to draw stimuli
-    draw_function = @draw_stims;
-    
     % (1) DRAW THE STIMULUS (before response)
     draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+    
+    % get time to meassure response (RT)
+    ref_time = GetSecs;
     
     % view logfile debug info
     if SETTINGS.DEBUG_MODE == 1;
@@ -289,7 +285,7 @@ for i = 1:stim_nr;
     end
     
     % (X) GET THE RESPONSE
-    while response == 0;                    % wait for respsonse
+    while response == 0 && GetSecs - ref_time < TIMING.duration; % wait for respsonse or timeout
         [~, ~, kb_keycode] = KbCheck;
         
         if find(kb_keycode)==leftkey        % --- left / LINUX: 114 / WIN: 37
@@ -343,9 +339,19 @@ for i = 1:stim_nr;
         end
     end
    
-    % (2) DRAW THE RESPONSE
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
-
+    % (2) DRAW THE RESPONSE OR MISS INDICATOR
+    if response ~= 0;
+        draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+    elseif response == 0; % indicate missing response
+        Screen('DrawLine', window, [250 0 0], -18, 0, 18, 0, 5);
+        Screen('DrawLine', window, [250 0 0], -18, -2, 18, -2, 5);
+        Screen('DrawLine', window, [250 0 0], -18, 2, 18, 2, 5);
+        Screen('DrawLine', window, [250 0 0], 0, -18, 0, 18, 5); 
+        Screen('DrawLine', window, [250 0 0], -2, -18, -2, 18, 5); 
+        Screen('DrawLine', window, [250 0 0], 2, -18, 2, 18, 5); 
+        Screen(window, 'Flip');
+    end
+        
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
     WaitSecs(TIMING.indication);
     
@@ -394,8 +400,8 @@ logrec(20,:) = stim_mat(7,:);        % ambiguity variance level
 logrec(21,:) = stim_mat(8,:);        % counteroffer level
 
 % ...derandomize...
-sorted_stim_mat = sortrows(stim_mat', [2 3])';  %#ok<NASGU> (this is created to be included in the save file)
-sorted_logrec = sortrows(logrec', [18 17])';    %#ok<NASGU> (this is created to be included in the save file)
+sorted_stim_mat = sortrows(stim_mat', [2 3])';
+sorted_logrec = sortrows(logrec', [18 17])';
 
 % ...and save
 disp(' '); disp('saving data...');
