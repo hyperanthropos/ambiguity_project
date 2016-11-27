@@ -1,4 +1,4 @@
-function [ ] = draw_stims( window, screen_resolution, probability, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, resolve )
+function [ ] = draw_stims( window, screen_resolution, probability, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response )
 % function to draw the stimuli on the screen with Psychtoolbox
 % typus: 1 = risky; 2 ambiguous;
 % position: 1 = counteroffer left; 2 = counteroffer right;
@@ -13,6 +13,9 @@ color3 = ones(1,3)*200; % light gray                for probabilistic offer 2
 color4 = (color2+color3)/2; % inbetween gray        for ambiguous offers
 probtextcolor = [150 0 0]; % something red          for probability numbers text
 problinecolor = [0 0 0]; % black                    for probability line
+
+% chose color scheme "white" or "gray";
+color_scheme = 'white';
 
 % use Swiss Francs abbreviation "Fr."
 use_abbreviation = 1; % 1 = use; 2 = do not use
@@ -95,24 +98,25 @@ prob_coord = prob_coordspace(probability*100+1);
 rect = [ -130-2, prob_coord, -300+1, -200+1; -130-2, 200-2, -300+1, prob_coord; 300-2, prob_coord, 130+1, -200+1; 300-2, 200-2, 130+1, prob_coord]; % rects to fill with color
 
 % color the boxes
-if resolve ~= 1;
-    rect_c = [color1; color1; color1; color1];
-else
-    if typus == 1 || ambiguity_resolve == 1 % if risky trial or resolved ambiguous trial
-        switch position
-            case 1 % counteroffer left
-                rect_c = [color1; color1; color2; color3];
-            case 2 % counteroffer right
-                rect_c = [color2; color3; color1; color1];
+switch color_scheme
+    case 'white' % no colors
+        rect_c = [color1; color1; color1; color1];
+    case 'gray' % gray tones for uncertain offers
+        if typus == 1 % if risky trial
+            switch position
+                case 1 % counteroffer left
+                    rect_c = [color1; color1; color2; color3];
+                case 2 % counteroffer right
+                    rect_c = [color2; color3; color1; color1];
+            end
+        elseif typus == 2 % if ambiguous trial
+            switch position
+                case 1 % counteroffer left
+                    rect_c = [color1; color1; color4; color4];
+                case 2 % counteroffer right
+                    rect_c = [color4; color4; color1; color1];
+            end
         end
-    elseif typus == 2 && ambiguity_resolve == 0 % if unresolved ambiguous trial
-        switch position
-            case 1 % counteroffer left
-                rect_c = [color1; color1; color4; color4];  
-            case 2 % counteroffer right
-                rect_c = [color4; color4; color1; color1];
-        end
-    end
 end
 Screen(window, 'FillRect', rect_c', rect');
 
@@ -137,15 +141,12 @@ switch typus
             draw_text(POSITION.upper, side);
             
             if disp_prob == 1;
-                % display probabities before choice
-                if resolve ~= 1;
-                    % display probabilities in %
-                    disp_text = [num2str(probability*100) '%'];
-                    draw_text(POSITION.low, side);
-                    % display risk value of inverse probability
-                    disp_text = [num2str(100-probability*100) '%'];
-                    draw_text(POSITION.high, side);
-                end
+                % display probabilities in %
+                disp_text = [num2str(probability*100) '%'];
+                draw_text(POSITION.low, side);
+                % display risk value of inverse probability
+                disp_text = [num2str(100-probability*100) '%'];
+                draw_text(POSITION.high, side);
             end
         
         % add probability line
@@ -163,11 +164,15 @@ switch typus
         disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
         draw_text(POSITION.upper, side);
         
-        if resolve ~= 1; % display ambiguity marker only before choice
+        if disp_prob == 1;
+            % display unkwon probabilities in (pseudo) %
+            disp_text = '??%';
+            draw_text(POSITION.low, side);
+            draw_text(POSITION.high, side);
+        else
             disp_text = '???';
             draw_text(POSITION.mid, side);
-        end
-        
+        end   
 end
 
 %% (2) DRAW THE RESPONSE INDICATION
@@ -212,50 +217,7 @@ if response ~= 0;
     
 end
 
-%% (3) REVEAL AMBIGUITY
-
-if resolve == 1;
-    
-    % set where content will be revealed
-    if position == 1; % counteroffer left
-        side = 'right';
-    elseif position == 2; % counteroffer right
-        side = 'left';
-    end
-    
-    % draw the revelation
-    if typus == 1 || ambiguity_resolve == 1 % if risky trial or resolved ambiguous trial
-        
-        if disp_prob == 1;
-            % display probabilities in %
-            disp_text = [num2str(probability*100) '%'];
-            draw_text(POSITION.low, side);
-            % display risk value of inverse probability
-            disp_text = [num2str(100-probability*100) '%'];
-            draw_text(POSITION.high, side);
-        end
-        
-        % add probability line
-        if position == 1; % counteroffer left
-            Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line
-        elseif position == 2; % counteroffer right
-            Screen('DrawLine', window, problinecolor, -300+1, prob_coord, -130-2, prob_coord, 5);  % probability line
-        end
-        
-    elseif typus == 2 && ambiguity_resolve == 0 % if unresolved ambiguous trial
-        
-        if disp_prob == 1;
-            % display unkwon probabilities in (pseudo) %
-            disp_text = '??%';
-            draw_text(POSITION.low, side);
-            draw_text(POSITION.high, side);
-        end
-        
-    end
-    
-end
-
-% BRING ON THE SCREEN
+%% BRING ON THE SCREEN
 Screen(window, 'Flip');
 
 %% END FUNCTION
