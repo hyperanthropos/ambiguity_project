@@ -1,9 +1,7 @@
-% GOOD TILL HERE
-
-%% code to present the experiment
+%% code to present fMRI experiment
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
-% input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
+% input: PARTICIPANT NUMBER, SESSION
 
 % USER MANUAL
 % this function creates stimuli via stimuli.mat ("stim_mat") presents it to
@@ -18,7 +16,7 @@
 % LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
 % LINE 06 - choice: 1 = left, 2 = right
 % LINE 07 - trial type: 1 = risky, 2 = ambiguous
-% LINE 08 - ambiguity resolved: 1 = yes, 0 = no, 3 = does not apply (risky trial)
+% LINE 08 - [not used for this experiment]
 % LINE 09 - position of counteroffer: 1 = left, 2 = right
 % LINE 10 - probability of high amount
 % LINE 11 - probability of low amount
@@ -29,7 +27,7 @@
 % LINE 16 - counteroffer amount
 
 % LINE 17 - stimulus number (sorted)
-% LINE 18 - number of repeat of the same variation of stimuli
+% LINE 18 - session number (to combine matrices for behavioral analysis)
 % LINE 19 - risk variance level (1-4; low to high variance)
 % LINE 20 - ambiguity variance level (1-4; low to high variance
 % LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
@@ -39,12 +37,16 @@
 % draw_stims.m features additional settings for visual presentation
 % (colors, visual control variants, ...)
 
-%% SET PARAMETERS
 
+
+%% SHIT CODE
+
+% ----------------------------------------- GOOD TILL HERE
+
+
+% input: SESSION, SAVE_FILE, SETTINGS
 
 %%% TEMPORARY CONTROL
-
-%%% IMPLEMENT - XX% as standard
 
 % temp adding of depends
 home = pwd;
@@ -56,75 +58,59 @@ addpath(genpath(PTB_path));
 
 % temp settings
 SESSION_IN = 1;
-AMBIGUITY_IN = 0;
 SAVE_FILE_IN = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/fMRI/task/logfiles/test.mat';
-SETTINGS_IN.TEST_FLAG = 0;
-SETTINGS_IN.LINUX_MODE = 1;
 
-%%% START SCRIPT (REMOVE THIS LINE)
 
-SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
-AMBIGUITY = AMBIGUITY_IN;           % resolve ambiguity, 1 = yes, 0 = no
-SAVE_FILE = SAVE_FILE_IN;           % where to save
 
-% FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
-SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
-SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
+%% SET PARAMETERS
+
+% SETTINGS GENERAL
+SETTINGS.fMRI = 0;                                  % wait for scanner trigger (else start with button press)
 SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMRI button box ( has to be set on "12345" )
+SETTINGS.EYETRACKER = 0;                            % activate eyetracker recording on scanner start
 
+% SETTINGS TESTING
+SETTINGS.TEST_MODE = 1;                             % show reduced number of trials
+SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
+SETTINGS.LINUX_MODE = 1;                            % set button mapping for linux or windows system
+
+% TIMING SETTINGS
+TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
+TIMING.duration = 5;        % time to decide, max RT (based on reaction time of subjects)
+TIMING.indication = .5;     % time for choice indication
+TIMING.iti = 1;             % variable inter trial interval, optimized to detect convolved bold signal       
+
+% SCREEN SETTINGS
 SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
                                                     % run Screen('Screens') to check what is available on your machine
 SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (centered according to this input)
-                                                    % test with Screen('Resolution', SETTINGS.SCREEN_NR)
-
-% TIMING SETTINGS
-
-    % --> total trial time = .5 + 5 + .5 + 1.5 = 7.5;
-TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
-TIMING.duration = 5;        % time to show choice, max RT (based on reaction time of subjects)
-TIMING.indication = .5;     % time to indicate choice
-TIMING.iti = 1;             % variable inter trial interval, optimized to detect convolved bold signal
-
-TIMING.selection = 2;      % time to show selected choice before revealing (not revealing) probabilities
-TIMING.outcome = 2;        % time to shwo the actual outcome (resolved probabilities or control)
-TIMING.iti = 1;             % time to wait before starting next trial with preparatory fixation cross
-                            % put within the stim_nr loop, for variable ITI
-
-% create zero timing for test mode                            
-if SETTINGS.TEST_MODE == 1;
-    TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
-    TIMING.selection = .0;      % time to show selected choice before revealing (not revealing) probabilities
-    TIMING.outcome = 0;         % time to shwo the actual outcome (resolved probabilities or control)
-    TIMING.iti = .0;            % time to wait before starting next trial with preparatory fixation cross
-end
+                                                    % test with Screen('Resolution', SETTINGS.SCREEN_NR)                                                                               
 
 %% CREATE STIMULI MATRIX
 
 % current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
 % alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
 
-STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
 STIMS.steps = 12;
-STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
-% create matrix
-[stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.diagnostic_graphs, SESSION, TIMING);
+% replace steps with reduced number if testing
+if SETTINGS.TEST_MODE == 1;
+    STIMS.steps = 1;
+end
 
-warning('hacked in stuff');
-stim_mat(5,:) = zeros(1,stim_nr);
-keyboard;
+% create matrix
+[stim_mat, stim_nr, duration] = stimuli(STIMS.steps, STIMS.diagnostic_graphs, STIMS.session, TIMING);
+% derandomize matrix
+% sorted_matrix = sortrows(stim_mat', [2 3])';
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
-    reaction_time = 2;
-    disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
-        num2str( (TIMING.pre_time + reaction_time + TIMING.selection + TIMING.outcome + TIMING.iti)*stim_nr/60 ) ' minutes.' ]);
+    disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' num2str( duration/60 ) ' minutes.' ]);
 end
 
 % prepare and preallocate log
@@ -133,6 +119,9 @@ logrec = NaN(21,stim_nr);
 %% PREPARE PRESENTATION AND PSYCHTOOLBOX
 % help for PTB Screen commands can be displayed with "Screen [command]?" 
 % help with keycodes with KbName('KeyNames') and affiliates
+
+% select function to draw stimuli
+draw_function = @draw_stims;
 
 % set used keys
 if SETTINGS.LINUX_MODE == 1;
@@ -181,29 +170,16 @@ Screen(window, 'Flip');
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 clear offset;
 
-% wait to start experiment (later synchronise with fMRI machine)
-% ---> insert code when changing to scanner design
-if SESSION == 0;
-    disp('press a button to continue...');
-    pause;
+% wait to start experiment (synchronise with fMRI machine)
+disp('waiting for scanner trigger...');
+if SETTINGS.fMRI == 1;
+    % ---> scanner trigger;
 else
-    switch SESSION
-        case 1
-            % WAIT TOGETHER FOT SESSION 1 (press F)
-            fprintf('\nthank you, the training is now finished. please have a short break.');
-            if SETTINGS.LINUX_MODE == 1; % set key to 'F'
-                continue_key = 42;
-            else
-                continue_key = 70;
-            end
-        case 2
-            % WAIT TOGETHER FOT SESSION 2 (press G)
-            fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
-            if SETTINGS.LINUX_MODE == 1; % set key to 'G'
+    disp('set manual start - press a button "G" to continue...');
+    if SETTINGS.LINUX_MODE == 1; % set key to 'G'
                 continue_key = 43;
             else
                 continue_key= 71;
-            end
     end
     press = 0;
     while press == 0;
@@ -234,8 +210,16 @@ for i = 1:stim_nr;
     ambiguity_low = stim_mat(13,i);
     ambiguity_high = stim_mat(14,i);
     counteroffer = stim_mat(15,i);
-    ambiguity_resolve = stim_mat(5,i);  % 1 = yes, 0 = no
+    
     response = 0; % first draw stimuli without response
+    
+    %%%%%%%%%%% INSERT WAIT UNTIL START
+    
+    WaitSecs(TIMING.indication);
+    
+    %%%%%%%%%% INSERT WAIT UNTIL START
+    
+    
     
     % recolor the fixaton cross shorty befor presenting a new stimulus
     Screen('DrawLine', window, [0 128 0], -10, 0, 10, 0, 5);
@@ -276,11 +260,7 @@ for i = 1:stim_nr;
     
     %%% WRITE LOG %%%
     logrec(7,i) = typus; % trial type: 1 = risky, 2 = ambiguous
-    if typus == 2;
-        logrec(8,i) = ambiguity_resolve; % ambiguity resolved: 1 = yes, 0 = no
-    elseif typus == 1;
-        logrec(8,i) = 3; % ambiguity resolved: 3 = does not apply (risky trial)
-    end
+    logrec(8,i) = NaN; % this line is not used
     logrec(9,i) = position; % position of counteroffer: 1 = left, 2 = right
 
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
@@ -293,13 +273,12 @@ for i = 1:stim_nr;
     draw_function = @draw_stims;
     
     % (1) DRAW THE STIMULUS (before response)
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
     
     % view logfile debug info
     if SETTINGS.DEBUG_MODE == 1;
         disp(' ');
         disp([ 'trial type: 1 = risky, 2 = ambiguous: ' num2str(logrec(7,i)) ]);
-        disp([ 'ambiguity resolved: 1 = yes, 0 = no, NaN = risky trial: ' num2str(logrec(8,i)) ]);
         disp([ 'position of counteroffer: 1 = left, 2 = right: ' num2str(logrec(9,i)) ]);
         disp(' ');
         disp([ 'time: ' num2str(logrec(2,i)) ]);
@@ -365,14 +344,10 @@ for i = 1:stim_nr;
     end
    
     % (2) DRAW THE RESPONSE
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
-    
-    % (3) REVEAL AMBIGUITY (or visual control) (last input of function)
-    WaitSecs(TIMING.selection); % shortly wait before revealing ambiguity
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
-    
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
-    WaitSecs(TIMING.outcome); % present final choice
+    WaitSecs(TIMING.indication);
     
     Screen('DrawLine', window, 0, -10, 0, 10, 0, 5);
     Screen('DrawLine', window, 0, 0, -10, 0, 10, 5);   
@@ -402,9 +377,6 @@ for i = 1:stim_nr;
     
     % clear all used variables for security
     clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
-    
-    % wait before next trial (insert variable ISI for fMRI here)
-    WaitSecs(TIMING.iti);
     
 end
 clear i leftkey rightkey;
