@@ -37,44 +37,20 @@
 % draw_stims.m features additional settings for visual presentation
 % (colors, visual control variants, ...)
 
-%% PREPARE FOR PRESENTATION
+%% PREPARE SCRIPT
 clear; close all; clc;
-
-%% SHIT CODE
-
-% ----------------------------------------- GOOD TILL HERE
-
-% ADD 20s at the end
-
-% input: SESSION, SAVE_FILE, SETTINGS
-
-%%% TEMPORARY CONTROL
-
-% temp adding of depends
 home = pwd;
 addpath(fullfile(home, 'dependencies'));
-
-% temp start of PTB
-PTB_path = '/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox/';
-addpath(genpath(PTB_path));
-
-% temp settings
-SESSION = 1;
-SAVE_FILE = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/CODE/madeleine/fMRI/task/logfiles/test.mat';
-
-
-
-
 
 %% SETTINGS
 
 % SETTINGS GENERAL
-SETTINGS.fMRI = 0;                                  % wait for scanner trigger (else start with button press)
+SETTINGS.fMRI = 1;                                  % wait for scanner trigger (else start with button press)
 SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMRI button box ( has to be set on "12345" )
 SETTINGS.EYETRACKER = 0;                            % activate eyetracker recording on scanner start
 
 % SETTINGS TESTING
-SETTINGS.TEST_MODE = 1;                             % show reduced number of trials
+SETTINGS.TEST_MODE = 0;                             % show reduced number of trials
 SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
 SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
 SETTINGS.LINUX_MODE = 1;                            % set button mapping for linux or windows system
@@ -89,14 +65,54 @@ TIMING.iti = 1;             % variable inter trial interval, optimized to detect
 SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
                                                     % run Screen('Screens') to check what is available on your machine
 SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (centered according to this input)
-                                                    % test with Screen('Resolution', SETTINGS.SCREEN_NR)                                                                               
+                                                    % test with Screen('Resolution', SETTINGS.SCREEN_NR)  
+                                                    
+%% PREPARE FOR PRESENTATION
+
+% capture subject data
+disp('welcome to the experiment!'); disp(' ');
+PARTICIPANT_NR = input('enter participant number:');
+SESSION = input('enter session number:');
+
+% prepare file structure and save file
+savedir = fullfile(home, 'logfiles');
+if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
+SAVE_FILE = fullfile(savedir, [ 'part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(SESSION) '.mat'] );
+if exist(SAVE_FILE, 'file')==2; % check if savefiles exist
+    disp(' '); disp('a logfile for this subjects already exists! do you want to overwrite?');
+    overwrite = input('enter = no / ''yes'' = yes : '); disp(' ');
+    if strcmp(overwrite, 'yes');
+        display('will continue and overwrite...'); 
+    else
+        error('security shutdown initiated! - check logfiles or choose annother participant number or session!');
+    end
+end
+clear overwrite;
+
+% security check for settings
+disp('SETTINGS ARE:'); disp(' ');
+disp(SETTINGS);
+if (SETTINGS.TEST_MODE + SETTINGS.WINDOW_MODE + SETTINGS.DEBUG_MODE + SETTINGS.LINUX_MODE) > 0;
+    warning('some test / debug settings are active');
+end
+if (SETTINGS.fMRI + SETTINGS.BUTTON_BOX + SETTINGS.EYETRACKER) < 3;
+    warning('not all fMRI options are set');
+end
+disp(' '); disp(['participant number: ' num2str(PARTICIPANT_NR)]);
+disp(['session number: ' num2str(SESSION)]);
+disp(' '); disp('VALIDATE AND PRESS ENTER TO CONTINUE...'); pause;
+
+% create replicable randomization
+randomisation = RandStream('mt19937ar', 'Seed', PARTICIPANT_NR + 10000*SESSION);
+RandStream.setGlobalStream(randomisation);
+clear randomisation;
 
 %% CREATE STIMULI MATRIX
 
 % current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
 % alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
 
-STIMS.steps = 12;
+STIMS.steps = 13;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
@@ -111,8 +127,9 @@ end
 % sorted_matrix = sortrows(stim_mat', [2 3])';
 
 % display time calulations
-if STIMS.diagnostic_graphs == 1;
-    disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' num2str( duration/60 ) ' minutes.' ]);
+if STIMS.diagnostic_graphs == 1 || SETTINGS.DEBUG_MODE == 1;
+    disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' num2str( (duration+20)/60 ) ' minutes.' ]);
+    % +20 seconds to capture last HRF (scanner should stop before presentation)
 end
 
 % prepare and preallocate log
@@ -175,13 +192,20 @@ clear offset;
 % wait to start experiment (synchronise with fMRI machine)
 disp('waiting for scanner trigger...');
 if SETTINGS.fMRI == 1;
-    % ---> scanner trigger;
+    continue_key = 53; % this is "y" on linux 
+    press = 0;
+    while press == 0;
+        [~, ~, kb_keycode] = KbCheck;
+        if find(kb_keycode)==continue_key;
+            press = 1;
+        end
+    end
 else
     disp('set manual start - press a button "G" to continue...');
     if SETTINGS.LINUX_MODE == 1; % set key to 'G'
-                continue_key = 43;
-            else
-                continue_key= 71;
+        continue_key = 43;
+    else
+        continue_key= 71;
     end
     press = 0;
     while press == 0;
@@ -190,8 +214,8 @@ else
             press = 1;
         end
     end
-    clear continue_key kb_keycode;
 end
+clear continue_key kb_keycode;
 
 %% PRESENT STIMULI
 
@@ -243,13 +267,11 @@ for i = 1:stim_nr;
             typus = 2; position = 1; % ambigious trial, counteroffer left
             if SETTINGS.DEBUG_MODE == 1;
             disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
             end
         elseif stim_mat(21,i) == 2;
             typus = 2; position = 2; % ambigious trial, counteroffer right
             if SETTINGS.DEBUG_MODE == 1;
             disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
             end
         end
         
@@ -387,6 +409,9 @@ for i = 1:stim_nr;
 end
 clear i leftkey rightkey;
 
+% wait for 20 seconds to capture last HRF
+WaitSecs(20);
+
 % close the screen
 Screen('CloseAll');
 
@@ -406,3 +431,11 @@ sorted_logrec = sortrows(logrec', [18 17])';
 % ...and save
 disp(' '); disp('saving data...');
 save(SAVE_FILE);
+
+% also create a reward file at the end
+if SESSION == 3
+    create_reward_file(PARTICIPANT_NR, savedir);
+end
+
+%% END OF SCRIPT
+    
