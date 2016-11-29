@@ -47,7 +47,6 @@ addpath(fullfile(home, 'dependencies'));
 % SETTINGS GENERAL
 SETTINGS.fMRI = 1;                                  % wait for scanner trigger (else start with button press)
 SETTINGS.BUTTON_BOX = 1;                            % set button mapping for fMRI button box ( USB / HID KEY 12345 | HHSC-1x4-D )
-SETTINGS.EYETRACKER = 1;                            % activate eyetracker recording on scanner start
 
 % SETTINGS TESTING
 SETTINGS.TEST_MODE = 0;                             % show reduced number of trials
@@ -95,7 +94,7 @@ disp(SETTINGS);
 if (SETTINGS.TEST_MODE + SETTINGS.WINDOW_MODE + SETTINGS.DEBUG_MODE + SETTINGS.LINUX_MODE) > 0;
     warning('some test / debug settings are active');
 end
-if (SETTINGS.fMRI + SETTINGS.BUTTON_BOX + SETTINGS.EYETRACKER) < 3;
+if (SETTINGS.fMRI + SETTINGS.BUTTON_BOX) < 2;
     warning('not all fMRI options are set');
 end
 disp(' '); disp(['participant number: ' num2str(PARTICIPANT_NR)]);
