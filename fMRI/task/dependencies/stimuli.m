@@ -53,9 +53,11 @@ X.AVL = [20 15 10 5 0];                                                     % am
 X.AVH = [25 30 35 40 45];                                                   % ambiguitly levels high
 X.AN = 5;                                                                   % number of ambiguous levels
 
-X.EV = 22.5;                                                      % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH)
+X.EV = 22.5;                                                    % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH)
 
 stim_nr = (X.RN+X.AN)*X.steps;
+
+NR_OF_SESSIONS = 3;                                             % how many sessions are you going to run
 
 % create percentage value of highest / lowest possible counteroffer
 % in realtion to expected value, so that the counteroffer is never lower
@@ -204,12 +206,32 @@ r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line
 r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ]
 
 % create counteroffers
-counteroffers = [];
-for i = 1:X.RN;
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
-end
-for i = 1:X.AN;
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
+counteroffer_steps = 'shifted';     % 'fixed' for the same counteroffer in each session
+                                    % 'shifted' for variable counteroffers in each session
+                                    % sessions can be combined to one matrix from min to max afterwards
+switch counteroffer_steps
+    case 'fixed';
+        % create identical counteroffers for each session
+        counteroffers = [];
+        for i = 1:X.RN;
+            counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
+        end
+        for i = 1:X.AN;
+            counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
+        end
+    case 'shifted';
+        % create shifted counteroffers for each sessions
+        counteroffers = [];
+        for i = 1:X.RN;
+            full_range = linspace(X.var{i}(1), X.var{i}(2), X.steps*NR_OF_SESSIONS)*X.EV; % full range of combined stimuli for all sessions
+            used_range = full_range(session:NR_OF_SESSIONS:length(full_range)); % selected stimuli range for this session
+            counteroffers = cat(2, counteroffers, used_range);
+        end
+        for i = 1:X.AN;
+            full_range = linspace(X.var{i}(1), X.var{i}(2), X.steps*NR_OF_SESSIONS)*X.EV; % full range of combined stimuli for all sessions
+            used_range = full_range(session:NR_OF_SESSIONS:length(full_range)); % selected stimuli range for this session
+            counteroffers = cat(2, counteroffers, used_range);
+        end
 end
 
 r_matrix(15,:) = counteroffers;                                   % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
@@ -278,7 +300,7 @@ offset = ITI/mean(gammavec); % calculate offset from mean ITI
 gammavec = gammavec*offset; % ...and correct for it
 
 % create trial onset vector
-null_events = 'no';
+null_events = 'yes';
 trialstart(1,:) = 1; % start first trial after 1 second
 switch null_events
     case 'no'
