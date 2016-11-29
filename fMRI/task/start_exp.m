@@ -45,21 +45,21 @@ addpath(fullfile(home, 'dependencies'));
 %% SETTINGS
 
 % SETTINGS GENERAL
-SETTINGS.fMRI = 0;                                  % wait for scanner trigger (else start with button press)
-SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMRI button box ( has to be set on "12345" )
-SETTINGS.EYETRACKER = 0;                            % activate eyetracker recording on scanner start
+SETTINGS.fMRI = 1;                                  % wait for scanner trigger (else start with button press)
+SETTINGS.BUTTON_BOX = 1;                            % set button mapping for fMRI button box ( USB / HID KEY 12345 | HHSC-1x4-D )
+SETTINGS.EYETRACKER = 1;                            % activate eyetracker recording on scanner start
 
 % SETTINGS TESTING
 SETTINGS.TEST_MODE = 0;                             % show reduced number of trials
-SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
+SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
 SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
-SETTINGS.LINUX_MODE = 1;                            % set button mapping for linux or windows system
+SETTINGS.LINUX_MODE = 0;                            % set button mapping for linux or windows system
 
 % TIMING SETTINGS
 TIMING.pre_time = .5;       % time to show recolored fixation cross to prepare action
 TIMING.duration = 5;        % time to decide, max RT (based on reaction time of subjects)
 TIMING.indication = .5;     % time for choice indication
-TIMING.iti = 1.5;           % variable inter trial interval, optimized to detect convolved bold signal       
+TIMING.iti = 1;             % variable inter trial interval, optimized to detect convolved bold signal       
 
 % SCREEN SETTINGS
 SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
@@ -109,10 +109,11 @@ clear randomisation;
 
 %% CREATE STIMULI MATRIX
 
-% current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
-% alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
+% current design: 12 steps of variation = 120 trials;
+% 6s per trial + 1s ISI = 120s*7 + 20 null events (3s) = 900s
+% (scanner should run 910s)
 
-STIMS.steps = 13;
+STIMS.steps = 12;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
