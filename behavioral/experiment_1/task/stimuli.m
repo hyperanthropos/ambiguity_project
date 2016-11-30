@@ -183,16 +183,16 @@ r_matrix(7,trials_risky) = repmat(1:X.AN, 1, X.steps);                    % line
 r_matrix(7,trials_ambiguous) = kron(1:X.AN, ones(1,X.steps));             % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(8,:) = repmat(1:X.steps, 1, X.AN+X.RN);                          % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 
-r_matrix(10,trials_risky) = kron(X.RPH, ones(1,X.steps));                 % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
-r_matrix(10,trials_ambiguous) = repmat(X.RPH, 1, X.steps);                % line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
-r_matrix(11,trials_risky) = kron(X.RVL, ones(1,X.steps));                 % line 11 - option 1 - lower value risk [ line 6 ] (always 0 for risk)
-r_matrix(11,trials_ambiguous) = repmat(X.RVL, 1, X.steps);                % line 11 - option 1 - lower value risk [ line 6 ] (always 0 for risk)
-r_matrix(12,trials_risky) = kron(X.RVH, ones(1,X.steps));                 % line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
-r_matrix(12,trials_ambiguous) = repmat(X.RVH, 1, X.steps);                % line 12 - option 1 - upper value risk [ line 6 ] (25, 33, 50, 100 for risk)
-r_matrix(13,trials_risky) = repmat(X.AVL, 1, X.steps);                    % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
-r_matrix(13,trials_ambiguous) =  kron(X.AVL, ones(1,X.steps));            % line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
-r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
-r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
+r_matrix(10,trials_risky) = kron(X.RPH, ones(1,X.steps));                 % line 10 - option 1 - probability of offer [ line 6 ]
+r_matrix(10,trials_ambiguous) = repmat(X.RPH, 1, X.steps);                % line 10 - option 1 - probability of offer [ line 6 ]
+r_matrix(11,trials_risky) = kron(X.RVL, ones(1,X.steps));                 % line 11 - option 1 - lower value risk [ line 6 ]
+r_matrix(11,trials_ambiguous) = repmat(X.RVL, 1, X.steps);                % line 11 - option 1 - lower value risk [ line 6 ]
+r_matrix(12,trials_risky) = kron(X.RVH, ones(1,X.steps));                 % line 12 - option 1 - upper value risk [ line 6 ]
+r_matrix(12,trials_ambiguous) = repmat(X.RVH, 1, X.steps);                % line 12 - option 1 - upper value risk [ line 6 ]
+r_matrix(13,trials_risky) = repmat(X.AVL, 1, X.steps);                    % line 13 - option 1 - lower value ambiguity [ line 7 ]
+r_matrix(13,trials_ambiguous) =  kron(X.AVL, ones(1,X.steps));            % line 13 - option 1 - lower value ambiguity [ line 7 ]
+r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line 14 - option 1 - upper value ambiguity [ line 7 ]
+r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ]
 
 % create counteroffers
 counteroffers = [];
@@ -292,7 +292,6 @@ matrix(16:19,:) = NaN(4,stim_nr);
 
 % derandomize
 % sorted_matrix = sortrows(matrix', [2 3])';
-
 
 %% end function code
 end
