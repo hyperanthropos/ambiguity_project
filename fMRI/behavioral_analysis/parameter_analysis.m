@@ -19,21 +19,17 @@ DRAW = [1 2 3];
 % 03 | COMPOSITE GROUP SUMMARY
 
 % set subjects to analyse
-PART{1} = 1:40; % subjects where ambiguity was not resolved
+PART = 1:40; % subjects where ambiguity was not resolved
 
 % set group to analyze
 GROUP = 1; % 1 = ambiguity not resolved; 2 = ambiguity resolved
 
 % exclude subjects for certain reasons
 EXCLUDE_SUBS = 0;
-% unresolved exclude candidates
+% exclude candidates
 % #4 = obvious maladaptive strategie at varlevel 4
 % #22 = extremly risk averse
-exclude{1}.vec = [4 22];
-% resolved exclude candidates
-% #1 very risk seeking
-% #11 very risk averse (but still a pattern)
-exclude{2}.vec = [1 11];
+exclude.vec = [4 22];
 
 % design specification
 REPEATS_NR = 3; % how many times was one cycle repeated
@@ -52,7 +48,7 @@ load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
 % exclude subjects from subject vector
 if EXCLUDE_SUBS == 1;
     for i = 1:2;
-        PART{i}(exclude{i}.vec) = [];
+        PART(exclude{i}.vec) = [];
     end
 end
 clear i exclude;
@@ -65,16 +61,11 @@ clear i exclude;
 if sum(DRAW == 1);
     
     figure('Name', 'F1: single subject per timepoint and variance', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
-    for sub = PART{GROUP};
+    for sub = PART;
         
-        if GROUP == 1;
-            x = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),1)); % over time
-            y = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),2)); % over variance
-        elseif GROUP == 2;
-            x = squeeze(mean(PARAM.premiums.ce.resolved(:,:,:,sub),2)); % over time
-            y = squeeze(mean(PARAM.premiums.ce.resolved(:,:,:,sub),2)); % over variance
-        end
-      
+            x = squeeze(mean(PARAM.premiums.ce(:,:,:,sub),1)); % over time
+            y = squeeze(mean(PARAM.premiums.ce(:,:,:,sub),2)); % over variance
+
         % plot single subjects over variance
         subplot(5,8,sub);
         plot( y, 'LineWidth', 2 ); hold on; box off;
@@ -97,57 +88,43 @@ end
 if sum(DRAW == 2);
     
     % setup for figure 2
-    axis_scale = [.5 4.5 10 22]; % scale fot axis
+    axis_scale = [.5 3.5 10 25]; % scale fot axis
     
-    figure('Name', 'F2: mean over time for variance levels between groups', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+    figure('Name', 'F2: mean over time for variance levels between groups', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
     
     % plot for both groups independend of "GROUPS" setting (control left, resolved right)
     for group = 1;
         
-        if group == 1;
-            data = mean(PARAM.premiums.ce.control(:,:,:,:), 1);
-        elseif group == 2;
-            data = mean(PARAM.premiums.ce.resolved(:,:,:,:), 1);
-        end
+            data = mean(PARAM.premiums.ce(:,:,:,:), 1);
         
         % plot mean preference over time
         x = squeeze( mean( data,4 ) ); % calulate mean over subs
-        x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5); % calculate se
+        x_se = squeeze( std( data,1,4 )./(size(PART,2))^.5); % calculate se
         
-        subplot(2,2,group);
+        subplot(2,1,group);
         plot( x, 'LineWidth', 3 ); box off; hold on;
         errorbar(x, x_se);
-        plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
+        plot( ones(1,REPEATS_NR)*EV, '--k' , 'LineWidth', 2 );
         axis(axis_scale); legend('R', 'A'); xlabel('time');
-        if group == 1;
-            title('control');
-        elseif group == 2;
-            title('resolved');
-        end
+
+            title('over time');
         
         % plot mean preference over time for each variance level
         for varlevel = 1:VAR_NR;
             
-            if group == 1;
-                data = mean(PARAM.premiums.ce.control(varlevel,:,:,:), 1);
-                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+varlevel);
-            elseif group == 2;
-                data = mean(PARAM.premiums.ce.resolved(varlevel,:,:,:), 1);
-                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+VAR_NR+1+varlevel);
-            end
+                data = mean(PARAM.premiums.ce(varlevel,:,:,:), 1);
+                subplot(2, VAR_NR ,VAR_NR+varlevel);
+
             
             x = squeeze( mean( data,4 ) ); % calulate mean over subs
-            x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5 ); % calculate se
+            x_se = squeeze( std( data,1,4 )./(size(PART,2))^.5 ); % calculate se
             
             plot( x, 'LineWidth', 3 ); box off; hold on;
             errorbar(x, x_se);
-            plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
+            plot( ones(1,REPEATS_NR)*EV, '--k' , 'LineWidth', 2 );
             axis(axis_scale); legend('R', 'A'); xlabel('time');
-            if group == 1;
+            
                 title(['control var: ' num2str(varlevel)]);
-            elseif group == 2;
-                title(['resolved var: ' num2str(varlevel)]);
-            end
             
         end
   
@@ -166,16 +143,13 @@ if sum(DRAW == 3);
     
     % add function for "barrwitherr"
     addpath(SUBFUNCTIONS_PATH);
-    axis_scale = [.5 4.5 10 22];
+    axis_scale = [.5 4.5 10 25];
     
     figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
     
     % prepare data to plot
-    if GROUP == 1;
-        data = PARAM.premiums.ce.control(:,:,:,PART{GROUP});
-    elseif GROUP == 2;
-        data = PARAM.premiums.ce.resolved(:,:,:,PART{GROUP});
-    end
+
+        data = PARAM.premiums.ce(:,:,:,PART);
     
     % data for all subjects
     data_persub = mean(mean(data, 1),2);
@@ -187,7 +161,7 @@ if sum(DRAW == 3);
     
     % --- PANEL 1: overall preference for risk / ambiguity
     subplot(1,3,1);
-    h = barwitherr(std(x, 1, 2)./(size(PART{GROUP},2))^.5, mean(x, 2)); hold on; box off;
+    h = barwitherr(std(x, 1, 2)./(size(PART,2))^.5, mean(x, 2)); hold on; box off;
     plot( [EV EV], '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto x'); ylabel('subjective value');
     set(gca, 'xtick',[1 2] ); set(gca, 'xticklabels', {'risk','ambiguity'} );
@@ -205,10 +179,10 @@ if sum(DRAW == 3);
     bar_or_line = 'line';
     switch bar_or_line
         case 'line';
-            h = errorbar(mean(y, 3), std(y, 1, 3)./(size(PART{GROUP},2))^.5, 'LineWidth', 2); hold on; box off;
+            h = errorbar(mean(y, 3), std(y, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
         case 'bar';
-            h = barwitherr(std(y, 1, 3)./(size(PART{GROUP},2))^.5, mean(y, 3)); hold on; box off;
+            h = barwitherr(std(y, 1, 3)./(size(PART,2))^.5, mean(y, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
     clear bar_or_line;
