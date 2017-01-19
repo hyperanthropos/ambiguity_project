@@ -49,12 +49,26 @@
         % PARAM.premiums.premium
         %   contains the risk premium factor between ce and EV
         %       premium > 0 = risk averse; premium < 0 risk seeking
+        
+%% TO DO LIST
+
+% features
+% ...
+
+% corrections
+warning('you really have to find a good way to treat missing values - they are not accounted for yet');
+
+% optimisations
+% the first transformation of parameter creation parts (like in RT) within the "repeat loop" is used several times in the script and could be implemented on a more global level
 
 %% SETUP
 clear; close('all'); clc;
 
+% save and overwrite parameter file
+SAVE = 0;
+
 % pause after each subject to see output
-PAUSE = 0; % 1 = pause; 2 = 3 seconds delay
+PAUSE = 1; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART = 1:40; 
@@ -148,8 +162,6 @@ for sub = PART
     
     %% --- CREATE PARAMETER
     
-    warning('the first transformation within the "repeat loop" is used several times in the script and could be implemented on a mor global level');
-    
     for repeat = 1:REPEATS_NR;
         
         risk_trials = RESULT_SORT.part{sub}.repeat{repeat}.risk;
@@ -185,9 +197,6 @@ for sub = PART
     % LINE 20 - ambiguity variance level (1-4; low to high variance
     
     %% --- CREATE PARAMETER
-    
-    warning('you really have to find a good way to treat missing valaues - they are not accounted for yet');
-    % ---> has to be implemented
     
     for repeat = 1:REPEATS_NR;
         
@@ -383,7 +392,9 @@ clear sub;
 
 %% SAVE CALCULATED PARAMETERS
 
-save(fullfile(DIR.output, 'parameters.mat'), 'PARAM', 'RESULT_SEQ', 'RESULT_SORT');
+if SAVE == 1;
+    save(fullfile(DIR.output, 'parameters.mat'), 'PARAM', 'RESULT_SEQ', 'RESULT_SORT');
+end
 
 % END OF SCRIPT
 disp('thank you, come again!');
