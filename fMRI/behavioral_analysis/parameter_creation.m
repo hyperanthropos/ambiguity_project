@@ -51,9 +51,10 @@
         %       premium > 0 = risk averse; premium < 0 risk seeking
         
 %% TO DO LIST
+clear; close('all'); clc;
 
 % features
-% ...
+% create parameters out of fused matrices
 
 % corrections
 warning('you really have to find a good way to treat missing values - they are not accounted for yet');
