@@ -174,15 +174,15 @@ for sub = PART
             
             x = risk_trials_var{var_level};
             
-            PARAM.RT.mean(var_level,repeat,1,sub) = mean( x(3,:) );
-            PARAM.RT.prob(var_level,repeat,1,sub) = mean( x(3,x(4,:)==2) ); % RT of chosen probabilistic trials (risky)
-            PARAM.RT.fixed(var_level,repeat,1,sub) = mean( x(3,x(4,:)==1) ); % RT of chosen fixed trials (counteroffer)
+            PARAM.RT.mean(var_level,repeat,1,sub) = nanean( x(3,:) );
+            PARAM.RT.prob(var_level,repeat,1,sub) = nanmean( x(3,x(4,:)==2) ); % RT of chosen probabilistic trials (risky)
+            PARAM.RT.fixed(var_level,repeat,1,sub) = nanmean( x(3,x(4,:)==1) ); % RT of chosen fixed trials (counteroffer)
             
             x = ambi_trials_var{var_level};
             
-            PARAM.RT.mean(var_level,repeat,2,sub) = mean( x(3,:) );
-            PARAM.RT.prob(var_level,repeat,2,sub) = mean( x(3,x(4,:)==2) ); % RT of chosen probabilistic trials (ambiguous)
-            PARAM.RT.fixed(var_level,repeat,2,sub) = mean( x(3,x(4,:)==1) ); % RT of chosen fixed trials (counteroffer)   
+            PARAM.RT.mean(var_level,repeat,2,sub) = nanmean( x(3,:) );
+            PARAM.RT.prob(var_level,repeat,2,sub) = nanmean( x(3,x(4,:)==2) ); % RT of chosen probabilistic trials (ambiguous)
+            PARAM.RT.fixed(var_level,repeat,2,sub) = nanmean( x(3,x(4,:)==1) ); % RT of chosen fixed trials (counteroffer)   
             
         end
     end
