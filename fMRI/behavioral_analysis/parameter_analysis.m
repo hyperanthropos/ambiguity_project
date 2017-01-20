@@ -25,16 +25,22 @@ PART = 1:40; % subjects where ambiguity was not resolved
 % insert code to select only RA or RS subs
 warning('implement this');
 
+% set sub-sample to analyse
+SAMPLE = 'all';
+
 % set group to analyze
 GROUP = 1; % 1 = ambiguity not resolved; 2 = ambiguity resolved
 warning('clean this');
 
-% exclude subjects for certain reasons
-EXCLUDE_SUBS = 0;
-% exclude candidates
-% #4 = obvious maladaptive strategie at varlevel 4
-% #22 = extremly risk averse
-exclude.vec = [4 22];
+
+
+
+% % % % exclude subjects for certain reasons
+% % % EXCLUDE_SUBS = 0;
+% % % % exclude candidates
+% % % % #4 = obvious maladaptive strategie at varlevel 4
+% % % % #22 = extremly risk averse
+% % % exclude.vec = [4 22];
 
 % set graphs to 'bar' or 'line' plots where applicable 
 BAR_LINE = 'line';
@@ -56,12 +62,32 @@ addpath(SUBFUNCTIONS_PATH);
 % load data
 load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
 
-% exclude subjects from subject vector
-if EXCLUDE_SUBS == 1;
-    for i = 1:2;
-        PART(exclude{i}.vec) = [];
-    end
+% select sample to analyse
+switch SAMPLE
+    case 'all'
+        
+        PART = PART;
+        
+    case 'RA'
+        
+        PART = PART;
+        
+    case 'RS';
+        
+        PART = PART;
+        
+    otherwise
+        error('the ''SAMPLE'' variable set under SETUP does not point to a valide sub sample');
 end
+
+% % % % exclude subjects from subject vector
+% % % if EXCLUDE_SUBS == 1;
+% % %     for i = 1:2;
+% % %         PART(exclude{i}.vec) = [];
+% % %     end
+% % % end
+
+
 clear i exclude;
 
 %% FIGURE 1: INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
