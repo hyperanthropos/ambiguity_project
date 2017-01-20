@@ -65,10 +65,10 @@ warning('you really have to find a good way to treat missing values - they are n
 clear; close('all'); clc;
 
 % save and overwrite parameter file
-SAVE = 0;
+SAVE = 1;
 
 % pause after each subject to see output
-PAUSE = 1; % 1 = pause; 2 = 3 seconds delay
+PAUSE = 0; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART = 1:40; 
@@ -174,7 +174,7 @@ for sub = PART
             
             x = risk_trials_var{var_level};
             
-            PARAM.RT.mean(var_level,repeat,1,sub) = nanean( x(3,:) );
+            PARAM.RT.mean(var_level,repeat,1,sub) = nanmean( x(3,:) );
             PARAM.RT.prob(var_level,repeat,1,sub) = nanmean( x(3,x(4,:)==2) ); % RT of chosen probabilistic trials (risky)
             PARAM.RT.fixed(var_level,repeat,1,sub) = nanmean( x(3,x(4,:)==1) ); % RT of chosen fixed trials (counteroffer)
             
