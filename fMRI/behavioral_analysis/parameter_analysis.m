@@ -13,7 +13,7 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [1 2 3 4];
+DRAW = 3; %[1 2 3 4];
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 % 02 | COMPARISON OF RESOLVED / UNRESOLVED GROUPS
 % 03 | COMPOSITE GROUP SUMMARY
@@ -27,6 +27,7 @@ warning('implement this');
 
 % set group to analyze
 GROUP = 1; % 1 = ambiguity not resolved; 2 = ambiguity resolved
+warning('clean this');
 
 % exclude subjects for certain reasons
 EXCLUDE_SUBS = 0;
@@ -34,6 +35,9 @@ EXCLUDE_SUBS = 0;
 % #4 = obvious maladaptive strategie at varlevel 4
 % #22 = extremly risk averse
 exclude.vec = [4 22];
+
+% set graphs to 'bar' or 'line' plots where applicable 
+BAR_LINE = 'line';
 
 % design specification
 REPEATS_NR = 3; % how many times was one cycle repeated
@@ -64,6 +68,9 @@ clear i exclude;
 
 % 4D matrix of premium paramters:
 % (var,repeat,type,sub) | type: 1 = risky trials; 2 = ambiguous trials
+
+
+warning('add difference line also here');
 
 if sum(DRAW == 1);
     
@@ -97,12 +104,13 @@ if sum(DRAW == 2);
     % setup for figure 2
     axis_scale = [.5 3.5 10 25]; % scale fot axis
     
+    % open figure
     figure('Name', 'F2: mean over time for variance levels between groups', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
     
     % plot for both groups independend of "GROUPS" setting (control left, resolved right)
     for group = 1;
         
-            data = nanmean(PARAM.premiums.ce(:,:,:,:), 1);
+        data = nanmean(PARAM.premiums.ce(:,:,:,:), 1);
         
         % plot mean preference over time
         x = squeeze( nanmean( data,4 ) ); % calulate mean over subs
@@ -152,11 +160,10 @@ if sum(DRAW == 3);
     axis_scale = [1 2 10 25];
     
     % open figure
-    figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
+    figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .7 .5]);
     
     % prepare data to plot
-
-        data = PARAM.premiums.ce(:,:,:,PART);
+    data = PARAM.premiums.ce(:,:,:,PART);
     
     % data for all subjects
     data_persub = nanmean(mean(data, 1),2);
@@ -166,8 +173,11 @@ if sum(DRAW == 3);
     data_allrep = nanmean(data, 2);
     y = squeeze(data_allrep);
     
+    % difference ambiguity minus risk over all repeats
+    z = y(:,2,:) - y(:,1,:);
+    
     % --- PANEL 1: overall preference for risk / ambiguity
-    subplot(1,3,1);
+    subplot(1,4,1);
     h = barwitherr(nanstd(x, 1, 2)./(size(PART,2))^.5, nanmean(x, 2)); hold on; box off;
     plot( [EV EV], '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto x'); ylabel('subjective value');
@@ -175,16 +185,15 @@ if sum(DRAW == 3);
     set(h(1), 'FaceColor', [.5 .5 .5]);
     
     % --- PANLEL 2: overall correlation of risk & ambiguity
-    subplot(1,3,2);
+    subplot(1,4,2);
     scatter(x(1,:), x(2,:));
     h = lsline; set(h, 'LineWidth', 2); hold on;
     scatter(x(1,:), x(2,:), 'k', 'MarkerFaceColor', 'k' );
     xlabel('SV risk'); ylabel('SV ambiguity');
  
     % --- PANEL 3: preference for different variance levels
-    subplot(1,3,3);
-    bar_or_line = 'line';
-    switch bar_or_line
+    subplot(1,4,3);
+    switch BAR_LINE
         case 'line';
             h = errorbar(nanmean(y, 3), nanstd(y, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
@@ -192,13 +201,26 @@ if sum(DRAW == 3);
             h = barwitherr(nanstd(y, 1, 3)./(size(PART,2))^.5, nanmean(y, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
-    clear bar_or_line;
     plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto x'); ylabel('subjective value');
     legend('risk', 'ambiguity');
     set(gca, 'xtick', 1:5 );
     xlabel('variance');
     
+    % --- PANEL 4: individual within subject preference difference
+    subplot(1,4,4);
+    switch BAR_LINE
+        case 'line';
+            h = errorbar(nanmean(z, 3), nanstd(z, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
+            set(h, 'Color', [.4 .4 .4]);
+        case 'bar';
+            h = barwitherr(nanstd(z, 1, 3)./(size(PART,2))^.5, nanmean(z, 3)); hold on; box off;
+            set(h(1), 'FaceColor', [.4 .4 .4]);
+    end
+    plot( zeros(1,VAR_NR), '--k' , 'LineWidth', 2 );
+    axis([1 2 -8 2]); axis('auto x'); ylabel('SV: ambiguity - risk');
+    legend('difference', 'neutral'); set(gca, 'xtick', 1:5 ); xlabel('variance');
+
     %%% EXTRA FIGURE 3.1: correlation over all variance levels
     figure('Name', 'F3.1: correlation for different variance levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .6 .4]);
     for varlevel = 1:VAR_NR;
@@ -212,8 +234,8 @@ if sum(DRAW == 3);
         scatter(x(1,:), x(2,:), 'k', 'MarkerFaceColor', 'k' );
         xlabel('SV risk'); ylabel('SV ambiguity');
     end
-    
-    clear data data_persub data_allrep x y varlevel axis_scale h;
+
+    clear data data_persub data_allrep x y z varlevel axis_scale h;
     
 end
 
@@ -245,8 +267,7 @@ if sum(DRAW == 4);
     
     % --- PANLEL 1: mean RT between groups over variance
     subplot(1,3,1);
-    bar_or_line = 'line';
-    switch bar_or_line
+    switch BAR_LINE
         case 'line';
             h = errorbar(nanmean(x, 3), nanstd(x, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
@@ -254,16 +275,13 @@ if sum(DRAW == 4);
             h = barwitherr(nanstd(x, 1, 3)./(size(PART,2))^.5, nanmean(x, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
-    clear bar_or_line;
     axis(axis_scale); axis('auto x'); ylabel('reaction time');
-    legend('risk', 'ambiguity');
-    set(gca, 'xtick', 1:5 );
-    xlabel('variance');
+    legend('risk', 'ambiguity'); set(gca, 'xtick', 1:5 );
+    xlabel('variance'); title('all trials');
     
     % --- PANLEL 2: probabilistic choices only: mean RT between groups over variance
     subplot(1,3,2);
-    bar_or_line = 'line';
-    switch bar_or_line
+    switch BAR_LINE
         case 'line';
             h = errorbar(nanmean(y, 3), nanstd(y, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
@@ -271,16 +289,13 @@ if sum(DRAW == 4);
             h = barwitherr(nanstd(y, 1, 3)./(size(PART,2))^.5, nanmean(y, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
-    clear bar_or_line;
     axis(axis_scale); axis('auto x'); ylabel('reaction time');
-    legend('risk', 'ambiguity');
-    set(gca, 'xtick', 1:5 );
-    xlabel('variance');
+    legend('risk', 'ambiguity'); set(gca, 'xtick', 1:5 );
+    xlabel('variance'); title('probabilistic choices');
     
     % --- PANLEL 3: fixed choices only: mean RT between groups over variance
     subplot(1,3,3);
-    bar_or_line = 'line';
-    switch bar_or_line
+    switch BAR_LINE
         case 'line';
             h = errorbar(nanmean(z, 3), nanstd(z, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
@@ -288,11 +303,8 @@ if sum(DRAW == 4);
             h = barwitherr(nanstd(z, 1, 3)./(size(PART,2))^.5, nanmean(z, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
-    clear bar_or_line;
-    axis(axis_scale); axis('auto x'); ylabel('reaction time');
-    legend('risk', 'ambiguity');
-    set(gca, 'xtick', 1:5 );
-    xlabel('variance');
+    axis(axis_scale); axis('auto x'); ylabel('reaction time');legend('risk', 'ambiguity'); set(gca, 'xtick', 1:5 );
+    xlabel('variance'); title('save choices');
 
     clear axis_scale h data data_allrep x y z;
     
