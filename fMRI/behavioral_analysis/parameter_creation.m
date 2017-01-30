@@ -43,7 +43,7 @@
     % RISK PREMIUMS
         % PARAM.premiums.abs_gambles(:,repeat,1:2,sub) | 1 = risky trials; 2 = ambiguous trials
         %   contains the number of how often the risky / ambiguous option was chosen over all variance levels
-        % PARAM.premiums.ce(var_level,repeat,2,sub) | 1 = risky trials; 2 = ambiguous trilas
+        % PARAM.premiums.ce(var_level,repeat,2,sub) | 1 = risky trials; 2 = ambiguous trials
         %   contains the certainty equivalent of the risky / ambigious option in CHF
         %       ce < EV = risk averse; ce > EV = risk seeking
         % PARAM.premiums.premium
@@ -51,13 +51,12 @@
         %       premium > 0 = risk averse; premium < 0 risk seeking
         
 %% TO DO LIST
-clear; close('all'); clc;
 
 % features
 % create parameters out of fused matrices
 
 % corrections
-warning('you really have to find a good way to treat missing values - they are not accounted for yet');
+% you really have to find a good way to treat missing values - they are not accounted for yet
 
 % optimisations
 % the first transformation of parameter creation parts (like in RT) within the "repeat loop" is used several times in the script and could be implemented on a more global level
@@ -66,13 +65,13 @@ warning('you really have to find a good way to treat missing values - they are n
 clear; close('all'); clc;
 
 % save and overwrite parameter file
-SAVE = 1;
+SAVE = 0;
 
 % pause after each subject to see output
 PAUSE = 0; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
-PART = 1:40; 
+PART = 1:3; 
 
 % design specification
 REPEATS_NR = 3; % how many times was one cycle repeated (number of sessions)
@@ -146,6 +145,17 @@ for sub = PART
         RESULT_SORT.part{sub}.repeat{repeat}.ambi = y{repeat}(:, y{repeat}(7,:) == 2);
     end
 end
+
+% sort risky and ambiguous trials
+% for repeat = 1:REPEATS_NR;
+%     
+%     risk_trials{repeat} = RESULT_SORT.part{sub}.repeat{repeat}.risk;
+%     ambi_trials{repeat} = RESULT_SORT.part{sub}.repeat{repeat}.ambi;
+%     % sort into variance levels
+%     risk_trials_var{repeat} = mat2cell(risk_trials{repeat}, size(risk_trials{repeat}, 1), ones(1, VAR_NR)*COUNTER_NR );
+%     ambi_trials_var{repeat} = mat2cell(ambi_trials{repeat}, size(ambi_trials{repeat}, 1), ones(1, VAR_NR)*COUNTER_NR );
+%     
+% end
 
 clear x y sub resolved repeat;
 
