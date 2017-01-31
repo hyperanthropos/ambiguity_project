@@ -7,7 +7,7 @@ clear; close all;
 
 % where is the data to be processed stored:
 DATA_FOLDER = '/home/fridolin/DATA/EXPERIMENTS/04_Madeleine/DATA/fMRI/fMRI_images/prepro_test';
-% which batch should be used for processing:
+% which batch should be used for processing (must be in a "batch" subfolder):
 BATCH = 'prepro_batch.mat';
 % which subjects should be processed:
 SUBJECTS = 1:40;
