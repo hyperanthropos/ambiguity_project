@@ -27,12 +27,32 @@
     % LINE 19 - risk variance level (1-5; low to high variance)
     % LINE 20 - ambiguity variance level (1-5; low to high variance
     % LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
+    
+% the following data for a GLM data is created
+    % onsets                % onset times in seconds
+    % RT                    % RT
+    % varlevel              % level of variance: 1-5 increasing
+    % chosen_var            % only variance levels of chosen trials
+    % chosen_var_neg        % variance inversely coded if not chosen
+    %             
+    % counteroffer          % value of counteroffer
+    % diff_value            % difference in EV between options (positive = counteroffer higher than gamble)
+    % abs_value             % absolute presented value
+    % position              % position of counteroffer: 1 = left, 2 = right
+    % choice                % chosen option: 1 = fixed option; 2 = risky/ambiguous option
+
 
 %% SETUP
 clear; close all; clc;
 
 SUBJECTS = 1:40;
 SESSIONS = 1:3;
+
+FIGURE.SUBS = 3;
+FIGURE.SESS = 1;
+
+% define fixed EV for all offers
+EV = 22.5;
 
 %% PREPARE SCRIPT
 
@@ -44,10 +64,10 @@ load(fullfile(DIR.data, 'parameters.mat'), 'PARAM');
 
 %% CREATE REGRESSORS
 
-% insert proper REGS preallocation
+% preallocate
+REGS.risk = cell(size(SUBJECTS, 2), size(SESSIONS, 2)); REGS.ambi = REGS.risk;
 
 for sub = SUBJECTS
-    fprintf(['analysing subject subject ' num2str(sub) ' ... ']);
     for run = SESSIONS
         
         % load subjects stimuli and response created from the experiment
@@ -62,14 +82,28 @@ for sub = SUBJECTS
                 case 'risky'
                     select = logrec(:,logrec(7,:) == 1); % only risk trials
                     variance_location = 19; % where is the variance in the logrec stored
+                    high_amount_location = 12;
+                    low_amount_location = 13;
                 case 'ambiguous'
                     select = logrec(:,logrec(7,:) == 2); % only ambiguous trials
                     variance_location = 20; % where is the variance in the logrec stored
+                    high_amount_location = 14;
+                    low_amount_location = 15;
             end
             
-            data.onsets = select(2,:); % onset times in seconds
-            data.RT = select(3,:); % RT
-            data.varlevel = select(variance_location, :); % level of variance 1-5 increasing
+            % create base regressors
+            data.base.onsets = select(2,:); % onset times in seconds
+            data.base.RT = select(3,:); % RT
+            data.base.varlevel = select(variance_location, :); % level of variance: 1-5 increasing
+            data.base.chosen_var = select(variance_location, :).*(select(4,:)-1); % only variance levels of chosen trials
+            data.base.chosen_var_neg = select(variance_location, :).*((select(4,:)-1.5)*2); % variance inversely coded if not chosen
+            
+            % create control covariates
+            data.cov.counteroffer = select(16,:); % value of counteroffer
+            data.cov.diff_value = select(16,:)-EV; % difference in EV between options (positive = counteroffer higher than gamble)
+            data.cov.abs_value = select(high_amount_location,:)+select(low_amount_location,:)+select(16,:); % absolute presented value
+            data.cov.position = select(9,:); % position of counteroffer: 1 = left, 2 = right
+            data.cov.choice = select(4,:); % chosen option: 1 = fixed option; 2 = risky/ambiguous option
             
             % create regs of one type of trials
             switch cell2mat(trialtype)
@@ -78,13 +112,24 @@ for sub = SUBJECTS
                 case 'ambiguous'
                     REGS.ambi{sub,run} = data; % all data of ambi trials
             end
+            
+            % create a figure showing covariance of regressors
+            if sum(find(FIGURE.SUBS==sub)) && sum(find(FIGURE.SESS==run))
+                
+                variables = [   data.base.RT; data.base.varlevel; data.base.chosen_var; data.base.chosen_var_neg; ...
+                    data.cov.counteroffer; data.cov.diff_value; data.cov.abs_value; data.cov.position; data.cov.choice  ]';
+                varnames = {'RT', 'var', 'vXc', 'vX-c', 'counter', 'diff', 'abs', 'pos', 'ch'};
+                corrplot(variables, 'varNames', varnames);
+                corrfig = gcf;
+                corrfig.Name = ['SUB: ' num2str(sub) ' | SESS: ' num2str(run) ' | ' cell2mat(trialtype)];
+                corrfig.Color = [1 1 1]; corrfig.Units = 'normalized'; corrfig.Position = [0 0 1 1];
+                
+            end % end figure
          
-        % end trialtype loop  
-        end
+        end % end trialtype loop
         
-    end
-    disp('done.');
-end
+    end % end tun loop
+end % end sub loop
 
 %% SAVE REGS DATA
 
