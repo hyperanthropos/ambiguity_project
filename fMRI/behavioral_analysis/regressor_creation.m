@@ -38,18 +38,22 @@
     % counteroffer          % value of counteroffer
     % diff_value            % difference in EV between options (positive = counteroffer higher than gamble)
     % abs_value             % absolute presented value
-    % position              % position of counteroffer: 1 = left, 2 = right
+    % position              % position of counteroffer: 0 = left, 1 = right
     % choice                % chosen option: 1 = fixed option; 2 = risky/ambiguous option
 
 
 %% SETUP
 clear; close all; clc;
 
-SUBJECTS = 1:40;
-SESSIONS = 1:3;
+% set range
+SUBJECTS = 1:40; % subs to analyze
+SESSIONS = 1:3; % sessions/runs to analyze
+SAVEREGS = 1; % save created regressors or onyl show graphical output
 
-FIGURE.SUBS = 3;
-FIGURE.SESS = 1;
+% set graphical output
+FIGURE.PAUSE = 0; % create a pause to examine online figure before next subjects' data is drawn 
+FIGURE.SUBS = 40; % for which subjects should a correlation matrix be created
+FIGURE.SESS = 3; % for which runs shoould a correlation matrix be created
 
 % define fixed EV for all offers
 EV = 22.5;
@@ -66,6 +70,9 @@ load(fullfile(DIR.data, 'parameters.mat'), 'PARAM');
 
 % preallocate
 REGS.risk = cell(size(SUBJECTS, 2), size(SESSIONS, 2)); REGS.ambi = REGS.risk;
+
+% open online covariance output
+online_fig = figure('Name', 'online correlation of regs', 'Color', 'w', 'units', 'normalized', 'outerposition', [.3 .3 .5 .6]);
 
 for sub = SUBJECTS
     for run = SESSIONS
@@ -102,7 +109,7 @@ for sub = SUBJECTS
             data.cov.counteroffer = select(16,:); % value of counteroffer
             data.cov.diff_value = select(16,:)-EV; % difference in EV between options (positive = counteroffer higher than gamble)
             data.cov.abs_value = select(high_amount_location,:)+select(low_amount_location,:)+select(16,:); % absolute presented value
-            data.cov.position = select(9,:); % position of counteroffer: 1 = left, 2 = right
+            data.cov.position = select(9,:)-1; % position of counteroffer: 0 = left, 1 = right
             data.cov.choice = select(4,:); % chosen option: 1 = fixed option; 2 = risky/ambiguous option
             
             % create regs of one type of trials
@@ -113,24 +120,45 @@ for sub = SUBJECTS
                     REGS.ambi{sub,run} = data; % all data of ambi trials
             end
             
-            % create a figure showing covariance of regressors
-            if sum(find(FIGURE.SUBS==sub)) && sum(find(FIGURE.SESS==run))
-                
-                variables = [   data.base.RT; data.base.varlevel; data.base.chosen_var; data.base.chosen_var_neg; ...
+            % create online correlation figure
+            figure(online_fig);
+            variables = [   data.base.RT; data.base.varlevel; data.base.chosen_var; data.base.chosen_var_neg; ...
                     data.cov.counteroffer; data.cov.diff_value; data.cov.abs_value; data.cov.position; data.cov.choice  ]';
-                varnames = {'RT', 'var', 'vXc', 'vX-c', 'counter', 'diff', 'abs', 'pos', 'ch'};
+            varnames = {'RT', 'var', 'vXc', 'vX-c', 'counter', 'diff', 'abs', 'pos', 'ch'};
+            switch cell2mat(trialtype)
+                case 'risky'
+                    subplot(2,size(SESSIONS, 2),run);
+                    imagesc(corr(variables, 'type', 'Spearman'));
+                    title(['SUB: ' num2str(sub) ' | SESS: ' num2str(run) ' | R']);
+                    drawnow;
+                case 'ambiguous'
+                    subplot(2,size(SESSIONS, 2),run+size(SESSIONS, 2));
+                    imagesc(corr(variables, 'type', 'Spearman'));
+                    title(['SUB: ' num2str(sub) ' | SESS: ' num2str(run) ' | A']);
+                    drawnow;
+            end
+
+            % create a figure showing full covariance matrix data of regressors
+            if sum(find(FIGURE.SUBS==sub)) && sum(find(FIGURE.SESS==run))
                 corrplot(variables, 'varNames', varnames);
                 corrfig = gcf;
                 corrfig.Name = ['SUB: ' num2str(sub) ' | SESS: ' num2str(run) ' | ' cell2mat(trialtype)];
                 corrfig.Color = [1 1 1]; corrfig.Units = 'normalized'; corrfig.Position = [0 0 1 1];
-                
-            end % end figure
+            end
          
         end % end trialtype loop
         
-    end % end tun loop
+    end % end run loop
+    
+    if FIGURE.PAUSE == 1;
+        fprintf('press key to contiue ... ');
+        pause; disp('okay.');
+    end
+    
 end % end sub loop
 
 %% SAVE REGS DATA
 
-save(fullfile(DIR.data, 'regressors.mat'), 'REGS');
+if SAVEREGS == 1;
+    save(fullfile(DIR.data, 'regressors.mat'), 'REGS');
+end
