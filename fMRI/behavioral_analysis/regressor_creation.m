@@ -51,6 +51,7 @@ SESSIONS = 1:3; % sessions/runs to analyze
 SAVEREGS = 1; % save created regressors or onyl show graphical output
 
 % set graphical output
+% (to check independence / orhthogonalization of regressors to use)
 FIGURE.PAUSE = 0; % create a pause to examine online figure before next subjects' data is drawn 
 FIGURE.SUBS = 40; % for which subjects should a correlation matrix be created
 FIGURE.SESS = 3; % for which runs shoould a correlation matrix be created
