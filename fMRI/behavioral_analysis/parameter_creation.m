@@ -65,13 +65,13 @@
 clear; close('all'); clc;
 
 % save and overwrite parameter file
-SAVE = 0;
+SAVE = 1;
 
 % pause after each subject to see output
 PAUSE = 0; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
-PART = 1:3; 
+PART = 1:40; 
 
 % design specification
 REPEATS_NR = 3; % how many times was one cycle repeated (number of sessions)
