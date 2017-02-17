@@ -1,7 +1,7 @@
 %% FUNCTIONAL IMAGING ANALYSIS SCRIPT
 % combined script to run 1st and 2nd level fMRI data analysis
-% needs the "regressors.mat" file created by the "regressor_creation.m"
-% script in a subfolder called "regressors"
+% needs functions to generate SPM batchfiles create_first_level.m & create_second_level.m in a subfolder called "batches"
+% needs the "regressors.mat" file created by the "regressor_creation.m" script in a subfolder called "regressors"
 
 %% SETUP
 clear; close('all'); clc;
