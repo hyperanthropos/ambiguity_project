@@ -4,7 +4,7 @@
 % script in a subfolder called "regressors"
 
 %% SETUP
-clear; close('all');
+clear; close('all'); clc;
 
 % set model
 SET.estimate = 0; % acutually estimate data or only save the batches
@@ -14,8 +14,8 @@ SET.model = 'TEST'; % name the model to create a folder and save data
 SET.regs = {'varlevel'}; % parametric modulators (pmods) to include
 SET.ortho = 0; % set if pmods should be orthogonalized by SPM
 
-SET.duration.type = 'events'; % how should duration be modeled - options: 'events', 'fixed', 'RT'
-SET.duration.fixed = 1; % which duration if fixed (in seconds)
+SET.duration_type = 'events'; % how should duration be modeled - options: 'events', 'fixed', 'RT'
+SET.duration_fixed = 1; % which duration if fixed (in seconds)
 
 SET.subs = 1:40; % which subjects should be included (1:40)
 SET.runs = 1:3; % which runs should be included (1:3)
@@ -30,17 +30,35 @@ DIR.spmpath = '/home/fridolin/DATA/MATLAB/SPM/spm12b/'; % path of SPM 12
 
 %% GENERAL STARTUP
 
+% SECURITY CHECK
+if  SET.estimate == 1;
+    warning('if the model is set to estimate the whole model folder will be deleted and recreated!');
+    disp('do you want to continue? 1 = no, 2 = yes');
+    answer = input(' ');
+    if answer ~= 2
+        error('please correct your "SET.estimate" flag');
+    end
+end
+
 % PATHWORK
 DIR.home = pwd;
 addpath(fullfile(DIR.home, 'batches'));
 addpath(fullfile(DIR.home, 'regressors'));
 load('regressors.mat');
+% make directories
 DIR.model = fullfile(DIR.modeldata, SET.model);
 DIR.batchsave = fullfile(DIR.model, 'used_bacthes');
-if exist(DIR.batchsave, 'dir') ~= 7; mkdir(DIR.batchsave); end
-delete(fullfile(DIR.batchsave, '*'));
+DIR.first_level = fullfile(DIR.model, 'first_level');
+DIR.second_level = fullfile(DIR.model, 'second_level');
+% clear old data
+if SET.estimate == 1;
+    if exist(DIR.model, 'dir') == 7; rmdir(fullfile(DIR.model),'s'); end
+else
+    delete(fullfile(DIR.batchsave, '*'));
+end
 
 % START SPM AND PREPARE BATCH
+fprintf('starting spm and preparing analysis...');
 addpath(DIR.spmpath);
 spm('Defaults','fMRI');
 spm_jobman('initcfg');
@@ -58,10 +76,13 @@ for iRun = SET.runs
     matlabbatch{1}.spm.stats.fmri_spec.sess(iRun) = base_run;
 end
 % save batch
-basebatch = fullfile(DIR.batchsave, 'base_batch.mat');
+if exist(DIR.batchsave, 'dir') ~= 7; mkdir(DIR.batchsave); end
+basebatch = fullfile(DIR.batchsave, 'base_batch_first_level.mat');
 save(basebatch, 'matlabbatch');
+disp(' done');
 
 %%% LOOP OVER SUBS
+fprintf('building batchfiles for spm for each subject...');
 batchcollector = cell(size(SET.subs)); % preallocate
 nRegs = length(SET.regs); % create additional variables
 for iSub = SET.subs
@@ -71,7 +92,7 @@ for iSub = SET.subs
     load(basebatch);
     
     % set directory
-    savedir = fullfile(DIR.model, 'first_level', ['sub_' num2str(subcode)]);  mkdir(savedir);
+    savedir = fullfile(DIR.first_level, ['sub_' num2str(subcode)]);
     matlabbatch{1}.spm.stats.fmri_spec.dir = cellstr(savedir);
     
     % session based operations |conditions: 1 = risky; 2 = ambiguous
@@ -86,13 +107,13 @@ for iSub = SET.subs
         
         matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).onset = REGS.risk{iSub, iRun}.base.onsets(:);
         matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).onset = REGS.ambi{iSub, iRun}.base.onsets(:);
-        switch SET.duration.type
+        switch SET.duration_type
             case 'events'
                 matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).duration = 0;
                 matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).duration = 0;
             case 'fixed'
-                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).duration = SET.duration.fixed;
-                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).duration = SET.duration.fixed;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).duration = SET.duration_fixed;
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).duration = SET.duration_fixed;
             case 'RT'
                 matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).duration = REGS.risk{iSub, iRun}.base.RT(:);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).duration = REGS.ambi{iSub, iRun}.base.RT(:);
@@ -169,6 +190,7 @@ for iSub = SET.subs
     batchcollector{iSub} = matlabbatch;
     
 end % end iSubs loop
+fprintf(' done!');
 
 %%% ANALYZE FIRST LEVEL
 if SET.estimate == 1;
@@ -178,6 +200,7 @@ if SET.estimate == 1;
     % run batches
     parfor iSub = parsub
         disp(['++++++++++++++++++++++++++++++++++++++++++++++ RUN SUB ' num2str(iSub) ' ++++++++++++++++++++++++++++++++++++++++++++++']);
+        mkdir(char(batchcollector{iSub}{1}.spm.stats.fmri_spec.dir));
         spm_jobman('initcfg');
         spm_jobman('run',batchcollector{iSub});
     end
@@ -186,20 +209,151 @@ end
 
 %% SECOND LEVEL ANALYSIS
 
+%%% COPY FIRST LEVEL CONTRASTS
+fprintf('now copying and renaming first-level contrasts for second level processing...');
+
+% set destination
+destination = fullfile(DIR.second_level, 'first_level_contrasts');
+if exist(destination, 'dir') ~= 7; mkdir(destination); end
+
+% ... and copy files
+for iCon = 1:nCons
+    concode = sprintf('%04d',iCon);
+    for iSub = SET.subs
+        subcode = sprintf('%03d',iSub);
+        
+        input = fullfile(DIR.first_level, ['sub_' num2str(subcode)], ['con_' num2str(concode) '.nii']);
+        output = fullfile(destination, [contrast_names{iCon} '_' num2str(subcode) '.nii']);
+        
+        if exist(input, 'file') == 2;
+            copyfile(input, output);
+        else
+            disp(' the following file does not exist:');
+            disp(input);
+            error(['there seems to be a problem with contrast ' num2str(iCon) ' of subject ' num2str(iSub) ' - please correct that issue!']);
+        end
+    end
+end
+disp(' done!');
+    
+%%% BUILD AND MODIFY BATCH
+fprintf('building batchfiles for second level analysis...');
+
+% load batch
+matlabbatch = create_second_level();
+basebatch = fullfile(DIR.batchsave, 'base_batch_second_level.mat');
+save(basebatch, 'matlabbatch');
+
+for iReg = 0:nRegs
+    % load batch
+    load(basebatch)
+    
+    if iReg == 0 % set onsets
+        
+        % set directory
+        savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iReg)) '_' 'onset_model']);
+        matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
+        
+        % select files
+        % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
+        filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{1} '_.*.nii'], inf));
+        filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{2} '_.*.nii'], inf));
+        
+        
+        
+        
+        
+        
+        
+        %%%%%% WORKING HERE
+        
+        %
+        for iSub = SET.subs
+            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair.scans = [];
+        end
+        
+        
+        
+        
+        
+        
+        
+        save( fullfile(DIR.batchsave, [num2str(sprintf('%02d',iReg)) '_' 'base' '_second_level.mat']) );
+        
+    else % set all pmods
+        
+        % set directory
+        savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg}]);
+        matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
+        
+        % select files
+        % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
+        filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{1} '_.*.nii'], inf));
+        filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{2} '_.*.nii'], inf));
+        
+        save( fullfile(DIR.batchsave, [num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg} '_second_level.mat']) );
+        
+    end
+    % save batch for processing
+    batchcollector{iRegs+1} = matlabbatch;   
+end
+disp(' done');
+ 
+    
+  filekeeper = cellstr(spm_select('ExtFPList', fullfile(DIR.data, num2str(subcode), 'mr_data'), '^swau.*run1.*.nii', inf));
+%         matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).scans = filekeeper;
+
+
+
+
+
+
+% spm_jobman('interactive',matlabbatch);
+
+
+
+
+% run second level analysis
+if SET.estimate == 1;
+    for iReg = 0:nRegs
+        disp('++++++++++++++++++++++++++++++++++++++++++++++ RUN SECOND LEVEL ++++++++++++++++++++++++++++++++++++++++++++++');
+        mkdir(char(batchcollector{iRegs+1}{1}.spm.stats.factorial_design.dir));
+        spm_jobman('initcfg');
+        spm_jobman('run',batchcollector{iRegs+1});
+    end
+end
+
+%% OUTPUT LOGS
+
 %%% TODO - CHANGE base. covar. regressor structure to simplier mechanism
 
-% % % --> copy data
-% % 
-% % % load batch
-% % matlabbatch = create_second_level();
-% % 
-% % % set directory
-% % savedir = fullfile(DIR.model, 'second_level', 'one_sample');  mkdir(savedir);
-% % 
-% % 
-% % % --> analyse batch
-% % spm_jobman('initcfg');
-% % spm_jobman('run',matlabbatch);
-% % 
-% % % optional: some automated ouptput
+disp(SET);
+disp(DIR);
+
+disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
+
+%%%%%%%%%%%%%% SCRATCHPAD:
+
+% % % % Example 3:  Making a conjunction map between two suprathreshold t-maps
+% % % 
+% % % % Read in both t-maps
+% % % TMap1 = spm_read_vols(spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0001.img'));
+% % % TMap2 = spm_read_vols(spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0002.img'));
+% % % 
+% % % % Define t-threshold
+% % % tthresh = 3.1768423;
+% % % 
+% % % % Mask out suprathreshold voxels from both t-maps
+% % % TMap1_suprathresh = TMap1>=tthresh;
+% % % TMap2_suprathresh = TMap2>=tthresh;
+% % % 
+% % % % Make conjunction map as the logical AND of both suprathreshold t-maps
+% % % ConjunctionMap = TMap1_suprathresh & TMap2_suprathresh;
+% % % 
+% % % % Write out the new conjunction map
+% % % V = spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0001.img');
+% % % V.fname = 'ConjunctionMap_TMap1_AND_TMap2.nii';
+% % % V.private.dat.fname = V.fname;
+% % % spm_write_vol(V,ConjunctionMap);
+
 
