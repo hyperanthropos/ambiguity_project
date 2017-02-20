@@ -15,7 +15,7 @@ SET.regs = {'varlevel'}; % parametric modulators (pmods) to include
 SET.ortho = 0; % set if pmods should be orthogonalized by SPM
 
 SET.duration_type = 'events'; % how should duration be modeled - options: 'events', 'fixed', 'RT'
-SET.duration_fixed = 1; % which duration if fixed (in seconds)
+SET.duration_fixed = 0; % which duration if fixed (in seconds)
 
 SET.subs = 1:40; % which subjects should be included (1:40)
 SET.runs = 1:3; % which runs should be included (1:3)
@@ -190,10 +190,18 @@ for iSub = SET.subs
     batchcollector{iSub} = matlabbatch;
     
 end % end iSubs loop
-fprintf(' done!');
+disp(' done!');
 
 %%% ANALYZE FIRST LEVEL
+
+% set destination for first level results (contrasts)
+destination = fullfile(DIR.second_level, 'first_level_contrasts');
+if exist(destination, 'dir') ~= 7; mkdir(destination); end
+
 if SET.estimate == 1;
+    
+    %%% START ACTUAL SPM GENERAL LINEAR MODEL ESTIMATION
+    
     % start parallel processing
     parpool(SET.workers);
     parsub = SET.subs;
@@ -205,38 +213,40 @@ if SET.estimate == 1;
         spm_jobman('run',batchcollector{iSub});
     end
     delete(gcp);
-end
-
-%% SECOND LEVEL ANALYSIS
-
-%%% COPY FIRST LEVEL CONTRASTS
-fprintf('now copying and renaming first-level contrasts for second level processing...');
-
-% set destination
-destination = fullfile(DIR.second_level, 'first_level_contrasts');
-if exist(destination, 'dir') ~= 7; mkdir(destination); end
-
-% ... and copy files
-for iCon = 1:nCons
-    concode = sprintf('%04d',iCon);
-    for iSub = SET.subs
-        subcode = sprintf('%03d',iSub);
-        
-        input = fullfile(DIR.first_level, ['sub_' num2str(subcode)], ['con_' num2str(concode) '.nii']);
-        output = fullfile(destination, [contrast_names{iCon} '_' num2str(subcode) '.nii']);
-        
-        if exist(input, 'file') == 2;
-            copyfile(input, output);
-        else
-            disp(' the following file does not exist:');
-            disp(input);
-            error(['there seems to be a problem with contrast ' num2str(iCon) ' of subject ' num2str(iSub) ' - please correct that issue!']);
+    
+    %%% COPY FIRST LEVEL CONTRASTS
+    fprintf('now copying and renaming first-level contrasts for second level processing...');
+    
+    % clear destination
+    delete(fullfile(destination, '*'));
+    
+    % ... and copy files
+    for iCon = 1:nCons
+        concode = sprintf('%04d',iCon);
+        for iSub = SET.subs
+            subcode = sprintf('%03d',iSub);
+            
+            input = fullfile(DIR.first_level, ['sub_' num2str(subcode)], ['con_' num2str(concode) '.nii']);
+            output = fullfile(destination, [contrast_names{iCon} '_' num2str(subcode) '.nii']);
+            
+            if exist(input, 'file') == 2;
+                copyfile(input, output);
+            else
+                disp(' the following file does not exist:');
+                disp(input);
+                error(['there seems to be a problem with contrast ' num2str(iCon) ' of subject ' num2str(iSub) ' - please correct that issue!']);
+            end
         end
     end
-end
-disp(' done!');
+    disp(' done!');
     
-%%% BUILD AND MODIFY BATCH
+end
+clear('batchcollector');
+
+
+%% SECOND LEVEL ANALYSIS
+    
+%%% BUILD AND MODIFY BATCH 1 (two sample t-test; risk vs. ambi)
 fprintf('building batchfiles for second level analysis...');
 
 % load batch
@@ -246,7 +256,7 @@ save(basebatch, 'matlabbatch');
 
 for iReg = 0:nRegs
     % load batch
-    load(basebatch)
+    load(basebatch);
     
     if iReg == 0 % set onsets
         
@@ -258,27 +268,13 @@ for iReg = 0:nRegs
         % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
         filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{1} '_.*.nii'], inf));
         filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{2} '_.*.nii'], inf));
-        
-        
-        
-        
-        
-        
-        
-        %%%%%% WORKING HERE
-        
-        %
         for iSub = SET.subs
-            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair.scans = [];
+            filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
+            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
         end
         
-        
-        
-        
-        
-        
-        
-        save( fullfile(DIR.batchsave, [num2str(sprintf('%02d',iReg)) '_' 'base' '_second_level.mat']) );
+        % save batch
+        save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iReg)) '_' 'base' '_second_level.mat']) );
         
     else % set all pmods
         
@@ -290,8 +286,13 @@ for iReg = 0:nRegs
         % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
         filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{1} '_.*.nii'], inf));
         filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{2} '_.*.nii'], inf));
+        for iSub = SET.subs
+            filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
+            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
+        end
         
-        save( fullfile(DIR.batchsave, [num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg} '_second_level.mat']) );
+        % save batch
+        save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg} '_second_level.mat']) );
         
     end
     % save batch for processing
@@ -299,19 +300,22 @@ for iReg = 0:nRegs
 end
 disp(' done');
  
-    
-  filekeeper = cellstr(spm_select('ExtFPList', fullfile(DIR.data, num2str(subcode), 'mr_data'), '^swau.*run1.*.nii', inf));
-%         matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).scans = filekeeper;
+%%% BUILD AND MODIFY BATCH 2 (ANOVA; all parameters)
 
+%%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
 
+% % %     % load batch
+% % %     matlabbatch = create_second_level('ANOVA');
+% % %     savebatch = fullfile(DIR.batchsave, ['X_' 'all_pmods_batch_second_level.mat']);
+% % %     save(savebatch, 'matlabbatch');
+% % %     %%% --> build another factorial design to compare all pmods with an F-test
+% % % 
+% % %     % save batch for processing
+% % %     batchcollector{iRegs+1+1} = matlabbatch;
+% % % 
+% % %     % spm_jobman('interactive',matlabbatch);
 
-
-
-
-% spm_jobman('interactive',matlabbatch);
-
-
-
+%%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
 
 % run second level analysis
 if SET.estimate == 1;
@@ -327,8 +331,11 @@ end
 
 %%% TODO - CHANGE base. covar. regressor structure to simplier mechanism
 
-disp(SET);
-disp(DIR);
+if SET.estimate == 1;
+    % make a diary file
+    disp(SET);
+    disp(DIR);
+end
 
 disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 
