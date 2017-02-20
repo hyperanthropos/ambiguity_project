@@ -195,7 +195,7 @@ disp(' done!');
 %%% ANALYZE FIRST LEVEL
 
 % set destination for first level results (contrasts)
-destination = fullfile(DIR.second_level, 'first_level_contrasts');
+destination = fullfile(DIR.first_level, 'all_contrasts');
 if exist(destination, 'dir') ~= 7; mkdir(destination); end
 
 if SET.estimate == 1;
@@ -207,7 +207,7 @@ if SET.estimate == 1;
     parsub = SET.subs;
     % run batches
     parfor iSub = parsub
-        disp(['++++++++++++++++++++++++++++++++++++++++++++++ RUN SUB ' num2str(iSub) ' ++++++++++++++++++++++++++++++++++++++++++++++']);
+        disp(['+++++++++++++++++++++++++++++++++++++++ RUN SUB ' num2str(iSub) ' +++++++++++++++++++++++++++++++++++++++']);
         mkdir(char(batchcollector{iSub}{1}.spm.stats.fmri_spec.dir));
         spm_jobman('initcfg');
         spm_jobman('run',batchcollector{iSub});
@@ -216,9 +216,6 @@ if SET.estimate == 1;
     
     %%% COPY FIRST LEVEL CONTRASTS
     fprintf('now copying and renaming first-level contrasts for second level processing...');
-    
-    % clear destination
-    delete(fullfile(destination, '*'));
     
     % ... and copy files
     for iCon = 1:nCons
@@ -243,7 +240,6 @@ if SET.estimate == 1;
 end
 clear('batchcollector');
 
-
 %% SECOND LEVEL ANALYSIS
     
 %%% BUILD AND MODIFY BATCH 1 (two sample t-test; risk vs. ambi)
@@ -254,51 +250,52 @@ matlabbatch = create_second_level();
 basebatch = fullfile(DIR.batchsave, 'base_batch_second_level.mat');
 save(basebatch, 'matlabbatch');
 
-for iReg = 0:nRegs
+% create a unique batch for each pmod + onset
+all_params = ['base' SET.regs];
+for iBatch = 1:length(all_params)
+    
     % load batch
     load(basebatch);
     
-    if iReg == 0 % set onsets
-        
-        % set directory
-        savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iReg)) '_' 'onset_model']);
-        matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
-        
-        % select files
-        % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
-        filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{1} '_.*.nii'], inf));
-        filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' 'base' '_' suffixes{2} '_.*.nii'], inf));
-        for iSub = SET.subs
-            filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
-            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
-        end
-        
-        % save batch
-        save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iReg)) '_' 'base' '_second_level.mat']) );
-        
-    else % set all pmods
-        
-        % set directory
-        savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg}]);
-        matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
-        
-        % select files
-        % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
-        filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{1} '_.*.nii'], inf));
-        filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' SET.regs{iReg} '_' suffixes{2} '_.*.nii'], inf));
-        for iSub = SET.subs
-            filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
-            matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
-        end
-        
-        % save batch
-        save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iReg)) '_' SET.regs{iReg} '_second_level.mat']) );
-        
+    %%% TEST 1 - paired t-test (risk & ambiguity)
+    
+    % set directory
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch}]);
+    matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
+    
+    % select files
+    % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
+    filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' all_params{iBatch} '_' suffixes{1} '_.*.nii'], inf));
+    filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' all_params{iBatch} '_' suffixes{2} '_.*.nii'], inf));
+    for iSub = SET.subs
+        filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
+        matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
     end
+    
+    %%% TEST 2 - two sample t-test (risk & ambiguity)
+    
+    %%% TEST 3 - one sample t-test risk
+    
+    %%% TEST 4 - one sample t-test ambiguity
+    
+    %%% TEST 5 - one sample t-test risk>ambiguity
+    
+    
+    
+    
+    
+    % save batch
+    save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_second_level.mat']) );
+    
     % save batch for processing
-    batchcollector{iRegs+1} = matlabbatch;   
+    batchcollector{iBatch} = matlabbatch;
+    
 end
 disp(' done');
+
+
+keyboard;
+
  
 %%% BUILD AND MODIFY BATCH 2 (ANOVA; all parameters)
 
@@ -320,7 +317,7 @@ disp(' done');
 % run second level analysis
 if SET.estimate == 1;
     for iReg = 0:nRegs
-        disp('++++++++++++++++++++++++++++++++++++++++++++++ RUN SECOND LEVEL ++++++++++++++++++++++++++++++++++++++++++++++');
+        disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iReg) ' +++++++++++++++++++++++++++++++++++++++']);
         mkdir(char(batchcollector{iRegs+1}{1}.spm.stats.factorial_design.dir));
         spm_jobman('initcfg');
         spm_jobman('run',batchcollector{iRegs+1});
