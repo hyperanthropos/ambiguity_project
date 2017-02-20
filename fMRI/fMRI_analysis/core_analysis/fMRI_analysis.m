@@ -146,7 +146,7 @@ for iSub = SET.subs
     
     % create contrast names
     contrast_names = cell(1,nCons);
-    suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi'; % prefixes for names
+    suffixes{1} = 'risk_sng'; suffixes{2} = 'ambi_sng'; suffixes{3} = 'risk_pls_ambi'; suffixes{4} = 'risk_grt_ambi'; % prefixes for names
     counter = 0;
     for iConGroup = 0:length(SET.regs)
         for iSuffix = 1:4
@@ -195,8 +195,8 @@ disp(' done!');
 %%% ANALYZE FIRST LEVEL
 
 % set destination for first level results (contrasts)
-destination = fullfile(DIR.first_level, 'all_contrasts');
-if exist(destination, 'dir') ~= 7; mkdir(destination); end
+con_destination = fullfile(DIR.first_level, 'all_contrasts');
+if exist(con_destination, 'dir') ~= 7; mkdir(con_destination); end
 
 if SET.estimate == 1;
     
@@ -224,7 +224,7 @@ if SET.estimate == 1;
             subcode = sprintf('%03d',iSub);
             
             input = fullfile(DIR.first_level, ['sub_' num2str(subcode)], ['con_' num2str(concode) '.nii']);
-            output = fullfile(destination, [contrast_names{iCon} '_' num2str(subcode) '.nii']);
+            output = fullfile(con_destination, [contrast_names{iCon} '_' num2str(subcode) '.nii']);
             
             if exist(input, 'file') == 2;
                 copyfile(input, output);
@@ -257,16 +257,18 @@ for iBatch = 1:length(all_params)
     % load batch
     load(basebatch);
     
+    % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk_pl_ambi'; suffixes{4} = 'risk_gt_ambi'; % prefixes for names
+    % (1) only risk; (2) only ambiguity; (3) ambiguity+risk versus baseline; (4) risk>ambiguity;
+    filekeeper_risk = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{1} '_.*.nii'], inf));
+    filekeeper_ambi = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{2} '_.*.nii'], inf));
+    filekeeper_risk_pls_ambi = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{3} '_.*.nii'], inf));
+    filekeeper_risk_grt_ambi = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{4} '_.*.nii'], inf));
+    
     %%% TEST 1 - paired t-test (risk & ambiguity)
     
-    % set directory
-    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch}]);
+    % set directory & select contrast files
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_01_' 'paired_t']);
     matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
-    
-    % select files
-    % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk+ambi'; suffixes{4} = 'risk>ambi';
-    filekeeper_risk = cellstr(spm_select('ExtFPList', destination, ['^' all_params{iBatch} '_' suffixes{1} '_.*.nii'], inf));
-    filekeeper_ambi = cellstr(spm_select('ExtFPList', destination, ['^' all_params{iBatch} '_' suffixes{2} '_.*.nii'], inf));
     for iSub = SET.subs
         filekeeper = [filekeeper_risk(iSub); filekeeper_ambi(iSub)];
         matlabbatch{1, 1}.spm.stats.factorial_design.des.pt.pair(iSub).scans = filekeeper;
@@ -274,16 +276,30 @@ for iBatch = 1:length(all_params)
     
     %%% TEST 2 - two sample t-test (risk & ambiguity)
     
-    %%% TEST 3 - one sample t-test risk
+    % set directory & select contrast files
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_02_' 'two_sample_t']);
+    matlabbatch{1, 4}.spm.stats.factorial_design.dir = cellstr(savedir);
+    matlabbatch{1, 4}.spm.stats.factorial_design.des.t2.scans1 = filekeeper_risk;
+    matlabbatch{1, 4}.spm.stats.factorial_design.des.t2.scans2 = filekeeper_ambi;
+
+    %%% TEST 3 - one sample t-test risk>ambiguity
     
-    %%% TEST 4 - one sample t-test ambiguity
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_03_' 'one_sample_risk>ambi']);
+    matlabbatch{1, 7}.spm.stats.factorial_design.dir = cellstr(savedir);
+    matlabbatch{1, 7}.spm.stats.factorial_design.des.t1.scans = filekeeper_risk_grt_ambi;
     
-    %%% TEST 5 - one sample t-test risk>ambiguity
+    %%% TEST 4 - one sample t-test risk
     
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_04_' 'one_sample_risk']);
+    matlabbatch{1, 10}.spm.stats.factorial_design.dir = cellstr(savedir);
+    matlabbatch{1, 10}.spm.stats.factorial_design.des.t1.scans = filekeeper_risk;
     
+    %%% TEST 5 - one sample t-test ambiguity
     
-    
-    
+    savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_05_' 'one_sample_ambi']);
+    matlabbatch{1, 13}.spm.stats.factorial_design.dir = cellstr(savedir);
+    matlabbatch{1, 13}.spm.stats.factorial_design.des.t1.scans = filekeeper_ambi;
+
     % save batch
     save( fullfile(DIR.batchsave, ['X_' num2str(sprintf('%02d',iBatch)) '_' all_params{iBatch} '_second_level.mat']) );
     
@@ -293,9 +309,8 @@ for iBatch = 1:length(all_params)
 end
 disp(' done');
 
-
-keyboard;
-
+    % matlabbatch = batchcollector{1};
+    % spm_jobman('interactive',matlabbatch);
  
 %%% BUILD AND MODIFY BATCH 2 (ANOVA; all parameters)
 
@@ -310,7 +325,6 @@ keyboard;
 % % %     % save batch for processing
 % % %     batchcollector{iRegs+1+1} = matlabbatch;
 % % % 
-% % %     % spm_jobman('interactive',matlabbatch);
 
 %%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
 
@@ -326,17 +340,38 @@ end
 
 %% OUTPUT LOGS
 
-%%% TODO - CHANGE base. covar. regressor structure to simplier mechanism
-
 if SET.estimate == 1;
-    % make a diary file
+    diary_file = fullfile(DIR.model, 'logfile.txt');
+    diary(diary_file); diary on;
+    disp(['the model "' SET.model '" was estimated with the followings settings:']);
     disp(SET);
     disp(DIR);
+    diary off;
 end
 
 disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 
+
+
+
+
+
+
+
+
+
 %%%%%%%%%%%%%% SCRATCHPAD:
+
+%%% TODO
+
+% CHANGE base. covar. regressor structure to simplier mechanism
+% DELETE EXISTING CONTRASTS WHEN DONE !!!
+% TEST 2 --> also test with equal variance and independence
+
+
+
+
+
 
 % % % % Example 3:  Making a conjunction map between two suprathreshold t-maps
 % % % 
