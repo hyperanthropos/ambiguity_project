@@ -84,7 +84,7 @@ end
 if exist(DIR.batchsave, 'dir') ~= 7; mkdir(DIR.batchsave); end
 basebatch = fullfile(DIR.batchsave, 'base_batch_first_level.mat');
 save(basebatch, 'matlabbatch');
-disp(' done');
+disp(' done!');
 
 %%% LOOP OVER SUBS
 fprintf('building batchfiles for spm for each subject...');
@@ -248,11 +248,11 @@ clear('batchcollector');
 
 %% SECOND LEVEL ANALYSIS
     
-%%% BUILD AND MODIFY BATCH 1 (two sample t-test; risk vs. ambi)
+%%% BUILD AND MODIFY BATCH 1 (different tests within each pmod)
 fprintf('building batchfiles for second level analysis...');
 
 % load batch
-matlabbatch = create_second_level();
+matlabbatch = create_second_level('BASIC');
 basebatch = fullfile(DIR.batchsave, 'base_batch_second_level.mat');
 save(basebatch, 'matlabbatch');
 
@@ -313,31 +313,45 @@ for iBatch = 1:length(all_params)
     batchcollector{iBatch} = matlabbatch;
     
 end
-disp(' done');
 
-    % matlabbatch = batchcollector{1};
-    % spm_jobman('interactive',matlabbatch);
- 
-%%% BUILD AND MODIFY BATCH 2 (ANOVA; all parameters)
+%%% BUILD AND MODIFY BATCH 2 (all pmods effects of interest)
 
+% load batch
+matlabbatch = create_second_level('ANOVA');
 
+% set directories
+savedir = fullfile(DIR.second_level, [num2str(sprintf('%02d',length(all_params)+1)) '_all_params_effects_of_interest']);
+matlabbatch{1, 1}.spm.stats.factorial_design.dir = cellstr(savedir);
 
-%%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
-
-% % %     % load batch
-% % %     matlabbatch = create_second_level('ANOVA');
-% % %     savebatch = fullfile(DIR.batchsave, ['X_' 'all_pmods_batch_second_level.mat']);
-% % %     save(savebatch, 'matlabbatch');
-% % %     %%% --> build another factorial design to compare all pmods with an F-test
-% % % 
-% % %     % save batch for processing
-% % %     batchcollector{iRegs+1+1} = matlabbatch;
-% % % 
-
-%%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
-
-% run second level analysis
+% set files
+counter = 0;
 for iBatch = 1:length(all_params)
+    % compare all pmods for risk, ambi and risk>ambi
+    % remember: suffixes{1} = 'risk'; suffixes{2} = 'ambi'; suffixes{3} = 'risk_pl_ambi'; suffixes{4} = 'risk_gt_ambi';
+    filekeeper_risk = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{1} '_.*.nii'], inf));
+    filekeeper_ambi = cellstr(spm_select('ExtFPList', con_destination, ['^' all_params{iBatch} '_' suffixes{2} '_.*.nii'], inf));
+    matlabbatch{1, 1}.spm.stats.factorial_design.des.anova.icell(1+counter).scans = filekeeper_risk;
+    matlabbatch{1, 1}.spm.stats.factorial_design.des.anova.icell(2+counter).scans = filekeeper_ambi;
+    counter = counter+2;
+end
+
+% set contrast weights
+con_length = length(all_params)*2;
+contrast = zeros(con_length);
+for iLine = 1:con_length
+    contrast(iLine,iLine) = 1;
+end
+matlabbatch{1, 3}.spm.stats.con.consess{1, 1}.fcon.weights = contrast;
+
+% save batch for processing
+batchcollector{length(all_params)+1} = matlabbatch;
+savebatch = fullfile(DIR.batchsave, ['X_' 'all_pmods_batch_second_level.mat']);
+save(savebatch, 'matlabbatch');
+disp(' done!');
+
+%%% ANALYZE SECOND LEVEL
+
+for iBatch = 1:length(all_params)+1
     disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iBatch) ' +++++++++++++++++++++++++++++++++++++++']);
     spm_jobman('initcfg');
     spm_jobman('run',batchcollector{iBatch});
@@ -365,7 +379,6 @@ disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 
 %%% TODO
 
-% DELETE EXISTING CONTRASTS WHEN DONE !!!
 % TEST 2 --> also test with equal variance and independence
 
 
