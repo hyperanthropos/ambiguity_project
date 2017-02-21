@@ -17,7 +17,7 @@ SET.ortho = 0; % set if pmods should be orthogonalized by SPM
 SET.duration_type = 'events'; % how should duration be modeled - options: 'events', 'fixed', 'RT'
 SET.duration_fixed = 0; % which duration if fixed (in seconds)
 
-SET.subs = 1:2; % which subjects should be included (1:40)
+SET.subs = 1:40; % which subjects should be included (1:40)
 SET.runs = 1:3; % which runs should be included (1:3)
 
 % set directories
