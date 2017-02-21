@@ -33,7 +33,7 @@ switch input
         matlabbatch{4}.spm.stats.factorial_design.dir = '<UNDEFINED>';
         matlabbatch{4}.spm.stats.factorial_design.des.t2.scans1 = '<UNDEFINED>';
         matlabbatch{4}.spm.stats.factorial_design.des.t2.scans2 = '<UNDEFINED>';
-        matlabbatch{4}.spm.stats.factorial_design.des.t2.dept = 0;
+        matlabbatch{4}.spm.stats.factorial_design.des.t2.dept = 1;
         matlabbatch{4}.spm.stats.factorial_design.des.t2.variance = 1;
         matlabbatch{4}.spm.stats.factorial_design.des.t2.gmsca = 0;
         matlabbatch{4}.spm.stats.factorial_design.des.t2.ancova = 0;
