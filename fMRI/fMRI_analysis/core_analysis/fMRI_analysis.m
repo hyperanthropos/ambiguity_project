@@ -7,7 +7,7 @@
 clear; close('all'); clc;
 
 % set model
-SET.estimate = 0; % acutually estimate data or only save the batches
+SET.estimate = 0; % acutually (re)estimate first level stats or only save the batches
 SET.workers = 6; % number of parallel workers to use for estimation
 
 SET.model = 'TEST'; % name the model to create a folder and save data
@@ -17,7 +17,7 @@ SET.ortho = 0; % set if pmods should be orthogonalized by SPM
 SET.duration_type = 'events'; % how should duration be modeled - options: 'events', 'fixed', 'RT'
 SET.duration_fixed = 0; % which duration if fixed (in seconds)
 
-SET.subs = 1:40; % which subjects should be included (1:40)
+SET.subs = 1:2; % which subjects should be included (1:40)
 SET.runs = 1:3; % which runs should be included (1:3)
 
 % set directories
@@ -30,16 +30,6 @@ DIR.spmpath = '/home/fridolin/DATA/MATLAB/SPM/spm12b/'; % path of SPM 12
 
 %% GENERAL STARTUP
 
-% SECURITY CHECK
-if  SET.estimate == 1;
-    warning('if the model is set to estimate the whole model folder will be deleted and recreated!');
-    disp('do you want to continue? 1 = no, 2 = yes');
-    answer = input(' ');
-    if answer ~= 2
-        error('please correct your "SET.estimate" flag');
-    end
-end
-
 % PATHWORK
 DIR.home = pwd;
 addpath(fullfile(DIR.home, 'batches'));
@@ -50,6 +40,19 @@ DIR.model = fullfile(DIR.modeldata, SET.model);
 DIR.batchsave = fullfile(DIR.model, 'used_bacthes');
 DIR.first_level = fullfile(DIR.model, 'first_level');
 DIR.second_level = fullfile(DIR.model, 'second_level');
+
+% SECURITY CHECK
+if  SET.estimate == 1 && exist(DIR.model, 'dir') == 7; % if set to estimate and model directory alrady exists
+    warning('if the model is set to estimate the whole model folder will be deleted and recreated!');
+    disp('do you want to continue? 1 = no, 2 = yes');
+    answer = input(' ');
+    if answer ~= 2
+        error('please correct your "SET.estimate" flag');
+    end
+elseif SET.estimate ~= 1 && exist(DIR.model, 'dir') ~= 7; % if not set to estimate and model directory doesn't exist
+    warning('it seemes this particular model was never estimated before...');
+    error('please correct your "SET.estimate" flag');
+end
 % clear old data
 if SET.estimate == 1;
     if exist(DIR.model, 'dir') == 7; rmdir(fullfile(DIR.model),'s'); end
@@ -105,8 +108,8 @@ for iSub = SET.subs
         
         %%% --- SET ONSETS AND DURATIONS
         
-        matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).onset = REGS.risk{iSub, iRun}.base.onsets(:);
-        matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).onset = REGS.ambi{iSub, iRun}.base.onsets(:);
+        matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).onset = REGS.risk{iSub, iRun}.onsets(:);
+        matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).onset = REGS.ambi{iSub, iRun}.onsets(:);
         switch SET.duration_type
             case 'events'
                 matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).duration = 0;
@@ -121,15 +124,17 @@ for iSub = SET.subs
         
         %%% --- SET PARAMETRIC MODULATORS PER RUN
         
-        for regressor = 1:nRegs
-            % regressors for risk
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).param = eval([ 'REGS.risk{iSub,iRun}.base.' SET.regs{regressor} '(:)' ]);
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).name = SET.regs{regressor};
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).poly = 1;
-            % regressors for ambiguity
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).param = eval([ 'REGS.ambi{iSub,iRun}.base.' SET.regs{regressor} '(:)' ]);
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).name = SET.regs{regressor};
-            matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).poly = 1;
+        if nRegs > 0 % check if any pmods are even present
+            for regressor = 1:nRegs
+                % regressors for risk
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).param = eval([ 'REGS.risk{iSub,iRun}.' SET.regs{regressor} '(:)' ]);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).name = SET.regs{regressor};
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(1).pmod(regressor).poly = 1;
+                % regressors for ambiguity
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).param = eval([ 'REGS.ambi{iSub,iRun}.' SET.regs{regressor} '(:)' ]);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).name = SET.regs{regressor};
+                matlabbatch{1}.spm.stats.fmri_spec.sess(iRun).cond(2).pmod(regressor).poly = 1;
+            end
         end
         
     end % end iRun loop (session based operations)
@@ -208,7 +213,6 @@ if SET.estimate == 1;
     % run batches
     parfor iSub = parsub
         disp(['+++++++++++++++++++++++++++++++++++++++ RUN SUB ' num2str(iSub) ' +++++++++++++++++++++++++++++++++++++++']);
-        mkdir(char(batchcollector{iSub}{1}.spm.stats.fmri_spec.dir));
         spm_jobman('initcfg');
         spm_jobman('run',batchcollector{iSub});
     end
@@ -314,6 +318,8 @@ disp(' done');
  
 %%% BUILD AND MODIFY BATCH 2 (ANOVA; all parameters)
 
+
+
 %%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
 
 % % %     % load batch
@@ -330,11 +336,10 @@ disp(' done');
 
 % run second level analysis
 if SET.estimate == 1;
-    for iReg = 0:nRegs
-        disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iReg) ' +++++++++++++++++++++++++++++++++++++++']);
-        mkdir(char(batchcollector{iRegs+1}{1}.spm.stats.factorial_design.dir));
+    for iBatch = 1:length(all_params)
+        disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iBatch) ' +++++++++++++++++++++++++++++++++++++++']);
         spm_jobman('initcfg');
-        spm_jobman('run',batchcollector{iRegs+1});
+        spm_jobman('run',batchcollector{iBatch});
     end
 end
 
@@ -351,16 +356,12 @@ end
 
 disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 
+% script ends here
 
 
 
 
-
-
-
-
-
-%%%%%%%%%%%%%% SCRATCHPAD:
+%% SCRATCHPAD:
 
 %%% TODO
 
