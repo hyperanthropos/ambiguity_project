@@ -373,39 +373,3 @@ disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 % script ends here
 
 
-
-
-%% SCRATCHPAD:
-
-%%% TODO
-
-% TEST 2 --> also test with equal variance and independence
-
-
-
-
-
-
-% % % % Example 3:  Making a conjunction map between two suprathreshold t-maps
-% % % 
-% % % % Read in both t-maps
-% % % TMap1 = spm_read_vols(spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0001.img'));
-% % % TMap2 = spm_read_vols(spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0002.img'));
-% % % 
-% % % % Define t-threshold
-% % % tthresh = 3.1768423;
-% % % 
-% % % % Mask out suprathreshold voxels from both t-maps
-% % % TMap1_suprathresh = TMap1>=tthresh;
-% % % TMap2_suprathresh = TMap2>=tthresh;
-% % % 
-% % % % Make conjunction map as the logical AND of both suprathreshold t-maps
-% % % ConjunctionMap = TMap1_suprathresh & TMap2_suprathresh;
-% % % 
-% % % % Write out the new conjunction map
-% % % V = spm_vol('/Users/mvlombardo/Documents/fMRI/Contrast1/spmT_0001.img');
-% % % V.fname = 'ConjunctionMap_TMap1_AND_TMap2.nii';
-% % % V.private.dat.fname = V.fname;
-% % % spm_write_vol(V,ConjunctionMap);
-
-
