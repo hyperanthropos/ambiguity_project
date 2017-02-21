@@ -7,7 +7,7 @@
 clear; close('all'); clc;
 
 % set model
-SET.estimate = 0; % acutually (re)estimate first level stats or only save the batches
+SET.estimate = 0; % (re)estimate first level stats or only replace the batchefiles and run 2nd level directly
 SET.workers = 6; % number of parallel workers to use for estimation
 
 SET.model = 'TEST'; % name the model to create a folder and save data
@@ -44,8 +44,8 @@ DIR.second_level = fullfile(DIR.model, 'second_level');
 % SECURITY CHECK
 if  SET.estimate == 1 && exist(DIR.model, 'dir') == 7; % if set to estimate and model directory alrady exists
     warning('if the model is set to estimate the whole model folder will be deleted and recreated!');
-    disp('do you want to continue? 1 = no, 2 = yes');
-    answer = input(' ');
+    disp('do you want to continue?');
+    answer = input('1 = no, 2 = yes: ');
     if answer ~= 2
         error('please correct your "SET.estimate" flag');
     end
@@ -53,11 +53,13 @@ elseif SET.estimate ~= 1 && exist(DIR.model, 'dir') ~= 7; % if not set to estima
     warning('it seemes this particular model was never estimated before...');
     error('please correct your "SET.estimate" flag');
 end
-% clear old data
-if SET.estimate == 1;
-    if exist(DIR.model, 'dir') == 7; rmdir(fullfile(DIR.model),'s'); end
-else
-    delete(fullfile(DIR.batchsave, '*'));
+
+% CLEAR OLD DATA
+if SET.estimate == 1; % everything will be restimated
+    if exist(DIR.model, 'dir') == 7; rmdir(fullfile(DIR.model),'s'); end % clear whole model
+else % first level data will be kept
+    if exist(DIR.batchsave, 'dir') == 7;delete(fullfile(DIR.batchsave, '*')); end % only delete batchfiles...
+    if exist(DIR.second_level, 'dir') == 7; rmdir(fullfile(DIR.second_level),'s'); end % ...and second level stats
 end
 
 % START SPM AND PREPARE BATCH
@@ -335,12 +337,10 @@ disp(' done');
 %%%%%%%%%% UNDER CONSTRUCTION %%%%%%%%%%%%%%%%%%%%%%%
 
 % run second level analysis
-if SET.estimate == 1;
-    for iBatch = 1:length(all_params)
-        disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iBatch) ' +++++++++++++++++++++++++++++++++++++++']);
-        spm_jobman('initcfg');
-        spm_jobman('run',batchcollector{iBatch});
-    end
+for iBatch = 1:length(all_params)
+    disp(['+++++++++++++++++++++++++++++++++++++++ RUN 2nd LEVEL REG ' num2str(iBatch) ' +++++++++++++++++++++++++++++++++++++++']);
+    spm_jobman('initcfg');
+    spm_jobman('run',batchcollector{iBatch});
 end
 
 %% OUTPUT LOGS
@@ -365,7 +365,6 @@ disp('ALL OPERATIONS COMPLETE - THANK YOU, COME AGAIN');
 
 %%% TODO
 
-% CHANGE base. covar. regressor structure to simplier mechanism
 % DELETE EXISTING CONTRASTS WHEN DONE !!!
 % TEST 2 --> also test with equal variance and independence
 
