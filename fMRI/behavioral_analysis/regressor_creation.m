@@ -48,7 +48,7 @@ clear; close all; clc;
 % set range
 SUBJECTS = 1:40; % subs to analyze
 SESSIONS = 1:3; % sessions/runs to analyze
-SAVEREGS = 1; % save created regressors or onyl show graphical output
+SAVEREGS = 1; % save created regressors or only show graphical output
 
 % set graphical output
 % (to check independence / orhthogonalization of regressors to use)
@@ -100,18 +100,18 @@ for sub = SUBJECTS
             end
             
             % create base regressors
-            data.base.onsets = select(2,:); % onset times in seconds
-            data.base.RT = select(3,:); % RT
-            data.base.varlevel = select(variance_location, :); % level of variance: 1-5 increasing
-            data.base.chosen_var = select(variance_location, :).*(select(4,:)-1); % only variance levels of chosen trials
-            data.base.chosen_var_neg = select(variance_location, :).*((select(4,:)-1.5)*2); % variance inversely coded if not chosen
+            data.onsets = select(2,:); % onset times in seconds
+            data.RT = select(3,:); % RT
+            data.varlevel = select(variance_location, :); % level of variance: 1-5 increasing
+            data.chosen_var = select(variance_location, :).*(select(4,:)-1); % only variance levels of chosen trials
+            data.chosen_var_neg = select(variance_location, :).*((select(4,:)-1.5)*2); % variance inversely coded if not chosen
             
             % create control covariates
-            data.cov.counteroffer = select(16,:); % value of counteroffer
-            data.cov.diff_value = select(16,:)-EV; % difference in EV between options (positive = counteroffer higher than gamble)
-            data.cov.abs_value = select(high_amount_location,:)+select(low_amount_location,:)+select(16,:); % absolute presented value
-            data.cov.position = select(9,:)-1; % position of counteroffer: 0 = left, 1 = right
-            data.cov.choice = select(4,:); % chosen option: 1 = fixed option; 2 = risky/ambiguous option
+            data.counteroffer = select(16,:); % value of counteroffer
+            data.diff_value = select(16,:)-EV; % difference in EV between options (positive = counteroffer higher than gamble)
+            data.abs_value = select(high_amount_location,:)+select(low_amount_location,:)+select(16,:); % absolute presented value
+            data.position = select(9,:)-1; % position of counteroffer: 0 = left, 1 = right
+            data.choice = select(4,:); % chosen option: 1 = fixed option; 2 = risky/ambiguous option
             
             % create regs of one type of trials
             switch cell2mat(trialtype)
@@ -123,8 +123,8 @@ for sub = SUBJECTS
             
             % create online correlation figure
             figure(online_fig);
-            variables = [   data.base.RT; data.base.varlevel; data.base.chosen_var; data.base.chosen_var_neg; ...
-                    data.cov.counteroffer; data.cov.diff_value; data.cov.abs_value; data.cov.position; data.cov.choice  ]';
+            variables = [   data.RT; data.varlevel; data.chosen_var; data.chosen_var_neg; ...
+                    data.counteroffer; data.diff_value; data.abs_value; data.position; data.choice  ]';
             varnames = {'RT', 'var', 'vXc', 'vX-c', 'counter', 'diff', 'abs', 'pos', 'ch'};
             switch cell2mat(trialtype)
                 case 'risky'
