@@ -1,5 +1,6 @@
 function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
 %% code to present the experiment
+% this code is used for behavioral experiment 2(!)
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
 % input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
@@ -9,6 +10,15 @@ function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN
 % the subject via draw_stims.m and records the repsonse. results are
 % collected in the "logrec" variable, which gets saved in wd/logfiles and
 % is ordered like this:
+
+
+
+
+%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
 
 % LINE 01 - trial number
 % LINE 02 - trial presentation time
@@ -82,6 +92,9 @@ end
 % current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
 % alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
 
+%%%%%%%%%%%%%%%%%%%%%%%%% DIRTY COMMENT
+warning('STIMS structure has to be updated - eg. reveal, repeats');
+
 STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
 STIMS.steps = 12;
 STIMS.repeats = 2;
@@ -96,7 +109,7 @@ if SESSION == 0;
 end
 
 % create matrix
-[stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.repeats, STIMS.diagnostic_graphs);
+[stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.diagnostic_graphs);
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
