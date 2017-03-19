@@ -1,4 +1,5 @@
-function [matrix, stim_nr] = stimuli( steps, repeat, diag )
+function [matrix, stim_nr] = stimuli( steps, diag )
+% this code is used for behavioral experiment 2(!)
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
 % can be fed into a task-presentation script
@@ -9,43 +10,55 @@ function [matrix, stim_nr] = stimuli( steps, repeat, diag )
 % line 03 - stimulus number (randomized)
 % line 04 - trial type (1 = risky, 2 = ambigious)
 %
-% line 06 - risk variance level (1-4; low to high variance)
-%               for risk: 25 at 80%, 33 at 60%, 50 at 40%, 100 at 20%
-% line 07 - ambiguity variance level (1-4; low to high variance)
-%               for ambiguity: 15 vs 25, 10 vs 30, 5 vs 35, 0 vs 40
-% line 08 - counteroffer level (1-number of levels; low to high counteroffer)
+% line 06 - risk variance level (1 to n; low to high variance)
+% line 07 - ambiguity variance level (1 to n; low to high variance)
+% line 08 - counteroffer level (1 to number of levels; low to high counteroffer)
 %
-% line 10 - option 1 - probability of offer [ line 6 ] (80%, 60%, 40%, 20%)
-% line 11 - option 1 - lower value risk [ line 6 ] (10.00 07.75 07.75 10.00 for risk)
-% line 12 - option 1 - upper value risk [ line 6 ] (22.50 28.17 38.37 60.00 for risk)
-% line 13 - option 1 - lower value ambiguity [ line 7 ] (15, 10, 5, 0 for ambigutiy)
-% line 14 - option 1 - upper value ambiguity [ line 7 ] (25, 30, 35, 40 for ambiguity)
-% line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
+% line 10 - option 1 - probability of offer [ line 6 ]
+% line 11 - option 1 - lower value risk [ line 6 ]
+% line 12 - option 1 - upper value risk [ line 6 ]
+% line 13 - option 1 - lower value ambiguity [ line 7 ]
+% line 14 - option 1 - upper value ambiguity [ line 7 ]
+% line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to expected value (EV))
 %
-% line 20 - ISI (time until next decision)
 % line 21 - position of counteroffer (left, right)
 % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 %
 % --- further notes:
-%   -   expected value (EV) of all trials is fixed to one value
-%   -   this funtion does not set up propper randomization - this has to be
+%   -   different expected values (EV) are used for different trials
+%   -   this function does not set up propper randomization - this has to be
 %       initialized before in a wrapper / presentation script
 
 %% SET PARAMETERS FOR STIMULI MATRIX CREATION
 
 DIAG = diag;                % run diagnostics of stimuli range
 
-isi = 1;                        % mean ISI between trials (for future fMRI optimisation)
-
 %XXX repeats has to be removed
-repeats = repeat;               % how many times should one set be repeated
+repeats = 3;               % how many times should one set be repeated
 
 X.steps = steps;                % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 
 
 
 
-%XXX stepsize counteroffers have to be handles completely differently
+%XXX stepsize counteroffers have to be handled completely differently
+
+% adapt to old solution
+
+% % %     % create percentage value of highest / lowest possible counteroffer
+% % %     % in realtion to expected value, so that the counteroffer is never lower
+% % %     % than the low uncertain or higher than the high uncertain amount
+% % %     % (assuming risk and ambiguity have the same number of variance levels)
+% % %     perc_bound(1,:) = max([X.RVL;X.AVL])/X.EV; % maximum of lowest offer divided by EV
+% % %     perc_bound(2,:) = min([X.RVH;X.AVH])/X.EV; % minimum of highest offer divided by EV
+% % % 
+% % %     % result: min/max percent for variance levels 1 to 5
+% % %     % [0.889 1.055] [0.667 1.244] [0.445 1.555] [0.430 1.778] [0.501 1.999]
+% % % 
+% % %     % set variance later used to scale counteroffers
+% % %     for i = 1:X.RN;
+% % %         X.var{i} = perc_bound(:,i);
+% % %     end
 
                                     % maximum counteroffer (risk vs. ambiguity): 22.5 vs 25, 28.2 vs 30, 38.4 vs 35, 60 vs 40
                                     % minimum counteroffer (risk vs. ambiguity): 10 vs 15, 7.8 vs 10, 7.8 vs 5, 10 vs 0
@@ -217,7 +230,6 @@ end
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
 
-r_matrix(20,:) = NaN(1,stim_nr/repeats);                                  % line 20 - ISI (not used in behavioral experiments)
 r_matrix(21,:) = randi(2, 1, stim_nr/repeats);                            % line 21 - position of counteroffer (left, right)
 r_matrix(22,:) = randi(2, 1, stim_nr/repeats);                            % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 
@@ -290,7 +302,7 @@ matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line
 % fill unused lines with NaN for security
 matrix(5,:) = NaN(1,stim_nr);
 matrix(9,:) = NaN(1,stim_nr);
-matrix(16:19,:) = NaN(4,stim_nr);
+matrix(16:20,:) = NaN(5,stim_nr);
 
 % derandomize
 % sorted_matrix = sortrows(matrix', [2 3])';
