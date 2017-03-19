@@ -1,3 +1,4 @@
+% this code is used for behavioral experiment 2(!)
 % script to match variance of risky offers to ambiguous trials
 % uses the symbolic math toolbox
 clear; close all; clc;
