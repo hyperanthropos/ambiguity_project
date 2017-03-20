@@ -6,7 +6,7 @@ function [matrix, stim_nr] = stimuli( steps, diag )
 %
 % --- stim_matrix description
 % line 01 - presentation number (sequential)
-% line 02 - repeat number
+%
 % line 03 - stimulus number (randomized)
 % line 04 - trial type (1 = risky, 2 = ambigious)
 %
@@ -33,8 +33,6 @@ function [matrix, stim_nr] = stimuli( steps, diag )
 
 DIAG = diag;                % run diagnostics of stimuli range
 
-%XXX repeats has to be removed
-repeats = 3;               % how many times should one set be repeated
 
 X.steps = steps;                % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 
@@ -69,10 +67,6 @@ X.var{2} = [0.500 1.330];                                         % for variance
 X.var{3} = [0.390 1.540];                                         % for variance level 3: 25% - 175% (5 - 35)
 X.var{4} = [0.500 1.750];                                         % for variance level 4: 0% - 200% (0 - 40)
 
-
-X.RN = 4;                                                       % number of risky levels
-X.AN = 4;                                                       % number of ambiguous levels
-
 %XXX EV has to be implemented dynamicaly
 X.EV = 20;                                                      % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH
 
@@ -91,7 +85,9 @@ X.RVH = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21
 % risky value levels low
 X.RVL = [7.4328    5.9694    5.0168    4.3870    4.0000    3.8197    3.8347    4.0544    4.5176   29.7313   23.8777   20.0674   17.5480   16.0000   15.2788   15.3387   16.2175   18.0703]; % probability values high
 
-stim_nr = (length(X.RPH)+length(X.AVL))*X.steps*repeats;
+X.RN = length(X.RPH); % number of risky levels
+X.AN = length(X.AVH); % number of ambiguous levels
+stim_nr = (length(X.RPH)+length(X.AVL))*X.steps; % number of stimuli
 
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
@@ -193,7 +189,7 @@ if DIAG == 1;
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
 
-%% CREATE MATRIX TO REPEAT
+%% CREATE SORTED MATRIX
 
 trials_risky = 1:X.RN*X.steps;
 trials_ambiguous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
@@ -222,6 +218,9 @@ r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line
 % create counteroffers
 counteroffers = [];
 for i = 1:X.RN;
+    
+    %%%%%%%%% CONTROLL FOR DIFFERENT EV VALUES
+    
 counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
 end
 for i = 1:X.AN;
@@ -230,8 +229,8 @@ end
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
 
-r_matrix(21,:) = randi(2, 1, stim_nr/repeats);                            % line 21 - position of counteroffer (left, right)
-r_matrix(22,:) = randi(2, 1, stim_nr/repeats);                            % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
+r_matrix(21,:) = randi(2, 1, stim_nr);                                    % line 21 - position of counteroffer (left, right)
+r_matrix(22,:) = randi(2, 1, stim_nr);                                    % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 
 %% DIAGNOSTIC: PLOT STIMULUS MATRIX
 
@@ -285,19 +284,13 @@ if DIAG == 1;
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
 
-%% RANDOMIZE AND REPEAT MATRIX 
+%% RANDOMIZE AND COMPLETE MATRIX 
 
-% randomize and repeat r_matrix
-repeat_size = size(r_matrix, 2);
-
-matrix = [];
-for i = 1:repeats;
-    matrix = cat(2, matrix, r_matrix(:,randperm(repeat_size)) );    
-end
+% randomize matrix
+matrix = r_matrix(:,randperm(stim_nr));    
 
 % complete matrix
-matrix(1,:) = 1:stim_nr;                                                  % line 01 - presentation number (sequential)
-matrix(2,:) = kron(1:repeats, ones(1,stim_nr/repeats));                   % line 02 - repeat number
+matrix(1,:) = 1:stim_nr;                                                   % line 01 - presentation number (sequential)
 
 % fill unused lines with NaN for security
 matrix(5,:) = NaN(1,stim_nr);
@@ -305,7 +298,7 @@ matrix(9,:) = NaN(1,stim_nr);
 matrix(16:20,:) = NaN(5,stim_nr);
 
 % derandomize
-% sorted_matrix = sortrows(matrix', [2 3])';
+% sorted_matrix = sortrows(matrix', 3)';
 
 %% end function code
 end
