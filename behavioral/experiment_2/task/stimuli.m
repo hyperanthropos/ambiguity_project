@@ -1,4 +1,7 @@
-function [matrix, stim_nr] = stimuli( steps, diag )
+% function [matrix, stim_nr] = stimuli( steps, diag )
+
+steps = 3; diag = 1;
+
 % this code is used for behavioral experiment 2(!)
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
@@ -26,49 +29,16 @@ function [matrix, stim_nr] = stimuli( steps, diag )
 %
 % --- further notes:
 %   -   different expected values (EV) are used for different trials
+%   -   it is assumed that EV is still matched between risky and ambiguous
+%       trials - and calculation is based on ambiguous values and repeated,
+%       as risky values input might be approximated 
 %   -   this function does not set up propper randomization - this has to be
 %       initialized before in a wrapper / presentation script
 
-%% SET PARAMETERS FOR STIMULI MATRIX CREATION
+%% SET PARAMETERS AND PREPARE MATRIX CREATION
 
-DIAG = diag;                % run diagnostics of stimuli range
-
-
-X.steps = steps;                % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
-
-
-
-
-%XXX stepsize counteroffers have to be handled completely differently
-
-% adapt to old solution
-
-% % %     % create percentage value of highest / lowest possible counteroffer
-% % %     % in realtion to expected value, so that the counteroffer is never lower
-% % %     % than the low uncertain or higher than the high uncertain amount
-% % %     % (assuming risk and ambiguity have the same number of variance levels)
-% % %     perc_bound(1,:) = max([X.RVL;X.AVL])/X.EV; % maximum of lowest offer divided by EV
-% % %     perc_bound(2,:) = min([X.RVH;X.AVH])/X.EV; % minimum of highest offer divided by EV
-% % % 
-% % %     % result: min/max percent for variance levels 1 to 5
-% % %     % [0.889 1.055] [0.667 1.244] [0.445 1.555] [0.430 1.778] [0.501 1.999]
-% % % 
-% % %     % set variance later used to scale counteroffers
-% % %     for i = 1:X.RN;
-% % %         X.var{i} = perc_bound(:,i);
-% % %     end
-
-                                    % maximum counteroffer (risk vs. ambiguity): 22.5 vs 25, 28.2 vs 30, 38.4 vs 35, 60 vs 40
-                                    % minimum counteroffer (risk vs. ambiguity): 10 vs 15, 7.8 vs 10, 7.8 vs 5, 10 vs 0
-                                    % combined: 15 - 22.5; 10 - 28.2; 7.8 - 35; 10 - 40; 
-                                    % in % [0.750 1.125]; [0.500 1.410]; [0.390 1.750]; [0.500 2.000];
-X.var{1} = [0.750 1.125];                                         % for variance level 1: 75% - 125% (15 - 25)
-X.var{2} = [0.500 1.330];                                         % for variance level 2: 50% - 150% (10 - 30)
-X.var{3} = [0.390 1.540];                                         % for variance level 3: 25% - 175% (5 - 35)
-X.var{4} = [0.500 1.750];                                         % for variance level 4: 0% - 200% (0 - 40)
-
-%XXX EV has to be implemented dynamicaly
-X.EV = 20;                                                      % expected value (has to matched to X.RPH, X.RVH, X.AVL, X.AVH
+DIAG = diag; % run diagnostics of stimuli range
+X.steps = steps; % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 
 % BASIC TRIAL CONTENT - created adjust_variance.m function in the "assisting scripts" folder
 
@@ -86,8 +56,28 @@ X.RVH = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21
 X.RVL = [7.4328    5.9694    5.0168    4.3870    4.0000    3.8197    3.8347    4.0544    4.5176   29.7313   23.8777   20.0674   17.5480   16.0000   15.2788   15.3387   16.2175   18.0703]; % probability values high
 
 X.RN = length(X.RPH); % number of risky levels
-X.AN = length(X.AVH); % number of ambiguous levels
-stim_nr = (length(X.RPH)+length(X.AVL))*X.steps; % number of stimuli
+X.AN = length(X.AVH); % number of ambiguous level
+if X.RN ~= X.AN; % check if they are equal
+    error('currently number of risky and ambiguous trials must be matched!');
+end
+stim_nr = (X.RN+X.AN)*X.steps; % number of stimuli
+
+% expected value for trials
+X.EV = (X.AVL+X.AVH)/2;
+
+% CREATE COUNTEROFFERS RANGE
+
+% create percentage value of highest / lowest possible counteroffer
+% in realtion to expected value, so that the counteroffer is never lower
+% than the low uncertain or higher than the high uncertain amount
+% (assuming risk and ambiguity have the same number of variance levels)
+perc_bound(1,:) = max([X.RVL;X.AVL])./X.EV; % maximum of lowest offer divided by EV
+perc_bound(2,:) = min([X.RVH;X.AVH])./X.EV; % minimum of highest offer divided by EV
+
+% set variance later used to scale counteroffers
+for i = 1:X.AN;
+    X.var{i} = perc_bound(:,i);
+end
 
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
 
@@ -98,26 +88,26 @@ if DIAG == 1;
     K.mvar = -1/60;        % mean variance (<0 is risk averse)
     K.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
     K.pros = 0.92;          % prospect theory (<1 is risk averse)
-    scale = [00 20];        % axis scale
+    scale = [00 40];        % axis scale
     
     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
     % mean variance of risky trials
-    mvar = NaN(2,4);
-    for i = 1:4;
+    mvar = NaN(2,X.RN);
+    for i = 1:X.RN;
         [mvar(1, i)] = mean_variance(X.RPH(i), X.RVH(i), X.RPL(i), X.RVL(i));
     end
     % mean variance for ambiguous trials
-    for i = 1:4;
+    for i = 1:X.AN;
         [mvar(2, i)] = mean_variance( .5, X.AVL(i), .5, X.AVH(i) );
     end
     % subjective value according to k parameter
-    SV.mvar = ones(2,4)*20 + mvar * K.mvar;
+    SV.mvar = ones(2,X.AN).*repmat(X.EV, 2, 1) + mvar * K.mvar;
     
     % SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
     odds_high = (1-X.RPH)./X.RPH;                                               % transform p to odds for high value prob
     odds_low = (1-X.RPL)./X.RPL;                                                % transform p to odds for low value prob
     SV.hyp(1,:) = X.RVH./(1+K.hyp.*odds_high) + X.RVL./(1+K.hyp.*odds_low);     % subjective value of risky offers
-    odds = [1 1 1 1];                                                           % odds are equal for ambiguous offers
+    odds = ones(1,X.AN);                                                        % odds are equal for ambiguous offers
     SV.hyp(2,:) = X.AVL./(1+K.hyp.*odds) + X.AVH./(1+K.hyp.*odds);              % subjective value of ambiguous offers
     
     % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
@@ -125,41 +115,42 @@ if DIAG == 1;
     SV.pros(2,:) = .5.*X.AVL.^K.pros + .5.*X.AVH.^K.pros;                       % subjective value of ambiguous offers
     
     % PLOT AND COMPARE SV
+    scalemax = X.AN+.5;
     figs.fig1 = figure('Color', [1 1 1]);
-    set(figs.fig1,'units','normalized','outerposition',[0 .8 .5 .8]);
+    set(figs.fig1,'units','normalized','outerposition',[0 0 1 1]);
     subplot(3,2,1);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2);
-    axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
-    legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'southwest');
+    axis([.5 scalemax scale]); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'northwest');
     subplot(3,2,2);
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
     plot(SV.pros(2,:), 'b--', 'linewidth', 2);
-    axis([.5 4.5 scale]); xlabel('variance'); ylabel('expected value');
-    legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'southwest');
+    axis([.5 scalemax scale]); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'northwest');
     subplot(3,3,4);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
-    axis([.5 4.5 scale]); title('mean variance'); xlabel('variance'); ylabel('expected value');
-    legend('risk', 'ambiguity', 'location', 'southwest');
+    axis([.5 scalemax scale]); title('mean variance'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
     subplot(3,3,5);
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
-    axis([.5 4.5 scale]); title('hyperbolic'); xlabel('variance'); ylabel('expected value');
-    legend('risk', 'ambiguity', 'location', 'southwest');
-    axis([.5 4.5 scale]);
+    axis([.5 scalemax scale]); title('hyperbolic'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
+    axis([.5 scalemax scale]);
     subplot(3,3,6);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
-    axis([.5 4.5 scale]); title('prospect theory'); xlabel('variance'); ylabel('expected value');
-    legend('risk', 'ambiguity', 'location', 'southwest');
+    axis([.5 scalemax scale]); title('prospect theory'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
    
     % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
     % expected value
     subplot(3,5,11);
-    COMP.ev = ones(2,4)*20;
+    COMP.ev = ones(2,X.AN)*20;
     bar(COMP.ev');
     title('expected value'); xlabel('variance');
     % variance
@@ -215,17 +206,12 @@ r_matrix(13,trials_ambiguous) =  kron(X.AVL, ones(1,X.steps));            % line
 r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line 14 - option 1 - upper value ambiguity [ line 7 ]
 r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ]
 
-% create counteroffers
+% create counteroffers (stepswise variation around EV)
 counteroffers = [];
-for i = 1:X.RN;
-    
-    %%%%%%%%% CONTROLL FOR DIFFERENT EV VALUES
-    
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
-end
 for i = 1:X.AN;
-counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV);
+    counteroffers = cat(2, counteroffers, linspace(X.var{i}(1), X.var{i}(2), X.steps)*X.EV(i));
 end
+counteroffers = repmat(counteroffers, 1, 2); % duplicate for risky trials
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
 
@@ -293,6 +279,7 @@ matrix = r_matrix(:,randperm(stim_nr));
 matrix(1,:) = 1:stim_nr;                                                   % line 01 - presentation number (sequential)
 
 % fill unused lines with NaN for security
+matrix(2,:) = NaN(1,stim_nr);
 matrix(5,:) = NaN(1,stim_nr);
 matrix(9,:) = NaN(1,stim_nr);
 matrix(16:20,:) = NaN(5,stim_nr);
@@ -301,4 +288,4 @@ matrix(16:20,:) = NaN(5,stim_nr);
 % sorted_matrix = sortrows(matrix', 3)';
 
 %% end function code
-end
+% end
