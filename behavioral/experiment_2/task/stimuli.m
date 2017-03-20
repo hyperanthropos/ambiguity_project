@@ -1,7 +1,4 @@
-% function [matrix, stim_nr] = stimuli( steps, diag )
-
-steps = 3; diag = 1;
-
+function [matrix, stim_nr] = stimuli( steps, diag )
 % this code is used for behavioral experiment 2(!)
 % matlab code to create stimuli for experiment
 % this function creates a matrix with all relevant stimuli properties which
@@ -115,36 +112,39 @@ if DIAG == 1;
     SV.pros(2,:) = .5.*X.AVL.^K.pros + .5.*X.AVH.^K.pros;                       % subjective value of ambiguous offers
     
     % PLOT AND COMPARE SV
+    % figure setup
     scalemax = X.AN+.5;
+    xname = ['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))];
+    % draw figure
     figs.fig1 = figure('Color', [1 1 1]);
     set(figs.fig1,'units','normalized','outerposition',[0 0 1 1]);
     subplot(3,2,1);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2);
-    axis([.5 scalemax scale]); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
     legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'northwest');
     subplot(3,2,2);
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
     plot(SV.pros(2,:), 'b--', 'linewidth', 2);
-    axis([.5 scalemax scale]); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
     legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'northwest');
     subplot(3,3,4);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); title('mean variance'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
     legend('risk', 'ambiguity', 'location', 'northwest');
     subplot(3,3,5);
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); title('hyperbolic'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
     legend('risk', 'ambiguity', 'location', 'northwest');
     axis([.5 scalemax scale]);
     subplot(3,3,6);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); title('prospect theory'); xlabel(['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))]); ylabel('subjective value');
+    axis([.5 scalemax scale]); title('prospect theory'); xlabel(xname); ylabel('subjective value');
     legend('risk', 'ambiguity', 'location', 'northwest');
    
     % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
@@ -185,7 +185,7 @@ end
 trials_risky = 1:X.RN*X.steps;
 trials_ambiguous = X.RN*X.steps+1:X.RN*X.steps+X.AN*X.steps;
 
-r_matrix(3,:) =  1:X.RN*X.steps+X.AN*X.steps;                             % line 03 - stimulus number (randomized)
+r_matrix(3,:) = 1:X.RN*X.steps+X.AN*X.steps;                              % line 03 - stimulus number (randomized)
 r_matrix(4,trials_risky) = ones(1, X.RN*X.steps);                         % line 04 - trial type (1 = risky, 2 = ambigious)
 r_matrix(4,trials_ambiguous) = ones(1, X.AN*X.steps)*2;                   % line 04 - trial type (1 = risky, 2 = ambigious)
 
@@ -225,48 +225,58 @@ if DIAG == 1;
     
     % plot trials and funtcions
     figs.fig2 = figure('Color', [1 1 1]);
-    set(figs.fig2,'units','normalized','outerposition',[0 .6 .5 .6]);
+    set(figs.fig2,'units','normalized','outerposition',[0 0 1 1]);
     
-    subplot(1,2,1);
-    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)/X.EV); box off; hold on;
-    plot(SV.mvar(1,:)./20, 'k-', 'linewidth', 2);
-    plot(SV.hyp(1,:)./20, 'r-', 'linewidth', 2);
-    plot(SV.pros(1,:)./20, 'b-', 'linewidth', 2);
-    
+    subplot(2,2,1);
+    % plot counteroffers
+    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)./kron(X.EV, ones(1,X.steps))); box off; hold on;
+    % plot predictions by utility theories
+    plot(SV.mvar(1,:)./X.EV, 'k-', 'linewidth', 2);
+    plot(SV.hyp(1,:)./X.EV, 'r-', 'linewidth', 2);
+    plot(SV.pros(1,:)./X.EV, 'b-', 'linewidth', 2);
     legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
-    axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
-    set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'80%','60%', '40%', '20%'});
+    % plot ranges of max offered values within gambles
+    plot(X.RVH./X.EV, 'k--', 'linewidth', 1);
+    plot(X.RVL./X.EV, 'k--', 'linewidth', 1);
+    xlabel(xname); ylabel('expected value ratio'); title('risky trials');
+    axis([.5 scalemax -.1 2.5]); 
     
-    subplot(1,2,2);
-    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)/X.EV); box off; hold on;
-    plot(SV.mvar(2,:)./20, 'k--', 'linewidth', 2);
-    plot(SV.hyp(2,:)./20, 'r--', 'linewidth', 2);
-    plot(SV.pros(2,:)./20, 'b--', 'linewidth', 2);
-    
+    subplot(2,2,2);
+    % plot counteroffers
+    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)./kron(X.EV, ones(1,X.steps))); box off; hold on;
+    % plot predictions by utility theories
+    plot(SV.mvar(2,:)./X.EV, 'k--', 'linewidth', 2);
+    plot(SV.hyp(2,:)./X.EV, 'r--', 'linewidth', 2);
+    plot(SV.pros(2,:)./X.EV, 'b--', 'linewidth', 2);
     legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
-    axis([.5 4.5 -.1 2.1]); xlabel('variance'); ylabel('expected value ratio');
-    set(gca, 'XTick', 1:4); set(gca, 'XTickLabel', {'15 vs 25', '10 vs 30', '5 vs 35', '0 vs 40'});
-    
-    %%% EXPECTED RESULTS
-    neutral = ones(1,9);
-    risky_experimental = [.8 .82 .83 .87];
-    risky_control = [.81 .8 .81 .84];
-    ambigous_control = [.6 .61 .61 .62];
-    ambigous_experimental = [.58 .63 .72 .79];
-    
-    figs.fig3 = figure('Color', [1 1 1]);
-    set(figs.fig3,'units','normalized','outerposition',[0 .4 .3 .4]);
-    
-    plot(1:9, neutral, 'k', 'linewidth', 2); hold on; box off;
-    plot([6 7 8 9], risky_experimental(1,1:4), 'b-*', 'linewidth', 2);
-    plot([1 2 3 4], risky_control(1,1:4), 'b--*', 'linewidth', 2);
-    plot([6 7 8 9], ambigous_experimental(1,1:4), 'r-*', 'linewidth', 2);
-    plot([1 2 3 4], ambigous_control(1,1:4), 'r--*', 'linewidth', 2);    
-    
-    axis([.5 9.5 0 1.1]); xlabel('time'); ylabel('risk preference');
-    set(gca, 'XTick', 1.5:5:9.5); set(gca, 'XTickLabel', {'control', 'experimental'})
-    legend('neutral', 'risk experimental', 'risk control', 'ambiguity experimental', 'ambiguity control', 'location', 'southwest');  
-    
+    % plot ranges of max offered values within gambles
+    plot(X.AVH./X.EV, 'k--', 'linewidth', 1);
+    plot(X.AVL./X.EV, 'k--', 'linewidth', 1);
+    xlabel(xname); ylabel('expected value ratio'); title('ambiguous trials');
+    axis([.5 scalemax -.1 2.5]);
+
+    % plot the same plots without normalisation to see EV differences
+    subplot(2,2,3);
+    scatter(r_matrix(6,trials_risky), r_matrix(15, trials_risky)); box off; hold on;
+    plot(SV.mvar(1,:), 'k-', 'linewidth', 2);
+    plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
+    plot(SV.pros(1,:), 'b-', 'linewidth', 2);
+    legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
+    plot(X.RVH, 'k--', 'linewidth', 1);
+    plot(X.RVL, 'k--', 'linewidth', 1);
+    xlabel(xname); ylabel('counteroffer value'); title('risky trials');
+    axis([.5 scalemax -5 80]);
+    subplot(2,2,4);
+    scatter(r_matrix(7,trials_ambiguous), r_matrix(15,trials_ambiguous)); box off; hold on;
+    plot(SV.mvar(2,:), 'k--', 'linewidth', 2);
+    plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
+    plot(SV.pros(2,:), 'b--', 'linewidth', 2);
+    legend('single trial', 'mvar', 'hyp', 'pros', 'location', 'northwest');
+    plot(X.AVH, 'k--', 'linewidth', 1);
+    plot(X.AVL, 'k--', 'linewidth', 1);
+    xlabel(xname); ylabel('counteroffer value'); title('ambiguous trials');
+    axis([.5 scalemax -5 80]);
+
     % --- --- --- END SKIP THIS SECTION --- --- --- %
 end
 
@@ -288,4 +298,4 @@ matrix(16:20,:) = NaN(5,stim_nr);
 % sorted_matrix = sortrows(matrix', 3)';
 
 %% end function code
-% end
+end
