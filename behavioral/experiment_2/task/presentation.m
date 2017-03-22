@@ -3,7 +3,7 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % this code is used for behavioral experiment 2(!)
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
 % written for Psychtoolbox (Version 3.0.13 - Build date: Aug 19 2016)
-% input: SESSION, AMBIGUTIY, SAVE_FILE, SETTINGS
+% input: SESSION, SAVE_FILE, SETTINGS
 
 % USER MANUAL
 % this function creates stimuli via stimuli.mat ("stim_mat") presents it to
@@ -20,8 +20,8 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % 
 % 1.) remove ambiguity revealed setting
 % 2.) create pause after half experiment
+% 3.) create reasonable training trials
 % 
-%
 % 
 % 
 % 
