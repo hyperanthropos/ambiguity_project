@@ -9,17 +9,20 @@ function [matrix, stim_nr] = stimuli( steps, diag )
 %
 % line 03 - stimulus number (randomized)
 % line 04 - trial type (1 = risky, 2 = ambigious)
+% line 05 - EV levels (low to high expected value)
 %
 % line 06 - risk variance level (1 to n; low to high variance)
 % line 07 - ambiguity variance level (1 to n; low to high variance)
 % line 08 - counteroffer level (1 to number of levels; low to high counteroffer)
 %
-% line 10 - option 1 - probability of offer [ line 6 ]
+% line 10 - option 1 - probability of higher offer [ line 6 ]
 % line 11 - option 1 - lower value risk [ line 6 ]
 % line 12 - option 1 - upper value risk [ line 6 ]
 % line 13 - option 1 - lower value ambiguity [ line 7 ]
 % line 14 - option 1 - upper value ambiguity [ line 7 ]
 % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to expected value (EV))
+%
+% line 17 - EV of probabilistic offers [ line 5 ]
 %
 % line 21 - position of counteroffer (left, right)
 % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
@@ -38,6 +41,9 @@ DIAG = diag; % run diagnostics of stimuli range
 X.steps = steps; % steps of counteroffer value (this must be matched to levels of risk and ambiguity)
 
 % BASIC TRIAL CONTENT - created adjust_variance.m function in the "assisting scripts" folder
+
+% number of internal EV levels within ambiguity/risk level specification
+X.EN = 2;
 
 % ambiguitly levels low
 X.AVL = [8     7     6     5     4     3     2     1     0    32    28    24    20    16    12     8     4     0]; % ambiguitly levels low
@@ -189,14 +195,17 @@ r_matrix(3,:) = 1:X.RN*X.steps+X.AN*X.steps;                              % line
 r_matrix(4,trials_risky) = ones(1, X.RN*X.steps);                         % line 04 - trial type (1 = risky, 2 = ambigious)
 r_matrix(4,trials_ambiguous) = ones(1, X.AN*X.steps)*2;                   % line 04 - trial type (1 = risky, 2 = ambigious)
 
+r_matrix(5,:) = [kron(kron(1:X.EN, ones(1,X.RN/2)), ones(1,X.steps)), ... % line 05 - EV levels (low to high expected value)
+                 kron(kron(1:X.EN, ones(1,X.AN/2)), ones(1,X.steps))];    % line 05 - EV levels (low to high expected value)
+             
 r_matrix(6,trials_risky) = kron(1:X.RN, ones(1,X.steps));                 % line 06 - risk variance level (1-4; low to high variance)
 r_matrix(6,trials_ambiguous) = NaN(1,X.AN*X.steps);                       % line 06 - risk variance level (1-4; low to high variance)
 r_matrix(7,trials_risky) = NaN(1,X.RN*X.steps);                           % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(7,trials_ambiguous) = kron(1:X.AN, ones(1,X.steps));             % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(8,:) = repmat(1:X.steps, 1, X.AN+X.RN);                          % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 
-r_matrix(10,trials_risky) = kron(X.RPH, ones(1,X.steps));                 % line 10 - option 1 - probability of offer [ line 6 ]
-r_matrix(10,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 10 - option 1 - probability of offer [ line 6 ]
+r_matrix(10,trials_risky) = kron(X.RPH, ones(1,X.steps));                 % line 10 - option 1 - probability of higher offer [ line 6 ]
+r_matrix(10,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 10 - option 1 - probability of higher offer [ line 6 ]
 r_matrix(11,trials_risky) = kron(X.RVL, ones(1,X.steps));                 % line 11 - option 1 - lower value risk [ line 6 ]
 r_matrix(11,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 11 - option 1 - lower value risk [ line 6 ]
 r_matrix(12,trials_risky) = kron(X.RVH, ones(1,X.steps));                 % line 12 - option 1 - upper value risk [ line 6 ]
@@ -214,6 +223,8 @@ end
 counteroffers = repmat(counteroffers, 1, 2); % duplicate for risky trials
 
 r_matrix(15,:) = counteroffers;                                           % line 15 - option 2 - counteroffer value [ line 8 ] (variable, matched to 20 expected value (EV)
+
+r_matrix(17,:) = repmat(kron(X.EV, ones(1,X.steps)), 1, 2);               % line 17 - EV of probabilistic offers [ line 5 ]
 
 r_matrix(21,:) = randi(2, 1, stim_nr);                                    % line 21 - position of counteroffer (left, right)
 r_matrix(22,:) = randi(2, 1, stim_nr);                                    % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
@@ -290,9 +301,9 @@ matrix(1,:) = 1:stim_nr;                                                   % lin
 
 % fill unused lines with NaN for security
 matrix(2,:) = NaN(1,stim_nr);
-matrix(5,:) = NaN(1,stim_nr);
 matrix(9,:) = NaN(1,stim_nr);
-matrix(16:20,:) = NaN(5,stim_nr);
+matrix(16,:) = NaN(1,stim_nr);
+matrix(18:20,:) = NaN(3,stim_nr);
 
 % derandomize
 % sorted_matrix = sortrows(matrix', 3)';
