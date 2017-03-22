@@ -12,7 +12,7 @@ function [ ] = wrapper_experiment_2( sub_nr )
 % if activated this reduces the trial number to training lenghts in all sessions for testing purposes
 SETTINGS.TEST_FLAG = 0; 
 % if activated button mappings for linux (not windows, as default) are used
-SETTINGS.LINUX_MODE = 0; 
+SETTINGS.LINUX_MODE = 1; 
 
 %%% fixed settings
 TARGET_PATH = 'N:\client_write\SFW_ambiguity\results'; % copies to a windows machine
@@ -24,10 +24,9 @@ PARTICIPANT_NR = sub_nr;
 home = pwd;
 savedir = fullfile(home, 'logfiles');
 if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
-save_file_0 = fullfile(savedir, [ 'exp_2_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(0) '.mat'] ); % training save
-save_file_1 = fullfile(savedir, [ 'exp_2_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
-save_file_2 = fullfile(savedir, [ 'exp_2_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(2) '.mat'] );
-if exist(save_file_1, 'file')==2 || exist(save_file_2, 'file')==2; % check if savefiles exist
+save_file_train = fullfile(savedir, [ 'exp_2_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(0) '.mat'] ); % training save
+save_file_exp = fullfile(savedir, [ 'exp_2_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
+if exist(save_file_exp, 'file')==2; % check if savefiles exist
     display(' '); display('a logfile for this subjects already exists! do you want to overwrite?');
     overwrite = input('enter = no / ''yes'' = yes : ');
     if strcmp(overwrite, 'yes');
@@ -53,17 +52,12 @@ clear randomisation;
 %% START PRESENTATION SESSIONS
 
 % PRESENT TRAINING
-presentation(0, 0, save_file_0, SETTINGS); % session, ambiguity, save destination
+presentation(0, save_file_train, SETTINGS); % session 0 = train, save destination, settings
 
-% WAIT TOGETHER FOT SESSION 1 (press F)
+% WAIT TOGETHER FOR REAL EXPERIMENT (press F)
 
-% PRESENT SESSION 1
-presentation(1, save_file_1, SETTINGS); % session, ambiguity, save destination
-
-% WAIT TOGETHER FOT SESSION 2 (press G)
-
-% PRESENT SESSION 2
-presentation(2, save_file_2, SETTINGS); % session, ambiguity, save destination
+% PRESENT EXPERIMENT
+presentation(1, save_file_exp, SETTINGS); % session 1 = exp, save destination, settings
 
 %% FINISH AND COPY LOGFILES
 
