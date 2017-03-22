@@ -8,14 +8,14 @@ function [ ] = draw_stims( window, screen_resolution, probability, risk_low, ris
 %% SETUP STIMULUS CREATION
 
 % set colors used
-color1 = ones(1,3)*180*255; % white                 for fixed offers and before choice
+color1 = ones(1,3)*180*255; % white                 for fixed offers
 color2 = ones(1,3)*120; % dark gray                 for probabilistic offer part 1
 color3 = ones(1,3)*200; % light gray                for probabilistic offer 2
 color4 = (color2+color3)/2; % inbetween gray        for ambiguous offers
 probtextcolor = [150 0 0]; % something red          for probability numbers text
 problinecolor = [0 0 0]; % black                    for probability line
 
-% chose color scheme "white" or "gray";
+% chose color scheme: all "white"; "gray" for uncertain offers; "countergray" for certain offers
 color_scheme = 'white';
 
 % use Swiss Francs abbreviation "Fr."
@@ -93,7 +93,8 @@ Screen('DrawLine', window, 0, 130, -200, 130, 200, 5);
 
 % convert probability into coordinates (between -200 & 200)
 prob_coordspace = linspace(200, -200, 100+1);
-prob_coord = prob_coordspace(probability*100+1);
+index = uint8(probability*100+1); % confirm transformation to index is integer
+prob_coord = prob_coordspace(index);
 
 % define areas to color (upper left, lower left, upper right, lower right)
 rect = [ -130-2, prob_coord, -300+1, -200+1; -130-2, 200-2, -300+1, prob_coord; 300-2, prob_coord, 130+1, -200+1; 300-2, 200-2, 130+1, prob_coord]; % rects to fill with color
@@ -102,6 +103,22 @@ rect = [ -130-2, prob_coord, -300+1, -200+1; -130-2, 200-2, -300+1, prob_coord; 
 switch color_scheme
     case 'white' % no colors
         rect_c = [color1; color1; color1; color1];
+    case 'countergray' % gray tones for certain offers
+        if typus == 1 % if risky trial
+            switch position
+                case 1 % counteroffer left
+                    rect_c = [color3; color3; color1; color1];
+                case 2 % counteroffer right
+                    rect_c = [color1; color1; color3; color3];
+            end
+        elseif typus == 2 % if ambiguous trial
+            switch position
+                case 1 % counteroffer left
+                    rect_c = [color3; color3; color1; color1];
+                case 2 % counteroffer right
+                    rect_c = [color1; color1; color3; color3];
+            end
+        end
     case 'gray' % gray tones for uncertain offers
         if typus == 1 % if risky trial
             switch position
