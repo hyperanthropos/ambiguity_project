@@ -35,7 +35,7 @@ DIAG = diag; % run diagnostics of stimuli range
 % BASIC TRIAL CONTENT - created with adjust_variance.m function in the "assisting scripts" folder
 
 % sacling factors for expected value levels
-X.ev_factors = [1 4];
+X.ev_factors = [1 4 7 10 13];
 
 % ambiguitly levels low
 X.AVL = [8     7     6     5     4     3     2     1     0]; % ambiguitly levels low
@@ -60,113 +60,6 @@ end
 X.MN = (X.AN+X.RN)/2; % number of risky/ambiguous matches
 stim_nr = X.MN*X.EN; % number of stimuli
 
-%% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
-
-if DIAG == 1;
-    % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
-    
-    % expected value for trials
-    X.EV = (X.AVL+X.AVH)/2;
-    
-    % set risk parameters for
-    K.mvar = -1/60;        % mean variance (<0 is risk averse)
-    K.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
-    K.pros = 0.92;          % prospect theory (<1 is risk averse)
-    scale = [00 40];        % axis scale
-    
-    % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
-    % mean variance of risky trials
-    mvar = NaN(2,X.RN);
-    for i = 1:X.RN;
-        [mvar(1, i)] = mean_variance(X.RPH(i), X.RVH(i), X.RPL(i), X.RVL(i));
-    end
-    % mean variance for ambiguous trials
-    for i = 1:X.AN;
-        [mvar(2, i)] = mean_variance( .5, X.AVL(i), .5, X.AVH(i) );
-    end
-    % subjective value according to k parameter
-    SV.mvar = ones(2,X.AN).*repmat(X.EV, 2, 1) + mvar * K.mvar;
-    
-    % SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
-    odds_high = (1-X.RPH)./X.RPH;                                               % transform p to odds for high value prob
-    odds_low = (1-X.RPL)./X.RPL;                                                % transform p to odds for low value prob
-    SV.hyp(1,:) = X.RVH./(1+K.hyp.*odds_high) + X.RVL./(1+K.hyp.*odds_low);     % subjective value of risky offers
-    odds = ones(1,X.AN);                                                        % odds are equal for ambiguous offers
-    SV.hyp(2,:) = X.AVL./(1+K.hyp.*odds) + X.AVH./(1+K.hyp.*odds);              % subjective value of ambiguous offers
-    
-    % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
-    SV.pros(1,:) = X.RPH.*X.RVH.^K.pros + X.RPL.*X.RVL.^K.pros;                 % subjective value of risky offers
-    SV.pros(2,:) = .5.*X.AVL.^K.pros + .5.*X.AVH.^K.pros;                       % subjective value of ambiguous offers
-    
-    % PLOT AND COMPARE SV
-    % figure setup
-    scalemax = X.AN+.5;
-    xname = ['variance | EVs: ' num2str(X.EV(1)) ' to ' num2str(X.EV(end))];
-    % draw figure
-    figs.fig1 = figure('Color', [1 1 1]);
-    set(figs.fig1,'units','normalized','outerposition',[0 0 1 1]);
-    subplot(3,2,1);
-    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
-    plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
-    plot(SV.pros(1,:), 'b-', 'linewidth', 2);
-    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
-    legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'northwest');
-    subplot(3,2,2);
-    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
-    plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
-    plot(SV.pros(2,:), 'b--', 'linewidth', 2);
-    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
-    legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'northwest');
-    subplot(3,3,4);
-    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
-    legend('risk', 'ambiguity', 'location', 'northwest');
-    subplot(3,3,5);
-    plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); xlabel(xname); ylabel('subjective value');
-    legend('risk', 'ambiguity', 'location', 'northwest');
-    axis([.5 scalemax scale]);
-    subplot(3,3,6);
-    plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
-    plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
-    axis([.5 scalemax scale]); title('prospect theory'); xlabel(xname); ylabel('subjective value');
-    legend('risk', 'ambiguity', 'location', 'northwest');
-   
-    % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
-    % expected value
-    subplot(3,5,11);
-    COMP.ev = ones(2,X.AN)*20;
-    bar(COMP.ev');
-    title('expected value'); xlabel('variance');
-    % variance
-    subplot(3,5,12);
-    COMP.var = mvar;
-    bar(COMP.var');
-    title('variance'); xlabel('variance');
-    % absolute value
-    subplot(3,5,13);
-    COMP.av(1,:) = X.RVH + X.RVL;
-    COMP.av(2,:) = X.AVH + X.AVL;
-    bar(COMP.av');
-    title('abs. value'); xlabel('variance');
-    % difference value
-    subplot(3,5,14);
-    COMP.dv(1,:) = X.RVH - X.RVL;
-    COMP.dv(2,:) = X.AVH - X.AVL;
-    bar(COMP.dv');
-    title('diff. value'); xlabel('variance');
-    % exp. val difference
-    subplot(3,5,15);
-    COMP.dv(1,:) = X.RVH.*X.RPH - X.RVL.*X.RPL;
-    COMP.dv(2,:) = X.AVH*.5 - X.AVL*.5;
-    bar(COMP.dv');
-    title('exp. val. diff'); xlabel('variance');
-    
-    % --- --- --- END SKIP THIS SECTION --- --- --- %
-end
-
 %% CREATE SORTED MATRIX
 
 r_matrix(3,1:stim_nr) = 1:stim_nr;                                      % line 03 - stimulus number (randomized)
@@ -184,6 +77,107 @@ r_matrix(14,1:stim_nr) = kron(X.ev_factors, X.AVH);                     % line 1
 r_matrix(17,1:stim_nr) = (r_matrix(13,:)+r_matrix(14,:))/2;             % line 17 - EV of probabilistic offers [ line 5 ]
 
 r_matrix(22,:) = randi(2, 1, stim_nr);                                  % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
+
+%% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
+
+if DIAG == 1;
+    % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
+    
+    % set risk parameters for
+    K.mvar = -1/60;        % mean variance (<0 is risk averse)
+    K.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
+    K.pros = 0.92;          % prospect theory (<1 is risk averse)
+    
+    % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
+    % mean variance of risky trials
+    mvar = NaN(2,stim_nr);
+    for i = 1:stim_nr;
+        [mvar(1, i)] = mean_variance(r_matrix(10,i), r_matrix(12,i), (1-r_matrix(10,i)), r_matrix(11,i));
+    end
+    % mean variance for ambiguous trials
+    for i = 1:stim_nr;
+        [mvar(2, i)] = mean_variance( .5, r_matrix(13,i), .5, r_matrix(14,i) );
+    end
+    % subjective value according to k parameter
+    SV.mvar = ones(2,stim_nr).*repmat(r_matrix(17,:), 2, 1) + mvar * K.mvar;
+    
+    % SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
+    odds_high = (1-r_matrix(10,:))./r_matrix(10,:); % transform p to odds for high value prob
+    odds_low = (1-(1-r_matrix(10,:)))./(1-r_matrix(10,:)); % transform p to odds for low value prob
+    SV.hyp(1,:) = r_matrix(12,:)./(1+K.hyp.*odds_high) + r_matrix(11,:)./(1+K.hyp.*odds_low); % subjective value of risky offers
+    odds = ones(1,stim_nr);  % odds are equal for ambiguous offers
+    SV.hyp(2,:) = r_matrix(13,:)./(1+K.hyp.*odds) + r_matrix(14,:)./(1+K.hyp.*odds); % subjective value of ambiguous offers
+    
+    % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
+    SV.pros(1,:) = r_matrix(10,:).*r_matrix(12,:).^K.pros + (1-r_matrix(10,:)).*r_matrix(11,:).^K.pros; % subjective value of risky offers
+    SV.pros(2,:) = .5.*r_matrix(13,:).^K.pros + .5.*r_matrix(14,:).^K.pros; % subjective value of ambiguous offers
+    
+    % PLOT AND COMPARE SV
+    % figure setup
+    xname = 'all stimuli, increasing variance, increasing EV';
+    % draw figure
+    figs.fig1 = figure('Color', [1 1 1]);
+    set(figs.fig1,'units','normalized','outerposition',[0 0 1 1]);
+    subplot(3,2,1);
+    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); hold on;
+    plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
+    plot(SV.pros(1,:), 'b-', 'linewidth', 2);
+    xlabel(xname); ylabel('subjective value');
+    legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'northwest');
+    subplot(3,2,2);
+    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
+    plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
+    plot(SV.pros(2,:), 'b--', 'linewidth', 2);
+    xlabel(xname); ylabel('subjective value');
+    legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'northwest');
+    subplot(3,3,4);
+    plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
+    xlabel(xname); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
+    subplot(3,3,5);
+    plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
+    xlabel(xname); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
+    subplot(3,3,6);
+    plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
+    plot(SV.pros(2,:), 'b--', 'linewidth', 2); box('off');
+    title('prospect theory'); xlabel(xname); ylabel('subjective value');
+    legend('risk', 'ambiguity', 'location', 'northwest');
+   
+    % COMPARE: EXPECTED VALUE, VARIANCE, ABSOLUTE VALUE, DIFFERENCE VALUE, EV DIFFERENCE
+    % expected value
+    subplot(3,5,11);
+    COMP.ev = repmat(r_matrix(17,:), 2, 1);
+    bar(COMP.ev');
+    title('expected value'); xlabel('variance & EV');
+    % variance
+    subplot(3,5,12);
+    COMP.var = mvar;
+    bar(COMP.var');
+    title('variance'); xlabel('variance & EV');
+    % absolute value
+    subplot(3,5,13);
+    COMP.av(1,:) = r_matrix(12,:) + r_matrix(11,:);
+    COMP.av(2,:) = r_matrix(14,:) + r_matrix(13,:);
+    bar(COMP.av');
+    title('abs. value'); xlabel('variance & EV');
+    % difference value
+    subplot(3,5,14);
+    COMP.dv(1,:) = r_matrix(12,:) - r_matrix(11,:);
+    COMP.dv(2,:) = r_matrix(14,:) - r_matrix(13,:);
+    bar(COMP.dv');
+    title('diff. value'); xlabel('variance & EV');
+    % exp. val difference
+    subplot(3,5,15);
+    COMP.dv(1,:) = r_matrix(12,:).*r_matrix(10,:) - r_matrix(11,:).*(1-r_matrix(10,:));
+    COMP.dv(2,:) = r_matrix(14,:)*.5 - r_matrix(13,:)*.5;
+    bar(COMP.dv');
+    title('exp. val. diff'); xlabel('variance & EV');
+    
+    % --- --- --- END SKIP THIS SECTION --- --- --- %
+end
 
 %% RANDOMIZE AND COMPLETE MATRIX 
 
