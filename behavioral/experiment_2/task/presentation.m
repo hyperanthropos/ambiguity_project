@@ -1,4 +1,4 @@
-function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN )
+function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 %% code to present the experiment
 % this code is used for behavioral experiment 2(!)
 % dependencies: stimuli.m, mean_variance.m, draw_stims.m
@@ -14,10 +14,26 @@ function [ ] = presentation( SESSION_IN, AMBIGUITY_IN, SAVE_FILE_IN, SETTINGS_IN
 
 
 
-%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+% 
+% CHANGES TO BE IMPLEMENTED:
+% 
+% 1.) remove ambiguity revealed setting
+% 2.) create pause after half experiment
+% 
+%
+% 
+% 
+% 
+% 
+% 
+% 
+% 
 
+AMBIGUITY_IN = 0; % do not reveal ambigutiy
+addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 
-
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 % LINE 01 - trial number
@@ -54,13 +70,10 @@ SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
 AMBIGUITY = AMBIGUITY_IN;           % resolve ambiguity, 1 = yes, 0 = no
 SAVE_FILE = SAVE_FILE_IN;           % where to save
 
-VISUAL_PRESET = 1;                  % set visual presentation of stimuli matching (risky and ambiguous offers)        
-                                    % 1 = with colors; 2 = without colors;
-
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
+SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
@@ -77,7 +90,6 @@ TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare a
 TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
 TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
 TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
-                            % put within the stim_nr loop, for variable ITI
 
 % create zero timing for test mode                            
 if SETTINGS.TEST_MODE == 1;
@@ -281,14 +293,7 @@ for i = 1:stim_nr;
     %%% USE FUNCTION TO DRAW THE STIMULI
     
     % select function to draw stimuli
-    switch VISUAL_PRESET;
-        case 1
-            draw_function = @draw_stims_colors;
-        case 2
-            draw_function = @draw_stims;
-        otherwise
-            error('invalid visual presentation - change VISUAL_PRESET flag');
-    end
+    draw_function = @draw_stims;
     
     % (1) DRAW THE STIMULUS (before response)
     draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
@@ -401,7 +406,7 @@ for i = 1:stim_nr;
     % clear all used variables for security
     clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
     
-    % wait before next trial (insert variable ISI for fMRI here)
+    % wait before next trial
     WaitSecs(TIMING.isi);
     
 end
