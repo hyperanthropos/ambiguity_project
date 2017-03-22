@@ -1,7 +1,7 @@
 function [ ] = wrapper_experiment_2( sub_nr )
 % wrapper function to be called from mother pc to control the experiment
-% this code is used for behavioral experiment 2(!)
 % on clients.
+% this code is used for behavioral experiment 2(!)
 % dependencies: presentation.m, stimuli.m, mean_variance.m, draw_stims.m,
 % create_reward_file.m
 % this function should be started remotely and sets basic settings to
@@ -54,7 +54,7 @@ clear randomisation;
 % PRESENT TRAINING
 presentation(0, save_file_train, SETTINGS); % session 0 = train, save destination, settings
 
-% WAIT TOGETHER FOR REAL EXPERIMENT (press F)
+% ...WAIT TOGETHER FOR REAL EXPERIMENT (press F)
 
 % PRESENT EXPERIMENT
 presentation(1, save_file_exp, SETTINGS); % session 1 = exp, save destination, settings
@@ -69,7 +69,7 @@ disp('done.'); disp(' ');
 % create reward file
 disp('selecting random trial for reward...');
 % run function to create and copy the reward info txt
-create_reward_file(savedir, save_file_1, save_file_2, TARGET_PATH, PARTICIPANT_NR);
+create_reward_file(savedir, save_file_exp, TARGET_PATH, PARTICIPANT_NR);
 disp(' ');
 disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW!');
 
