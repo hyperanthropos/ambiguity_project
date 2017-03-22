@@ -1,17 +1,11 @@
-function [ ] = create_reward_file( savedir, save_file_1, save_file_2, TARGET_PATH, PARTICIPANT_NR )
+function [ ] = create_reward_file( savedir, save_file, TARGET_PATH, PARTICIPANT_NR )
 % function to select a random trial and create a textfile to give to
 % participants for outpayment transparency
 
 %% SELECT TRIAL, CREATE AND COPY TEXT FILE
 
 % select session and trial for outpayment
-reward_session = randi(2);
-if reward_session == 1;
-    load(save_file_1, 'logrec'); 
-elseif reward_session == 2;
-    load(save_file_2, 'logrec'); 
-end
-reward_trial = randi(size(logrec, 2));
+load(save_file, 'logrec'); 
 
 % start diary
 diary_file = fullfile(savedir, [ 'reward_file_part_' sprintf('%03d', PARTICIPANT_NR) '.txt'] );
