@@ -190,20 +190,20 @@ r_matrix(4,trials_risky) = ones(1, X.RN*X.steps);                         % line
 r_matrix(4,trials_ambiguous) = ones(1, X.AN*X.steps)*2;                   % line 04 - trial type (1 = risky, 2 = ambigious)
 
 r_matrix(6,trials_risky) = kron(1:X.RN, ones(1,X.steps));                 % line 06 - risk variance level (1-4; low to high variance)
-r_matrix(6,trials_ambiguous) = repmat(1:X.RN, 1, X.steps);                % line 06 - risk variance level (1-4; low to high variance)
-r_matrix(7,trials_risky) = repmat(1:X.AN, 1, X.steps);                    % line 07 - ambiguity variance level (1-4; low to high variance)
+r_matrix(6,trials_ambiguous) = NaN(1,X.AN*X.steps);                       % line 06 - risk variance level (1-4; low to high variance)
+r_matrix(7,trials_risky) = NaN(1,X.RN*X.steps);                           % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(7,trials_ambiguous) = kron(1:X.AN, ones(1,X.steps));             % line 07 - ambiguity variance level (1-4; low to high variance)
 r_matrix(8,:) = repmat(1:X.steps, 1, X.AN+X.RN);                          % line 08 - counteroffer level (1-number of levels; low to high counteroffer)
 
 r_matrix(10,trials_risky) = kron(X.RPH, ones(1,X.steps));                 % line 10 - option 1 - probability of offer [ line 6 ]
-r_matrix(10,trials_ambiguous) = repmat(X.RPH, 1, X.steps);                % line 10 - option 1 - probability of offer [ line 6 ]
+r_matrix(10,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 10 - option 1 - probability of offer [ line 6 ]
 r_matrix(11,trials_risky) = kron(X.RVL, ones(1,X.steps));                 % line 11 - option 1 - lower value risk [ line 6 ]
-r_matrix(11,trials_ambiguous) = repmat(X.RVL, 1, X.steps);                % line 11 - option 1 - lower value risk [ line 6 ]
+r_matrix(11,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 11 - option 1 - lower value risk [ line 6 ]
 r_matrix(12,trials_risky) = kron(X.RVH, ones(1,X.steps));                 % line 12 - option 1 - upper value risk [ line 6 ]
-r_matrix(12,trials_ambiguous) = repmat(X.RVH, 1, X.steps);                % line 12 - option 1 - upper value risk [ line 6 ]
-r_matrix(13,trials_risky) = repmat(X.AVL, 1, X.steps);                    % line 13 - option 1 - lower value ambiguity [ line 7 ]
+r_matrix(12,trials_ambiguous) = NaN(1,X.AN*X.steps);                      % line 12 - option 1 - upper value risk [ line 6 ]
+r_matrix(13,trials_risky) = NaN(1,X.RN*X.steps);                          % line 13 - option 1 - lower value ambiguity [ line 7 ]
 r_matrix(13,trials_ambiguous) =  kron(X.AVL, ones(1,X.steps));            % line 13 - option 1 - lower value ambiguity [ line 7 ]
-r_matrix(14,trials_risky) = repmat(X.AVH, 1, X.steps);                    % line 14 - option 1 - upper value ambiguity [ line 7 ]
+r_matrix(14,trials_risky) = NaN(1,X.RN*X.steps);                          % line 14 - option 1 - upper value ambiguity [ line 7 ]
 r_matrix(14,trials_ambiguous) =  kron(X.AVH, ones(1,X.steps));            % line 14 - option 1 - upper value ambiguity [ line 7 ]
 
 % create counteroffers (stepswise variation around EV)
