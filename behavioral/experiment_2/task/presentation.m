@@ -87,14 +87,12 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
 % TIMING SETTINGS
 
 TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
-TIMING.selection = .3;      % time to show selected choice before revealing (not revealing) probabilities
-TIMING.outcome = 2;         % time to shwo the actual outcome (resolved probabilities or control)
+TIMING.outcome = 2;         % time to shwo selected choice
 TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
 
 % create zero timing for test mode                            
 if SETTINGS.TEST_MODE == 1;
     TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
-    TIMING.selection = .0;      % time to show selected choice before revealing (not revealing) probabilities
     TIMING.outcome = 0;         % time to shwo the actual outcome (resolved probabilities or control)
     TIMING.isi = .0;            % time to wait before starting next trial with preparatory fixation cross
 end
@@ -127,7 +125,7 @@ end
 if STIMS.diagnostic_graphs == 1;
     reaction_time = 2;
     disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
-        num2str( (TIMING.pre_time + reaction_time + TIMING.selection + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
+        num2str( (TIMING.pre_time + reaction_time + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
 end
 
 % prepare and preallocate log
@@ -296,7 +294,7 @@ for i = 1:stim_nr;
     draw_function = @draw_stims;
     
     % (1) DRAW THE STIMULUS (before response)
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
     
     % view logfile debug info
     if SETTINGS.DEBUG_MODE == 1;
@@ -368,12 +366,8 @@ for i = 1:stim_nr;
     end
    
     % (2) DRAW THE RESPONSE
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 0);
-    
-    % (3) REVEAL AMBIGUITY (or visual control) (last input of function)
-    WaitSecs(TIMING.selection); % shortly wait before revealing ambiguity
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response, ambiguity_resolve, 1);
-    
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+      
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
     WaitSecs(TIMING.outcome); % present final choice
     
