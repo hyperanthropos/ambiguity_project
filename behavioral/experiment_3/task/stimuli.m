@@ -35,20 +35,20 @@ DIAG = diag; % run diagnostics of stimuli range
 % BASIC TRIAL CONTENT - created with adjust_variance.m function in the "assisting scripts" folder
 
 % sacling factors for expected value levels
-X.ev_factors = [1 4 7 10 13];
+X.ev_factors = [1 2 3 4 5 6];
 
 % ambiguitly levels low
-X.AVL = [8     7     6     5     4     3     2     1     0]; % ambiguitly levels low
+X.AVL = linspace(7, 0, 15); % ambiguitly levels low
 % ambiguitly levels high
-X.AVH = [9    10    11    12    13    14    15    16    17]; % ambiguitly levels high
+X.AVH = linspace(7.5, 14.5, 15); % ambiguitly levels high
 % risky probabilities for low offers
-X.RPL = [0.1800    0.2600    0.3400    0.4200    0.5000    0.5800    0.6600    0.7400    0.8200]; % probability low value
+X.RPL = linspace(.15, .85, 15); % probability low value
 % risky probabilities for high offer
-X.RPH = [0.8200    0.7400    0.6600    0.5800    0.5000    0.4200    0.3400    0.2600    0.1800]; % probability high value
+X.RPH = linspace(.85, .15, 15); % probability high value
 % risky value levels high
-X.RVH = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21.1529   26.6422]; % probability values low
+X.RVH = [7.3550    7.6250    7.9717    8.3956    8.9010    9.4954   10.1897   11.0000   11.9486   13.0675   14.4045   16.0333   18.0753   20.7500   24.5085]; % probability values low
 % risky value levels low
-X.RVL = [7.4328    5.9694    5.0168    4.3870    4.0000    3.8197    3.8347    4.0544    4.5176]; % probability values high
+X.RVL = [6.6549    5.7500    5.0849    4.5768    4.1838    3.8820    3.6570    3.5000    3.4057    3.3716    3.3976    3.4857    3.6416    3.8750   4.2044]; % probability values high
 
 % define numbers for calculations
 X.EN = length(X.ev_factors); % number of ev levels
@@ -84,8 +84,8 @@ if DIAG == 1;
     % --- --- --- SKIP THIS DIAGNOSTIC SECTION --- --- --- %
     
     % set risk parameters for
-    K.mvar = -1/60;        % mean variance (<0 is risk averse)
-    K.hyp = 1.6;            % hyperbolic discounting (>1 is risk averse)
+    K.mvar = -1/60;         % mean variance (<0 is risk averse)
+    K.hyp = 2.0;            % hyperbolic discounting (>1 is risk averse)
     K.pros = 0.92;          % prospect theory (<1 is risk averse)
     
     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
