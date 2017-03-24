@@ -92,9 +92,13 @@ Screen('DrawLine', window, 0, 130, -200, 130, 200, 5);
 %% (1) DRAW SPECIFIC TRIAL
 
 % convert probability into coordinates (between -200 & 200)
-prob_coordspace = linspace(200, -200, 100+1);
-index = uint8(probability*100+1); % confirm transformation to index is integer
-prob_coord = prob_coordspace(index);
+if isfinite(probability)
+    prob_coordspace = linspace(200, -200, 100+1);
+    index = uint8(probability*100+1); % confirm transformation to index is integer
+    prob_coord = prob_coordspace(index);
+else
+    prob_coord = 0; % no probabilitly divider is shown
+end
 
 % define areas to color (upper left, lower left, upper right, lower right)
 rect = [ -130-2, prob_coord, -300+1, -200+1; -130-2, 200-2, -300+1, prob_coord; 300-2, prob_coord, 130+1, -200+1; 300-2, 200-2, 130+1, prob_coord]; % rects to fill with color
