@@ -18,9 +18,8 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % 
 % CHANGES TO BE IMPLEMENTED:
 % 
-% 1.) remove ambiguity revealed setting
-% 2.) create pause after half experiment
-% 3.) create reasonable training trials
+% none i can think of - just go over the coe to check it is claer
+% 
 % 
 % 
 % 
@@ -30,7 +29,6 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % 
 % 
 
-AMBIGUITY_IN = 0; % do not reveal ambigutiy
 addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,7 +65,6 @@ addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 %% SET PARAMETERS
 
 SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
-AMBIGUITY = AMBIGUITY_IN;           % resolve ambiguity, 1 = yes, 0 = no
 SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
@@ -87,7 +84,7 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
 % TIMING SETTINGS
 
 TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
-TIMING.outcome = 2;         % time to shwo selected choice
+TIMING.outcome = .5;        % time to shwo selected choice
 TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
 
 % create zero timing for test mode                            
@@ -99,27 +96,21 @@ end
 
 %% CREATE STIMULI MATRIX
 
-% current design: 12 steps of variation with 2 repeats; 192 trials, ca. 15min (x 2 sessions)
-% alternative: 16 steps of variation with 3 repeats; 384 trials, ca. 32min (x 1 sessions)
-
-%%%%%%%%%%%%%%%%%%%%%%%%% DIRTY COMMENT
-warning('STIMS structure has to be updated - eg. reveal, repeats');
-
-STIMS.reveal_amb = AMBIGUITY;                           % 1 = yes, 0 = no
+% current design: 12 steps of variation = 432 trials
 STIMS.steps = 12;
-STIMS.repeats = 2;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
-% never reveal ambiguity in training (session = 0) + shorten trial number
-if SESSION == 0;
-    STIMS.steps = 1;
-    STIMS.repeats = 1;
-    STIMS.reveal_amb = 0;
-end
-
 % create matrix
 [stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.diagnostic_graphs);
+
+% create alternative trials for training
+if SESSION == 0;
+    STIMS.steps = 11;
+    [stim_mat] = stimuli(STIMS.steps, STIMS.diagnostic_graphs);
+    stim_nr = 10;
+    stim_mat = stim_mat(:,1:stim_nr);
+end
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
@@ -223,7 +214,7 @@ start_time = GetSecs;
 
 % loop over all trials
 for i = 1:stim_nr;
-    
+  
     %%% WRITE LOG %%%
     logrec(1,i) = i; % trial number
     %%% WRITE LOG %%%
@@ -402,6 +393,21 @@ for i = 1:stim_nr;
     
     % wait before next trial
     WaitSecs(TIMING.isi);
+    
+    % show a "half time screen" allowing participants to make a short break
+    if i == round(stim_nr/2)
+        % (setting screen back to default to draw text and later back to origin again *)
+        % * this  double transformation is necessary for compatibility with different PTB versions
+        Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
+        offset = Screen(window, 'TextBounds', 'HALF DONE BREAK - PRESS BUTTON TO CONTINUE')/2;
+        Screen(window, 'DrawText', 'HALF DONE BREAK - PRESS BUTTON TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+        Screen(window, 'Flip');
+        Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
+        clear offset;
+        WaitSecs(5);
+        disp('press a button to continue...');
+        pause;
+    end
     
 end
 clear i leftkey rightkey;
