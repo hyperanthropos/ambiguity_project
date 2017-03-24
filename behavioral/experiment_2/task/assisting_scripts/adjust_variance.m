@@ -11,14 +11,12 @@ cd(home);
 
 %% setup & parameters
 
-% output multiple solutions
-DISPLAY_SOLUTION = 0;
+DISPLAY_SOLUTION = 0; % output multiple solutions
+TEST_SOLUTION = 1; % proof that final values are matched in EV and variance
 
-% 9 desired steps of variance variation;
-var_steps = 9;
-% 2 desired orthogonal expected value levels;
-ev_steps = 2;
-ev_values = [8.5 34]; % good possible EVs = [8.5, 17, 25.5, 34, ...]
+var_steps = 9; % desired steps of variance variation;
+ev_steps = 2; % desired orthogonal expected value levels;
+ev_values = [8.5 34]; % actual values good possible EVs = [8.5, 17, 25.5, 34, ...]
 
 %% calculate variance for ambigous trials$
 
@@ -86,20 +84,6 @@ for iTrial = 1:nTrials;
     
 end
 
-%% test solution
-disp(' '); disp('+++++ TESTING SOLUTION...'); disp(' ');
-
-for iTrial = 1:nTrials;
-    
-    disp([ '--- p = ' num2str(X.RPH(iTrial)) ' & ' num2str(X.RPL(iTrial)) ' | EV = ' num2str(EV_goal(iTrial))]);
-    
-    disp([ 'goal variance = ' num2str(var_goal(iTrial)) ]);
-    
-    [var, ev] = mean_variance( X.RPH(iTrial), X.RVH(iTrial), X.RPL(iTrial), X.RVL(iTrial) );
-    disp([ 'var = ' num2str(var) ', ev = ' num2str(ev) ]); disp(' ');
-    
-end
-
 %% show all calculated trials
 disp(' '); disp('+++++ SHOWING FINAL CALCULATED TRIALS...'); disp(' ');
 
@@ -117,3 +101,19 @@ X.RPH = [0.8200    0.7400    0.6600    0.5800    0.5000    0.4200    0.3400    0
 
 X.RVH = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21.1529   26.6422   34.9370   37.5565   41.1774   45.9135   52.0000   59.8531   70.2248   84.6116  106.5687]; % probability values low
 X.RVL = [7.4328    5.9694    5.0168    4.3870    4.0000    3.8197    3.8347    4.0544    4.5176   29.7313   23.8777   20.0674   17.5480   16.0000   15.2788   15.3387   16.2175   18.0703]; % probability values high
+
+%% test solution
+if TEST_SOLUTION == 1;
+    disp(' '); disp('+++++ TESTING SOLUTION...'); disp(' ');
+    
+    for iTrial = 1:nTrials;
+        
+        disp([ '--- p = ' num2str(X.RPH(iTrial)) ' & ' num2str(X.RPL(iTrial)) ]);
+        
+        disp([ 'goal variance = ' num2str(var_goal(iTrial)) ' | goal ev = ' num2str(EV_goal(iTrial)) ]);
+        
+        [var, ev] = mean_variance( X.RPH(iTrial), X.RVH(iTrial), X.RPL(iTrial), X.RVL(iTrial) );
+        disp([ 'var = ' num2str(var) ' | ev = ' num2str(ev) ]); disp(' ');
+        
+    end
+end
