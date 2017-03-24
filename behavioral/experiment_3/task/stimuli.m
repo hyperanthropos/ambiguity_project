@@ -123,22 +123,24 @@ if DIAG == 1;
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2);
     xlabel(xname); ylabel('subjective value');
+    title('expected SV for risky trials')
     legend('mvar - risk', 'hyp - risk', 'pros - risk', 'location', 'northwest');
     subplot(3,2,2);
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2);
     plot(SV.pros(2,:), 'b--', 'linewidth', 2);
     xlabel(xname); ylabel('subjective value');
+    title('expected SV for ambiguous trials')
     legend('mvar - ambi', 'hyp - ambi', 'pros - ambi', 'location', 'northwest');
     subplot(3,3,4);
     plot(SV.mvar(1,:), 'k-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.mvar(2,:), 'k--', 'linewidth', 2); box('off');
-    xlabel(xname); ylabel('subjective value');
+    title('mean variance approach'); xlabel(xname); ylabel('subjective value');
     legend('risk', 'ambiguity', 'location', 'northwest');
     subplot(3,3,5);
     plot(SV.hyp(1,:), 'r-', 'linewidth', 2); box('off'); box('off'); hold on;
     plot(SV.hyp(2,:), 'r--', 'linewidth', 2); box('off');
-    xlabel(xname); ylabel('subjective value');
+    title('hyperbolic discounting'); xlabel(xname); ylabel('subjective value');
     legend('risk', 'ambiguity', 'location', 'northwest');
     subplot(3,3,6);
     plot(SV.pros(1,:), 'b-', 'linewidth', 2); box('off'); box('off'); hold on;
