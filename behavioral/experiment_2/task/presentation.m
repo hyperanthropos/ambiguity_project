@@ -11,29 +11,6 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % collected in the "logrec" variable, which gets saved in wd/logfiles and
 % is ordered like this:
 
-
-
-
-% %%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
-% 
-% CHANGES TO BE IMPLEMENTED:
-% 
-% none i can think of - just go over the coe to check it is claer
-% 
-% 
-% 
-% 
-% 
-% 
-% 
-% 
-% 
-
-addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 % LINE 01 - trial number
 % LINE 02 - trial presentation time
 % LINE 03 - reaction time
@@ -41,7 +18,7 @@ addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 % LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
 % LINE 06 - choice: 1 = left, 2 = right
 % LINE 07 - trial type: 1 = risky, 2 = ambiguous
-% LINE 08 - ambiguity resolved: 1 = yes, 0 = no, 3 = does not apply (risky trial)
+% LINE 08 - [not applicable]
 % LINE 09 - position of counteroffer: 1 = left, 2 = right
 % LINE 10 - probability of high amount
 % LINE 11 - probability of low amount
@@ -63,6 +40,9 @@ addpath(genpath('/home/fridolin/DATA/MATLAB/PSYCHTOOLBOX/Psychtoolbox'));
 % (colors, visual control variants, ...)
 
 %% SET PARAMETERS
+
+% %%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
 SAVE_FILE = SAVE_FILE_IN;           % where to save
@@ -94,6 +74,12 @@ if SETTINGS.TEST_MODE == 1;
     TIMING.isi = .0;            % time to wait before starting next trial with preparatory fixation cross
 end
 
+% CHECK IF THE CORRECT PRESENTATION FUNCTION IS CALLED
+% this function should only be called for experiment 2
+if SETTINGS_IN.EXP_NUMBER ~= 2
+    error('it seems wrapper and presentation version are different - please check that the correct files are in your matlab search path!');
+end
+    
 %% CREATE STIMULI MATRIX
 
 % current design: 12 steps of variation = 432 trials
@@ -268,11 +254,7 @@ for i = 1:stim_nr;
     
     %%% WRITE LOG %%%
     logrec(7,i) = typus; % trial type: 1 = risky, 2 = ambiguous
-    if typus == 2;
-        logrec(8,i) = ambiguity_resolve; % ambiguity resolved: 1 = yes, 0 = no
-    elseif typus == 1;
-        logrec(8,i) = 3; % ambiguity resolved: 3 = does not apply (risky trial)
-    end
+    logrec(8,i) = NaN; % not applicable
     logrec(9,i) = position; % position of counteroffer: 1 = left, 2 = right
 
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
@@ -291,7 +273,6 @@ for i = 1:stim_nr;
     if SETTINGS.DEBUG_MODE == 1;
         disp(' ');
         disp([ 'trial type: 1 = risky, 2 = ambiguous: ' num2str(logrec(7,i)) ]);
-        disp([ 'ambiguity resolved: 1 = yes, 0 = no, NaN = risky trial: ' num2str(logrec(8,i)) ]);
         disp([ 'position of counteroffer: 1 = left, 2 = right: ' num2str(logrec(9,i)) ]);
         disp(' ');
         disp([ 'time: ' num2str(logrec(2,i)) ]);
@@ -391,23 +372,23 @@ for i = 1:stim_nr;
     % clear all used variables for security
     clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
     
-    % wait before next trial
-    WaitSecs(TIMING.isi);
-    
     % show a "half time screen" allowing participants to make a short break
     if i == round(stim_nr/2)
         % (setting screen back to default to draw text and later back to origin again *)
         % * this  double transformation is necessary for compatibility with different PTB versions
         Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
-        offset = Screen(window, 'TextBounds', 'HALF DONE BREAK - PRESS BUTTON TO CONTINUE')/2;
-        Screen(window, 'DrawText', 'HALF DONE BREAK - PRESS BUTTON TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+        offset = Screen(window, 'TextBounds', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE')/2;
+        Screen(window, 'DrawText', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
         Screen(window, 'Flip');
         Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
         clear offset;
-        WaitSecs(5);
+        WaitSecs(3);
         disp('press a button to continue...');
-        pause;
+        pause; 
     end
+    
+    % wait before next trial
+    WaitSecs(TIMING.isi);
     
 end
 clear i leftkey rightkey;
