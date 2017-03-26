@@ -31,7 +31,7 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % LINE 16 - counteroffer amount
 
 % LINE 17 - stimulus number (sorted)
-% LINE 18 - number of repeat of the same variation of stimuli
+% LINE 18 - [not applicable]
 % LINE 19 - risk variance level (1-n; low to high variance)
 % LINE 20 - ambiguity variance level (1-n; low to high variance)
 % LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
@@ -45,20 +45,16 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 
 %% SET PARAMETERS
 
-% %%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 SESSION = SESSION_IN;               % which session (1 or 2) or 0 for training
 SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
+SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
-SETTINGS.BUTTON_BOX = 0;                            % set button mapping for fMRI button box ( has to be set on "12345" )
 
 SETTINGS.SCREEN_NR = max(Screen('Screens'));        % set screen to use
                                                     % run Screen('Screens') to check what is available on your machine
@@ -66,14 +62,11 @@ SETTINGS.SCREEN_RES = [1280 1024];                  % set screen resolution (cen
                                                     % test with Screen('Resolution', SETTINGS.SCREEN_NR)
 
 % TIMING SETTINGS
-
-TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
 TIMING.outcome = .5;        % time to shwo selected choice
 TIMING.isi = .3;            % time to wait before starting next trial with preparatory fixation cross
 
 % create zero timing for test mode                            
 if SETTINGS.TEST_MODE == 1;
-    TIMING.pre_time = .0;       % time to show recolored fixation cross to prepare action
     TIMING.outcome = 0;         % time to shwo the actual outcome (resolved probabilities or control)
     TIMING.isi = .0;            % time to wait before starting next trial with preparatory fixation cross
 end
@@ -104,13 +97,13 @@ end
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
-    reaction_time = 2;
+    reaction_time = 3.5;
     disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
-        num2str( (TIMING.pre_time + reaction_time + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
+        num2str( (reaction_time + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
 end
 
 % prepare and preallocate log
-logrec = NaN(21,stim_nr);
+logrec = NaN(23,stim_nr);
 
 %% PREPARE PRESENTATION AND PSYCHTOOLBOX
 % help for PTB Screen commands can be displayed with "Screen [command]?" 
@@ -121,10 +114,6 @@ if SETTINGS.LINUX_MODE == 1;
     rightkey = 115; leftkey = 114;
 else
     rightkey = 39; leftkey = 37;
-end
-
-if SETTINGS.BUTTON_BOX == 1;
-    rightkey = 49; leftkey = 51;    % button box has to be set on "12345"
 end
 
 % supress warnings to see diagnostic output of stimuli
@@ -163,8 +152,7 @@ Screen(window, 'Flip');
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 clear offset;
 
-% wait to start experiment (later synchronise with fMRI machine)
-% ---> insert code when changing to scanner design
+% wait to start experiment
 if SESSION == 0;
     disp('press a button to continue...');
     pause;
@@ -220,11 +208,10 @@ for i = 1:stim_nr;
     counteroffer = stim_mat(15,i);
     response = 0; % first draw stimuli without response
     
-    % recolor the fixaton cross shorty befor presenting a new stimulus
+    % recolor the fixaton cross shortly befor presenting a new stimulus
     Screen('DrawLine', window, [0 128 0], -10, 0, 10, 0, 5);
     Screen('DrawLine', window, [0 128 0], 0, -10, 0, 10, 5);
     Screen(window, 'Flip');
-    WaitSecs(TIMING.pre_time);
     
     % select what to draw
     if stim_mat(4,i) == 1;
@@ -245,13 +232,11 @@ for i = 1:stim_nr;
             typus = 2; position = 1; % ambigious trial, counteroffer left
             if SETTINGS.DEBUG_MODE == 1;
             disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
             end
         elseif stim_mat(21,i) == 2;
             typus = 2; position = 2; % ambigious trial, counteroffer right
             if SETTINGS.DEBUG_MODE == 1;
             disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
-            disp([ 'turns out to be: ' num2str(probablity*100) '% chance of ' num2str(ambiguity_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(ambiguity_low) 'CHF' ]);
             end
         end
         
@@ -407,14 +392,14 @@ Screen('CloseAll');
 
 % add relevant info from stim_mat to logfile...
 logrec(17,:) = stim_mat(3,:);        % stimulus number
-logrec(18,:) = stim_mat(2,:);        % repeat number
+logrec(18,:) = stim_mat(2,:);        % [not applicable = NaN]
 logrec(19,:) = stim_mat(6,:);        % risk variance level
 logrec(20,:) = stim_mat(7,:);        % ambiguity variance level
 logrec(21,:) = stim_mat(8,:);        % counteroffer level
 
 % ...derandomize...
-sorted_stim_mat = sortrows(stim_mat', [2 3])';  %#ok<NASGU> (this is created to be included in the save file)
-sorted_logrec = sortrows(logrec', [18 17])';    %#ok<NASGU> (this is created to be included in the save file)
+sorted_stim_mat = sortrows(stim_mat', 3)'; %#ok<NASGU> (this is created to be included in the save file)
+sorted_logrec = sortrows(logrec', 17)'; %#ok<NASGU> (this is created to be included in the save file)
 
 % ...and save
 disp(' '); disp('saving data...');
