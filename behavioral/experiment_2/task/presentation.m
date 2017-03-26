@@ -14,12 +14,14 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % LINE 01 - trial number
 % LINE 02 - trial presentation time
 % LINE 03 - reaction time
+
 % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
 % LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
 % LINE 06 - choice: 1 = left, 2 = right
 % LINE 07 - trial type: 1 = risky, 2 = ambiguous
 % LINE 08 - [not applicable]
 % LINE 09 - position of counteroffer: 1 = left, 2 = right
+
 % LINE 10 - probability of high amount
 % LINE 11 - probability of low amount
 % LINE 12 - risky amount high
@@ -30,9 +32,11 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 
 % LINE 17 - stimulus number (sorted)
 % LINE 18 - number of repeat of the same variation of stimuli
-% LINE 19 - risk variance level (1-4; low to high variance)
-% LINE 20 - ambiguity variance level (1-4; low to high variance
+% LINE 19 - risk variance level (1-n; low to high variance)
+% LINE 20 - ambiguity variance level (1-n; low to high variance)
 % LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
+% LINE 22 - expected value level (1-n; low to high expected value)
+% LINE 23 - expected value of probabilistic offer
 
 % stimuli.m has more information about the stimuli created
 % (matching, diagnostics, ...)
@@ -206,13 +210,14 @@ for i = 1:stim_nr;
     %%% WRITE LOG %%%
       
     % sort elements that will be used for each trial
+    ev_level = stim_mat(5,i);
+    expected_value = stim_mat(17,i);
     probablity = stim_mat(10,i);
     risk_low = stim_mat(11,i);
     risk_high = stim_mat(12,i);
     ambiguity_low = stim_mat(13,i);
     ambiguity_high = stim_mat(14,i);
     counteroffer = stim_mat(15,i);
-    ambiguity_resolve = stim_mat(5,i);  % 1 = yes, 0 = no
     response = 0; % first draw stimuli without response
     
     % recolor the fixaton cross shorty befor presenting a new stimulus
@@ -358,6 +363,8 @@ for i = 1:stim_nr;
     logrec(14,i) = ambiguity_high;      % ambiguous amount high
     logrec(15,i) = ambiguity_low;       % ambiguous amount low
     logrec(16,i) = counteroffer;        % counteroffer amount
+    logrec(22,i) = ev_level;            % expected value level
+    logrec(23,i) = expected_value;      % expected value
 
     % view logfile debug info
     if SETTINGS.DEBUG_MODE == 1;
