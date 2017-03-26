@@ -31,7 +31,7 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % LINE 16 - [not applicable]
 
 % LINE 17 - stimulus number (sorted)
-% LINE 18 - [not applicable]
+% LINE 18 - session 1 or 2 (number of repeat of the same variation of stimuli)
 % LINE 19 - risk variance level (1-15; low to high variance)
 % LINE 20 - ambiguity variance level (1-15; low to high variance)
 % LINE 21 - [not applicable]
@@ -146,8 +146,13 @@ clear background_color;
 % launch a start screen (setting screen back to default to draw text and later back to origin again *)
 % * this  double transformation is necessary for compatibility with different PTB versions
 Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
-offset = Screen(window, 'TextBounds', 'PLEASE WAIT...')/2;
-Screen(window, 'DrawText', 'PLEASE WAIT...', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+if SESSION ~= 2;
+    offset = Screen(window, 'TextBounds', 'SESSION 2 - PRESS "G" TO START')/2;
+    Screen(window, 'DrawText', 'SESSION 2 - PRESS "G" TO START', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+else
+    offset = Screen(window, 'TextBounds', 'PLEASE WAIT...')/2;
+    Screen(window, 'DrawText', 'PLEASE WAIT...', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+end
 Screen(window, 'Flip');
 Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
 clear offset;
@@ -159,7 +164,7 @@ if SESSION == 0;
 else
     switch SESSION
         case 1
-            % WAIT TOGETHER FOT SESSION 1 (press F)
+            % WAIT TOGETHER FOR SESSION 1 (press F)
             fprintf('\nthank you, the training is now finished. please have a short break.');
             if SETTINGS.LINUX_MODE == 1; % set key to 'F'
                 continue_key = 42;
@@ -167,7 +172,7 @@ else
                 continue_key = 70;
             end
         case 2
-            % WAIT TOGETHER FOT SESSION 2 (press G)
+            % WAIT TOGETHER FOR SESSION 2 (press G)
             fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
             if SETTINGS.LINUX_MODE == 1; % set key to 'G'
                 continue_key = 43;
@@ -353,6 +358,9 @@ Screen('CloseAll');
 logrec(17,:) = stim_mat(3,:);        % stimulus number
 logrec(19,:) = stim_mat(6,:);        % risk variance level
 logrec(20,:) = stim_mat(7,:);        % ambiguity variance level
+
+% add session number to logrec
+logrec(18,:) = ones(1,stim_nr)*SESSION;
 
 % ...derandomize...
 sorted_stim_mat = sortrows(stim_mat', 3)'; %#ok<NASGU> (this is created to be included in the save file)
