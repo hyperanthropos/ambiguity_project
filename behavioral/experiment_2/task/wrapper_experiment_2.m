@@ -12,7 +12,7 @@ function [ ] = wrapper_experiment_2( sub_nr )
 % if activated this reduces the trial number to training lenghts in all sessions for testing purposes
 SETTINGS.TEST_FLAG = 0; 
 % if activated button mappings for linux (not windows, as default) are used
-SETTINGS.LINUX_MODE = 1; 
+SETTINGS.LINUX_MODE = 0; 
 
 %%% fixed settings
 TARGET_PATH = 'N:\client_write\SFW_ambiguity\results'; % copies to a windows machine
