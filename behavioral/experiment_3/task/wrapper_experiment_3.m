@@ -28,8 +28,9 @@ home = pwd;
 savedir = fullfile(home, 'logfiles');
 if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
 save_file_train = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(0) '.mat'] ); % training save
-save_file_exp = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
-if exist(save_file_exp, 'file')==2; % check if savefiles exist
+save_file_exp_1 = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
+save_file_exp_2 = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(2) '.mat'] );
+if exist(save_file_exp_1, 'file')==2 || exist(save_file_exp_2, 'file')==2; % check if savefiles exist
     display(' '); display('a logfile for this subjects already exists! do you want to overwrite?');
     overwrite = input('enter = no / ''yes'' = yes : ');
     if strcmp(overwrite, 'yes');
@@ -59,8 +60,11 @@ presentation(0, save_file_train, SETTINGS); % session 0 = train, save destinatio
 
 % ...WAIT TOGETHER FOR REAL EXPERIMENT (press F)
 
-% PRESENT EXPERIMENT
-presentation(1, save_file_exp, SETTINGS); % session 1 = exp, save destination, settings
+% PRESENT SESSION 1
+presentation(1, save_file_exp_1, SETTINGS); % session 1 = exp, save destination, settings
+
+% PRESENT SESSION 2
+presentation(2, save_file_exp_2, SETTINGS); % session 2 = exp, save destination, settings
 
 %% FINISH AND COPY LOGFILES
 
@@ -72,7 +76,7 @@ disp('done.'); disp(' ');
 % create reward file
 disp('selecting random trial for reward...');
 % run function to create and copy the reward info txt
-create_reward_file(savedir, save_file_exp, TARGET_PATH, PARTICIPANT_NR);
+create_reward_file(savedir, save_file_exp_1, save_file_exp_2, TARGET_PATH, PARTICIPANT_NR);
 disp(' ');
 disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW!');
 
