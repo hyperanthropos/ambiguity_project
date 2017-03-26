@@ -214,13 +214,13 @@ for i = 1:stim_nr;
     
     % select what to draw
     if stim_mat(21,i) == 1;
-        typus = 1; position = 1; % risky offer left
+        position = 1; % risky offer left
         if SETTINGS.DEBUG_MODE == 1;
             disp([  num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' CHF' ...
                 '| OR |' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) ' CHF']);
         end
     elseif stim_mat(21,i) == 2;
-        typus = 1; position = 2; % risky offer right
+        position = 2; % risky offer right
         if SETTINGS.DEBUG_MODE == 1;
             disp([  num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) ' CHF' ...
                 '| OR |' num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' CHF'  ]);
@@ -228,8 +228,6 @@ for i = 1:stim_nr;
     end
     
     %%% WRITE LOG %%%
-    logrec(7,i) = NaN; % not applicable
-    logrec(8,i) = NaN; % not applicable
     logrec(9,i) = position; % position of risky offer: 1 = left, 2 = right
 
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
@@ -265,7 +263,6 @@ for i = 1:stim_nr;
             
             %%% WRITE LOG %%%
             logrec(3,i) = GetSecs-ref_time; % reaction time
-            logrec(5,i) = NaN; % not applicable
             logrec(6,i) = response; % response (1 = left, 2 = right);
             
             if position == 1; % risky offer left
@@ -280,7 +277,6 @@ for i = 1:stim_nr;
             
             %%% WRITE LOG %%%
             logrec(3,i) = GetSecs-ref_time; % reaction time
-            logrec(5,i) = NaN; % not applicable
             logrec(6,i) = response; % response (1 = left, 2 = right);
             
             if position == 1; % risky offer left
@@ -313,7 +309,6 @@ for i = 1:stim_nr;
     logrec(13,i) = risk_low;            % risky amount low
     logrec(14,i) = ambiguity_high;      % ambiguous amount high
     logrec(15,i) = ambiguity_low;       % ambiguous amount low
-    logrec(16,i) = NaN;                 % not applicable
     logrec(22,i) = ev_level;            % expected value level
     logrec(23,i) = expected_value;      % expected value
 
@@ -356,10 +351,8 @@ Screen('CloseAll');
 
 % add relevant info from stim_mat to logfile...
 logrec(17,:) = stim_mat(3,:);        % stimulus number
-logrec(18,:) = stim_mat(2,:);        % [not applicable = NaN]
 logrec(19,:) = stim_mat(6,:);        % risk variance level
 logrec(20,:) = stim_mat(7,:);        % ambiguity variance level
-logrec(21,:) = stim_mat(8,:);        % [not applicable = NaN]
 
 % ...derandomize...
 sorted_stim_mat = sortrows(stim_mat', 3)'; %#ok<NASGU> (this is created to be included in the save file)
