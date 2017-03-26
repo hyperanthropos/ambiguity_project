@@ -15,16 +15,12 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % LINE 02 - trial presentation time
 % LINE 03 - reaction time
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
-% LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
+% LINE 04 - choice: 1 = risky option; 2 = ambiguous option;
+% LINE 05 - [not applicable]
 % LINE 06 - choice: 1 = left, 2 = right
-% LINE 07 - trial type: 1 = risky, 2 = ambiguous
+% LINE 07 - [not applicable]
 % LINE 08 - [not applicable]
-% LINE 09 - position of counteroffer: 1 = left, 2 = right
+% LINE 09 - position of risky (non ambiguous) offer: 1 = left, 2 = right
 
 % LINE 10 - probability of high amount
 % LINE 11 - probability of low amount
@@ -32,15 +28,15 @@ function [ ] = presentation( SESSION_IN, SAVE_FILE_IN, SETTINGS_IN )
 % LINE 13 - risky amount low
 % LINE 14 - ambiguous amount high
 % LINE 15 - ambiguous amount low
-% LINE 16 - counteroffer amount
+% LINE 16 - [not applicable]
 
 % LINE 17 - stimulus number (sorted)
 % LINE 18 - [not applicable]
-% LINE 19 - risk variance level (1-n; low to high variance)
-% LINE 20 - ambiguity variance level (1-n; low to high variance)
-% LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
-% LINE 22 - expected value level (1-n; low to high expected value)
-% LINE 23 - expected value of probabilistic offer
+% LINE 19 - risk variance level (1-15; low to high variance)
+% LINE 20 - ambiguity variance level (1-15; low to high variance)
+% LINE 21 - [not applicable]
+% LINE 22 - expected value level (1-6; low to high expected value)
+% LINE 23 - expected value of probabilistic offers
 
 % stimuli.m has more information about the stimuli created
 % (matching, diagnostics, ...)
@@ -84,24 +80,24 @@ end
 %% CREATE STIMULI MATRIX
 
 % current design: 12 steps of variation = 432 trials
-STIMS.steps = 12;
 STIMS.diagnostic_graphs = 0;
 STIMS.session = SESSION;
 
 % create matrix
-[stim_mat, stim_nr] = stimuli(STIMS.steps, STIMS.diagnostic_graphs);
+[stim_mat, stim_nr] = stimuli(STIMS.diagnostic_graphs);
 
 % create alternative trials for training
 if SESSION == 0;
-    STIMS.steps = 11;
-    [stim_mat] = stimuli(STIMS.steps, STIMS.diagnostic_graphs);
-    stim_nr = 10;
+    [stim_mat] = stimuli(STIMS.diagnostic_graphs);
+    stim_nr = 4;
     stim_mat = stim_mat(:,1:stim_nr);
+    % create a small modification so that training stimuli are different from experimental ones
+    stim_mat(11:12,:) = stim_mat(11:12,:)*( 1+(rand(1)/2.5-.2) ); % +/- up to 20%
 end
 
 % display time calulations
 if STIMS.diagnostic_graphs == 1;
-    reaction_time = 3.5;
+    reaction_time = 5;
     disp([ num2str(stim_nr) ' trials will be presented, taking approximately ' ...
         num2str( (reaction_time + TIMING.outcome + TIMING.isi)*stim_nr/60 ) ' minutes.' ]);
 end
@@ -209,7 +205,6 @@ for i = 1:stim_nr;
     risk_high = stim_mat(12,i);
     ambiguity_low = stim_mat(13,i);
     ambiguity_high = stim_mat(14,i);
-    counteroffer = stim_mat(15,i);
     response = 0; % first draw stimuli without response
     
     % recolor the fixaton cross shortly befor presenting a new stimulus
@@ -218,38 +213,24 @@ for i = 1:stim_nr;
     Screen(window, 'Flip');
     
     % select what to draw
-    if stim_mat(4,i) == 1;
-        if stim_mat(21,i) == 1;
-            typus = 1; position = 1; % risky trial, counteroffer left
-            if SETTINGS.DEBUG_MODE == 1;
-            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) 'CHF' ]);
-            end
-        elseif stim_mat(21,i) == 2;
-            typus = 1; position = 2; % risky trial, counteroffer right
-            if SETTINGS.DEBUG_MODE == 1;
-            disp([ num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' | OR | ' num2str(counteroffer) ' CHF'  ]);
-            end
+    if stim_mat(21,i) == 1;
+        typus = 1; position = 1; % risky offer left
+        if SETTINGS.DEBUG_MODE == 1;
+            disp([  num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' CHF' ...
+                '| OR |' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) ' CHF']);
         end
-        
-    elseif stim_mat(4,i) == 2;
-        if stim_mat(21,i) == 1;
-            typus = 2; position = 1; % ambigious trial, counteroffer left
-            if SETTINGS.DEBUG_MODE == 1;
-            disp([ num2str(counteroffer) ' CHF | OR | ' num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF' ]);
-            end
-        elseif stim_mat(21,i) == 2;
-            typus = 2; position = 2; % ambigious trial, counteroffer right
-            if SETTINGS.DEBUG_MODE == 1;
-            disp([ num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) 'CHF | OR | ' num2str(counteroffer) ' CHF' ]);
-            end
+    elseif stim_mat(21,i) == 2;
+        typus = 1; position = 2; % risky offer right
+        if SETTINGS.DEBUG_MODE == 1;
+            disp([  num2str(ambiguity_high) ' CHF ? ' num2str(ambiguity_low) ' CHF' ...
+                '| OR |' num2str(probablity*100) '% chance of ' num2str(risk_high) ' CHF and ' num2str(100-probablity*100) '% chance of ' num2str(risk_low) ' CHF'  ]);
         end
-        
     end
     
     %%% WRITE LOG %%%
-    logrec(7,i) = typus; % trial type: 1 = risky, 2 = ambiguous
+    logrec(7,i) = NaN; % not applicable
     logrec(8,i) = NaN; % not applicable
-    logrec(9,i) = position; % position of counteroffer: 1 = left, 2 = right
+    logrec(9,i) = position; % position of risky offer: 1 = left, 2 = right
 
     logrec(2,i) = GetSecs-start_time; % time of presention of trial
     ref_time = GetSecs; % get time to meassure response
@@ -261,13 +242,12 @@ for i = 1:stim_nr;
     draw_function = @draw_stims;
     
     % (1) DRAW THE STIMULUS (before response)
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, position, response);
     
     % view logfile debug info
     if SETTINGS.DEBUG_MODE == 1;
         disp(' ');
-        disp([ 'trial type: 1 = risky, 2 = ambiguous: ' num2str(logrec(7,i)) ]);
-        disp([ 'position of counteroffer: 1 = left, 2 = right: ' num2str(logrec(9,i)) ]);
+        disp([ 'position of risky offer: 1 = left, 2 = right: ' num2str(logrec(9,i)) ]);
         disp(' ');
         disp([ 'time: ' num2str(logrec(2,i)) ]);
         if i > 1;
@@ -285,22 +265,13 @@ for i = 1:stim_nr;
             
             %%% WRITE LOG %%%
             logrec(3,i) = GetSecs-ref_time; % reaction time
+            logrec(5,i) = NaN; % not applicable
             logrec(6,i) = response; % response (1 = left, 2 = right);
             
-            if position == 1; % counteroffer left
-                logrec(4,i) = 1; % choice was fixed option
-                if typus == 1; % risky trial
-                    logrec(5,i) = 1; % choice was fixed (risky)
-                elseif typus == 2; % ambigious trial
-                    logrec(5,i) = 3; % choice was fixed (ambiguous)
-                end
-            elseif position == 2; % counteroffer right
-                logrec(4,i) = 2; % choice was risky/ambiguous option
-                if typus == 1; % risky trial
-                    logrec(5,i) = 2; % choice risky
-                elseif typus == 2; % ambigious trial
-                    logrec(5,i) = 4; % choice ambiguous
-                end
+            if position == 1; % risky offer left
+                logrec(4,i) = 1; % choice was risky option
+            elseif position == 2; % risky offer right
+                logrec(4,i) = 2; % choice was ambiguous option
             end
             %%% WRITE LOG %%%
      
@@ -309,22 +280,13 @@ for i = 1:stim_nr;
             
             %%% WRITE LOG %%%
             logrec(3,i) = GetSecs-ref_time; % reaction time
+            logrec(5,i) = NaN; % not applicable
             logrec(6,i) = response; % response (1 = left, 2 = right);
             
-            if position == 1; % counteroffer left
-                logrec(4,i) = 2; % choice was risky/ambiguous option
-                if typus == 1; % risky trial
-                    logrec(5,i) = 2; % choice risky
-                elseif typus == 2; % ambigious trial
-                    logrec(5,i) = 4; % choice ambiguous
-                end
-            elseif position == 2; % counteroffer right
-                logrec(4,i) = 1; % choice was fixed option
-                if typus == 1; % risky trial
-                    logrec(5,i) = 1; % choice was fixed (risky)
-                elseif typus == 2; % ambigious trial
-                    logrec(5,i) = 3; % choice was fixed (ambiguous)
-                end
+            if position == 1; % risky offer left
+                logrec(4,i) = 2; % choice ambiguous option
+            elseif position == 2; % risky offer right
+                logrec(4,i) = 1; % choice was risky option
             end
             %%% WRITE LOG %%%
             
@@ -332,7 +294,7 @@ for i = 1:stim_nr;
     end
    
     % (2) DRAW THE RESPONSE
-    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, counteroffer, typus, position, response);
+    draw_function(window, SETTINGS.SCREEN_RES, probablity, risk_low, risk_high, ambiguity_low, ambiguity_high, position, response);
       
     % (X) WAIT AND FLIP BACK TO PRESENTATION CROSS
     WaitSecs(TIMING.outcome); % present final choice
@@ -351,7 +313,7 @@ for i = 1:stim_nr;
     logrec(13,i) = risk_low;            % risky amount low
     logrec(14,i) = ambiguity_high;      % ambiguous amount high
     logrec(15,i) = ambiguity_low;       % ambiguous amount low
-    logrec(16,i) = counteroffer;        % counteroffer amount
+    logrec(16,i) = NaN;                 % not applicable
     logrec(22,i) = ev_level;            % expected value level
     logrec(23,i) = expected_value;      % expected value
 
@@ -359,14 +321,12 @@ for i = 1:stim_nr;
     if SETTINGS.DEBUG_MODE == 1;
         disp(' ');
         disp([ 'RT: ' num2str(logrec(3,i)) ]);
-        disp([ 'choice: 1 = fixed; 2 = ambiguous: ' num2str(logrec(4,i)) ]);
-        disp([ 'choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous: ' num2str(logrec(5,i)) ]); 
-        
+        disp([ 'choice: 1 = risky; 2 = ambiguous: ' num2str(logrec(4,i)) ]);
         disp(' '); disp(' --- --- --- --- --- --- ---- '); disp(' ');
     end
     
     % clear all used variables for security
-    clear probablity risk_low risk_high ambiguity_low ambiguity_high counteroffer risk position response typus kb_keycode;
+    clear probablity risk_low risk_high ambiguity_low ambiguity_high risk position response kb_keycode;
     
     % show a "half time screen" allowing participants to make a short break
     if i == round(stim_nr/2)
@@ -399,7 +359,7 @@ logrec(17,:) = stim_mat(3,:);        % stimulus number
 logrec(18,:) = stim_mat(2,:);        % [not applicable = NaN]
 logrec(19,:) = stim_mat(6,:);        % risk variance level
 logrec(20,:) = stim_mat(7,:);        % ambiguity variance level
-logrec(21,:) = stim_mat(8,:);        % counteroffer level
+logrec(21,:) = stim_mat(8,:);        % [not applicable = NaN]
 
 % ...derandomize...
 sorted_stim_mat = sortrows(stim_mat', 3)'; %#ok<NASGU> (this is created to be included in the save file)
