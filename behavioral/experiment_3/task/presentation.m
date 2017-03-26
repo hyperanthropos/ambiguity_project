@@ -50,8 +50,8 @@ SAVE_FILE = SAVE_FILE_IN;           % where to save
 
 % FURTHER SETTINGS
 
-SETTINGS.DEBUG_MODE = 1;                            % display trials in command window and some diagnotcis
-SETTINGS.WINDOW_MODE = 1;                           % set full screen or window for testing
+SETTINGS.DEBUG_MODE = 0;                            % display trials in command window and some diagnotcis
+SETTINGS.WINDOW_MODE = 0;                           % set full screen or window for testing
 SETTINGS.TEST_MODE = SETTINGS_IN.TEST_FLAG;         % show reduced number of trials (training number) for each session
 
 SETTINGS.LINUX_MODE = SETTINGS_IN.LINUX_MODE;       % set button mapping for linux or windows system
@@ -146,7 +146,7 @@ clear background_color;
 % launch a start screen (setting screen back to default to draw text and later back to origin again *)
 % * this  double transformation is necessary for compatibility with different PTB versions
 Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
-if SESSION ~= 2;
+if SESSION == 2;
     offset = Screen(window, 'TextBounds', 'SESSION 2 - PRESS "G" TO START')/2;
     Screen(window, 'DrawText', 'SESSION 2 - PRESS "G" TO START', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
 else
