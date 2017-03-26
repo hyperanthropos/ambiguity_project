@@ -14,8 +14,8 @@ color4 = (color2+color3)/2; % inbetween gray        for ambiguous offers
 probtextcolor = [150 0 0]; % something red          for probability numbers text
 problinecolor = [0 0 0]; % black                    for probability line
 
-% chose color scheme: all "white"; "gray" for uncertain offers; "countergray" for certain offers
-color_scheme = 'white';
+% chose color scheme: all "white"; "gray" for uncertain offers;
+color_scheme = 'gray';
 
 % use Swiss Francs abbreviation "Fr."
 use_abbreviation = 1; % 1 = use; 2 = do not use
@@ -106,95 +106,127 @@ rect = [ -130-2, prob_coord, -300+1, -200+1; -130-2, 200-2, -300+1, prob_coord; 
 switch color_scheme
     case 'white' % no colors
         rect_c = [color1; color1; color1; color1];
-    case 'countergray' % gray tones for certain offers
-        if typus == 1 % if risky trial
-            switch position
-                case 1 % counteroffer left
-                    rect_c = [color3; color3; color1; color1];
-                case 2 % counteroffer right
-                    rect_c = [color1; color1; color3; color3];
-            end
-        elseif typus == 2 % if ambiguous trial
-            switch position
-                case 1 % counteroffer left
-                    rect_c = [color3; color3; color1; color1];
-                case 2 % counteroffer right
-                    rect_c = [color1; color1; color3; color3];
-            end
-        end
     case 'gray' % gray tones for uncertain offers
-        if typus == 1 % if risky trial
+
             switch position
-                case 1 % counteroffer left
-                    rect_c = [color1; color1; color2; color3];
-                case 2 % counteroffer right
-                    rect_c = [color2; color3; color1; color1];
+                case 1 % risky offer left
+                    rect_c = [color4; color4; color2; color3];
+                case 2 % risky offer right
+                    rect_c = [color2; color3; color4; color4];
             end
-        elseif typus == 2 % if ambiguous trial
-            switch position
-                case 1 % counteroffer left
-                    rect_c = [color1; color1; color4; color4];
-                case 2 % counteroffer right
-                    rect_c = [color4; color4; color1; color1];
-            end
-        end
+
+
 end
 Screen(window, 'FillRect', rect_c', rect');
 
-% display counteroffer
-disp_text = [ sprintf('%.1f', counteroffer) abbrev_add ];
+% define correct sidess
 switch position
-    case 1 % counteroffer left
-        draw_text(POSITION.mid, 'left');
-        side = 'right';  
-    case 2 % counteroffer right
-        draw_text(POSITION.mid, 'right')
-        side = 'left';  
+    case 1 % risky offer left
+        side_risky = 'left';  
+        side_ambi = 'right';
+    case 2 % risky offer right
+        side_risky = 'right';  
+        side_ambi = 'left';
 end
 
-switch typus
-    case 1 % riky trial
-            % display risk value of probability
-            disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
-            draw_text(POSITION.under, side);
-            % display risk value of inverse probability
-            disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
-            draw_text(POSITION.upper, side);
-            
-            if disp_prob == 1;
-                % display probabilities in %
-                disp_text = [num2str(probability*100) '%'];
-                draw_text(POSITION.low, side);
-                % display risk value of inverse probability
-                disp_text = [num2str(100-probability*100) '%'];
-                draw_text(POSITION.high, side);
-            end
-        
-        % add probability line
-        if position == 1; % counteroffer left
-            Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line right
-        elseif position == 2; % counteroffer right
-            Screen('DrawLine', window, problinecolor, -300+1, prob_coord, -130-2, prob_coord, 5); % probability line left
-        end
-        
-    case 2 % ambiguous trial
-        % display high ambiguity
-        disp_text = [ sprintf('%.1f', ambiguity_high) abbrev_add ];
-        draw_text(POSITION.under, side);
-        % display low ambiguity
-        disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
-        draw_text(POSITION.upper, side);
-        
-        if disp_prob == 1;
-            % display unkwon probabilities in (pseudo) %
-            disp_text = '??%';
-            draw_text(POSITION.low, side);
-            draw_text(POSITION.high, side);
-        else
-            disp_text = '???';
-            draw_text(POSITION.mid, side);
-        end   
+%%% RISKY SIDE %%%
+% display risk value of probability
+disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
+draw_text(POSITION.under, side_risky);
+% display risk value of inverse probability
+disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
+draw_text(POSITION.upper, side_risky);
+
+if disp_prob == 1;
+    % display probabilities in %
+    disp_text = [num2str(probability*100) '%'];
+    draw_text(POSITION.low, side_risky);
+    % display risk value of inverse probability
+    disp_text = [num2str(100-probability*100) '%'];
+    draw_text(POSITION.high, side_risky);
 end
+
+% add probability line
+if position == 1; % risky offer left
+    Screen('DrawLine', window, problinecolor, -300+1, prob_coord, -130-2, prob_coord, 5); % probability line left
+elseif position == 2; % risky offer right
+    Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line right
+end
+
+%%% AMBIGUOUS SIDE %%%
+% display high ambiguity
+disp_text = [ sprintf('%.1f', ambiguity_high) abbrev_add ];
+draw_text(POSITION.under, side_ambi);
+% display low ambiguity
+disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
+draw_text(POSITION.upper, side_ambi);
+
+if disp_prob == 1;
+    % display unkwon probabilities in (pseudo) %
+    disp_text = '??%';
+    draw_text(POSITION.low, side_ambi);
+    draw_text(POSITION.high, side_ambi);
+else
+    disp_text = '???';
+    draw_text(POSITION.mid, side_ambi);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% % switch typus
+% %     case 1 % riky trial
+% %             % display risk value of probability
+% %             disp_text = [ sprintf('%.1f', risk_high) abbrev_add ];
+% %             draw_text(POSITION.under, side);
+% %             % display risk value of inverse probability
+% %             disp_text = [ sprintf('%.1f', risk_low) abbrev_add ];
+% %             draw_text(POSITION.upper, side);
+% %             
+% %             if disp_prob == 1;
+% %                 % display probabilities in %
+% %                 disp_text = [num2str(probability*100) '%'];
+% %                 draw_text(POSITION.low, side);
+% %                 % display risk value of inverse probability
+% %                 disp_text = [num2str(100-probability*100) '%'];
+% %                 draw_text(POSITION.high, side);
+% %             end
+% %         
+% %         % add probability line
+% %         if position == 1; % counteroffer left
+% %             Screen('DrawLine', window, problinecolor, 300-2, prob_coord, 130+1, prob_coord, 5); % probability line right
+% %         elseif position == 2; % counteroffer right
+% %             Screen('DrawLine', window, problinecolor, -300+1, prob_coord, -130-2, prob_coord, 5); % probability line left
+% %         end
+% %         
+% %     case 2 % ambiguous trial
+% %         % display high ambiguity
+% %         disp_text = [ sprintf('%.1f', ambiguity_high) abbrev_add ];
+% %         draw_text(POSITION.under, side);
+% %         % display low ambiguity
+% %         disp_text = [ sprintf('%.1f', ambiguity_low) abbrev_add ];
+% %         draw_text(POSITION.upper, side);
+% %         
+% %         if disp_prob == 1;
+% %             % display unkwon probabilities in (pseudo) %
+% %             disp_text = '??%';
+% %             draw_text(POSITION.low, side);
+% %             draw_text(POSITION.high, side);
+% %         else
+% %             disp_text = '???';
+% %             draw_text(POSITION.mid, side);
+% %         end   
+% % end
 
 %% (2) DRAW THE RESPONSE INDICATION
 
