@@ -18,6 +18,9 @@ SETTINGS.LINUX_MODE = 1;
 TARGET_PATH = 'N:\client_write\SFW_ambiguity\results'; % copies to a windows machine
 PARTICIPANT_NR = sub_nr;
 
+% identifier for experiemt two (in case multiple experiments are in the search path)
+SETTINGS.EXP_NUMBER = 2;
+
 %% PREPARE AND CONFRIM
 
 % prepare file structure and save file
