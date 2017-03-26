@@ -21,6 +21,7 @@ function [matrix, stim_nr] = stimuli( diag )
 %
 % line 17 - EV of probabilistic offers [ line 5 ]
 %
+% line 21 - position of risky (non ambiguous) offer (1 = left; 2 = right)
 % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 %
 % --- further notes:
@@ -76,6 +77,7 @@ r_matrix(14,1:stim_nr) = kron(X.ev_factors, X.AVH);                     % line 1
 
 r_matrix(17,1:stim_nr) = (r_matrix(13,:)+r_matrix(14,:))/2;             % line 17 - EV of probabilistic offers [ line 5 ]
 
+r_matrix(21,:) = randi(2, 1, stim_nr);                                  % line 21 - position of risky offer (1 = left; 2 = right)
 r_matrix(22,:) = randi(2, 1, stim_nr);                                  % line 22 - position of higher offer (up or down) (higher offer = probabilistic in risky trials)
 
 %% DIAGNOSTIC: COMPARE MEAN VARIANCE APPROACH TO UTILITY FUNCTIONS
@@ -194,7 +196,7 @@ matrix(2,:) = NaN(1,stim_nr);
 matrix(4,:) = NaN(1,stim_nr);
 matrix(8:9,:) = NaN(2,stim_nr);
 matrix(15:16,:) = NaN(2,stim_nr);
-matrix(18:21,:) = NaN(4,stim_nr);
+matrix(18:20,:) = NaN(3,stim_nr);
 
 % derandomize
 % sorted_matrix = sortrows(matrix', 3)';
