@@ -34,9 +34,9 @@ disp_prob = 1;
 
 % define positions for text (left)
 POSITION.upper =    [-215, -230];
-POSITION.high =     [-215, -160];
+POSITION.high =     [-215, -170];
 POSITION.mid =      [-215, 0];
-POSITION.low =      [-215, 160];
+POSITION.low =      [-215, 170];
 POSITION.under =    [-215, 230];
 
 % define nested function to draw text
