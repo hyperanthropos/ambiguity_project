@@ -1,4 +1,4 @@
-function [ ] = create_reward_file( savedir, save_file, TARGET_PATH, PARTICIPANT_NR )
+function [ ] = create_reward_file( savedir, save_file, TARGET_PATH, PARTICIPANT_NR, run_nr )
 % this code is used for behavioral experiment 2(!)
 % function to select a random trial and create a textfile to give to
 % participants for outpayment transparency
@@ -14,7 +14,7 @@ while reward_trial(1) == reward_trial(2)
 end
 
 % start diary
-diary_file = fullfile(savedir, [ 'reward_file_part_' sprintf('%03d', PARTICIPANT_NR) '.txt'] );
+diary_file = fullfile(savedir, [ sprintf('%03d', run_nr) '_reward_file_part_' sprintf('%03d', PARTICIPANT_NR) '.txt' ] );
 diary(diary_file);
 diary on;
 
