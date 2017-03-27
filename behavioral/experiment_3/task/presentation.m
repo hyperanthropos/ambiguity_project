@@ -333,8 +333,8 @@ for i = 1:stim_nr;
         % (setting screen back to default to draw text and later back to origin again *)
         % * this  double transformation is necessary for compatibility with different PTB versions
         Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
-        offset = Screen(window, 'TextBounds', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE')/2;
-        Screen(window, 'DrawText', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+        offset = Screen(window, 'TextBounds', 'HALF TIME BREAK - PRESS ENTER TO CONTINUE')/2;
+        Screen(window, 'DrawText', 'HALF TIME BREAK - PRESS ENTER TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
         Screen(window, 'Flip');
         Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
         clear offset;
