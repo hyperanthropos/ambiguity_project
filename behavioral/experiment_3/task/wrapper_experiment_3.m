@@ -9,6 +9,9 @@ function [ ] = wrapper_experiment_3( sub_nr )
 
 %% SETTINGS
 
+% specify the n-th time you are running this experiment (to create distinguishable logfiles)
+SETTINGS.EXPERIMENT_RUN = 1;
+
 % if activated this reduces the trial number to training lenghts in all sessions for testing purposes
 SETTINGS.TEST_FLAG = 0; 
 % if activated button mappings for linux (not windows, as default) are used
@@ -24,12 +27,13 @@ SETTINGS.EXP_NUMBER = 3;
 %% PREPARE AND CONFRIM
 
 % prepare file structure and save file
+run_nr = SETTINGS.EXPERIMENT_RUN;
 home = pwd;
 savedir = fullfile(home, 'logfiles');
 if exist(savedir, 'dir') ~= 7; mkdir(savedir); end % create savedir if it doesn't exist
-save_file_train = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(0) '.mat'] ); % training save
-save_file_exp_1 = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
-save_file_exp_2 = fullfile(savedir, [ 'exp_3_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(2) '.mat'] );
+save_file_train = fullfile(savedir, [ 'exp_3_' sprintf('%03d', run_nr) '_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(0) '.mat'] ); % training save
+save_file_exp_1 = fullfile(savedir, [ 'exp_3_' sprintf('%03d', run_nr) '_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(1) '.mat'] );
+save_file_exp_2 = fullfile(savedir, [ 'exp_3_' sprintf('%03d', run_nr) '_part_' sprintf('%03d', PARTICIPANT_NR) '_sess_' num2str(2) '.mat'] );
 if exist(save_file_exp_1, 'file')==2 || exist(save_file_exp_2, 'file')==2; % check if savefiles exist
     display(' '); display('a logfile for this subjects already exists! do you want to overwrite?');
     overwrite = input('enter = no / ''yes'' = yes : ');
@@ -76,7 +80,8 @@ disp('done.'); disp(' ');
 % create reward file
 disp('selecting random trial for reward...');
 % run function to create and copy the reward info txt
-create_reward_file(savedir, save_file_exp_1, save_file_exp_2, TARGET_PATH, PARTICIPANT_NR);
+create_reward_file(savedir, save_file_exp_1, save_file_exp_2, TARGET_PATH, PARTICIPANT_NR, run_nr);
+clc; % do not show information to subjects
 disp(' ');
 disp('THANK YOU, THE EXPERIMENT IS FINISHED NOW!');
 
