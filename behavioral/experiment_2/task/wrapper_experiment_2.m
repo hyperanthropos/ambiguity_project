@@ -52,7 +52,7 @@ disp(['participant number: ' num2str(PARTICIPANT_NR)]);  disp(' ');
 disp(' '); disp('PRESS ENTER TO CONTINUE...'); pause;
 
 % create replicable randomization
-randomisation = RandStream('mt19937ar', 'Seed', PARTICIPANT_NR);
+randomisation = RandStream('mt19937ar', 'Seed', PARTICIPANT_NR+1000*run_nr);
 RandStream.setGlobalStream(randomisation);
 clear randomisation;
 
