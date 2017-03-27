@@ -157,23 +157,12 @@ if SESSION == 0;
     disp('press a button to continue...');
     pause;
 else
-    switch SESSION
-        case 1
-            % WAIT TOGETHER FOT SESSION 1 (press F)
-            fprintf('\nthank you, the training is now finished. please have a short break.');
-            if SETTINGS.LINUX_MODE == 1; % set key to 'F'
-                continue_key = 42;
-            else
-                continue_key = 70;
-            end
-        case 2
-            % WAIT TOGETHER FOT SESSION 2 (press G)
-            fprintf('\nthank you, half of the experiment is now finished. please have a short break.');
-            if SETTINGS.LINUX_MODE == 1; % set key to 'G'
-                continue_key = 43;
-            else
-                continue_key= 71;
-            end
+    % WAIT TOGETHER FOT SESSION 1 (press F)
+    fprintf('\nthank you, the training is now finished. please have a short break.');
+    if SETTINGS.LINUX_MODE == 1; % set key to 'F'
+        continue_key = 42;
+    else
+        continue_key = 70;
     end
     press = 0;
     while press == 0;
@@ -369,8 +358,8 @@ for i = 1:stim_nr;
         % (setting screen back to default to draw text and later back to origin again *)
         % * this  double transformation is necessary for compatibility with different PTB versions
         Screen('glTranslate', window, -SETTINGS.SCREEN_RES(1)/2, -SETTINGS.SCREEN_RES(2)/2, 0);
-        offset = Screen(window, 'TextBounds', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE')/2;
-        Screen(window, 'DrawText', 'HALF TIME BREAK - PRESS BUTTON TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
+        offset = Screen(window, 'TextBounds', 'HALF TIME BREAK - PRESS ENTER TO CONTINUE')/2;
+        Screen(window, 'DrawText', 'HALF TIME BREAK - PRESS ENTER TO CONTINUE', SETTINGS.SCREEN_RES(1)/2-offset(3), SETTINGS.SCREEN_RES(2)/2-offset(4));
         Screen(window, 'Flip');
         Screen('glTranslate', window, SETTINGS.SCREEN_RES(1)/2, SETTINGS.SCREEN_RES(2)/2, 0);
         clear offset;
