@@ -1,5 +1,5 @@
 function [ ] = create_reward_file( savedir, save_file_1, save_file_2, TARGET_PATH, PARTICIPANT_NR, run_nr )
-% this code is used for behavioral experiment 2(!)
+% this code is used for behavioral experiment 3(!)
 % function to select a random trial and create a textfile to give to
 % participants for outpayment transparency
 
