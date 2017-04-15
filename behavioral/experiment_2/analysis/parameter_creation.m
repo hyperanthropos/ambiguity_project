@@ -1,4 +1,5 @@
 %% SCRIPT TO ANALYZE PILOT DATA
+% analysis script for experiment_2 (!)
 % this script creates parametes for further statistical analysis
 % it needs logfiles created by the behavioral pilot presentation.m
 % script
@@ -8,6 +9,10 @@
 % RESULT_SORT sorting trials according to their design stucture
 % where ambiguity is coded as 1 for not resolved group and 2 for resolved group
 % ambiguity was resolved for all session excpet the first in the ambiguity group
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % the matrices within these structures are sorted according to this:
 % LINE 01 - trial number
@@ -37,7 +42,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = 1; % 1 = pause; 2 = 3 seconds delay
+PAUSE = true; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:23; % subjects where ambiguity was not resolved
@@ -51,7 +56,7 @@ TRIAL_NR = 96; % how many trials was one cycle
 EV = 20; % what is the expected value of all gambles
 
 % skip loading of individual files
-SKIP_LOAD = 1;
+SKIP_LOAD = false;
 
 %% DATA HANDLING
 
