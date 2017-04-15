@@ -7,8 +7,6 @@
 % unprocessed data is stored into two structures:
 % RESULT_SEQ sorting trials as they were presented
 % RESULT_SORT sorting trials according to their design stucture
-% where ambiguity is coded as 1 for not resolved group and 2 for resolved group
-% ambiguity was resolved for all session excpet the first in the ambiguity group
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
