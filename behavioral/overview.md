@@ -22,7 +22,7 @@ preference revealed through comparison against controlled variaton of certain co
 
 basic setup:
 * trial types = 2 (risk, ambiguity)
-* EVs = 2 (7.5 & 34)
+* EVs = 2 (8.5 & 34)
 * variance levels = 9
 * linear counteroffers = 12
 * repeats = 0 (1 session)
