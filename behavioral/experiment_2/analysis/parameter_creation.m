@@ -40,7 +40,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = 2; % 1 = pause; 2 = 3 seconds delay
+PAUSE = false; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:28; % subjects first batch
@@ -262,7 +262,7 @@ for sub = PART
     end
 
     % END PARAMETER 2
-    clear repeat risk_trials ambi_trials risk_choices ambi_choices;
+    clear repeat risk_trials ambi_trials risk_choices ambi_choices axisscale ce ev_level var_level new_axis x risk_trials_var ambi_trials_var;
     
     %% PARAMTER SECTION 3: --- (ADD FURTHER PARAMETER HERE WHEN NEEDED)
     
