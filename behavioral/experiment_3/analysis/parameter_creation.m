@@ -1,5 +1,5 @@
 %% SCRIPT TO ANALYZE PILOT DATA
-% analysis script for experiment_2 (!)
+% analysis script for experiment_3 (!)
 % this script creates parametes for further statistical analysis
 % it needs logfiles created by the behavioral pilot presentation.m
 % script
@@ -7,6 +7,16 @@
 % unprocessed data is stored into two structures:
 % RESULT_SEQ sorting trials as they were presented
 % RESULT_SORT sorting trials according to their design stucture
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 % the matrices within these structures are sorted according to this:
 % LINE 01 - trial number
