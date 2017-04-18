@@ -40,7 +40,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = true; % 1 = pause; 2 = 3 seconds delay
+PAUSE = 2; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:28; % subjects first batch
@@ -207,13 +207,19 @@ for sub = PART
     
     %% --- CREATE FIGURE 1
 
-    FIGS.fig1 = figure('Name', [ num2str(sub) '-' num2str(repeat) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
-    axisscale = [.5 VAR_NR+.5 0 2.2];
-    
-    for ev_level = 1:EV_LEVELS;
+    for repeat = 1:REPEATS_NR;
         
-            repeat = 1; % no repeated meassures in this experiment
-           
+        switch repeat
+            case 1
+                FIGS.fig1 = figure('Name', [ 'subject' num2str(sub) ' | repeat ' num2str(repeat) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
+            case 2
+                FIGS.fig2 = figure('Name', [ 'subject' num2str(sub) ' | repeat ' num2str(repeat)], 'Color', 'w', 'units', 'normalized', 'outerposition', [.5 .5 .5 1]);
+        end
+        
+        axisscale = [.5 VAR_NR+.5 0 2.2];
+        
+        for ev_level = 1:EV_LEVELS;
+            
             risk_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk;
             ambi_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi;
             risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
@@ -250,85 +256,12 @@ for sub = PART
             plot( ones(1, VAR_NR), ':k', 'LineWidth', 2);
             axis(new_axis); axis('auto y');
             xlabel('variance'); title([' EV: ' num2str(EV(ev_level))  ' (comparison)']); legend('risk', 'ambiguity', 'neutrality');
-            ylabel('subjective value'); 
+            ylabel('subjective value');
             
-    end
-    
-    %% --- CREATE FIGURE 2
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    % sorting variance rather than repeats
-    FIGS.fig2 = figure('Name', [ num2str(sub) '-' num2str(resolved) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [.5 .5 .5 1]);
-    
-    x = RESULT_SORT.ambi{resolved}.part{sub}.mat;
-    for varlevel = 1:VAR_NR;
-        %%% create data to plot
-        selector = x(7,:)==1 & x(19,:)==varlevel;
-        varmat_risk = x(:,selector);
-        selector = x(7,:)==2 & x(20,:)==varlevel;
-        varmat_ambi = x(:,selector);
-        
-        %%% plot parameter
-        % risky trials
-        subplot(2,5,varlevel);
-        scatter(varmat_risk(18,:), varmat_risk(16,:), 'k'); box off; hold on;
-        scatter(varmat_risk(18,varmat_risk(4,:)==1), varmat_risk(16,varmat_risk(4,:)==1), 'b', 'MarkerFaceColor', 'b');
-        if resolved == 1;
-            plot( PARAM.premiums.ce.control(varlevel,:,1,sub), '--k', 'LineWidth', 3); box off; hold on;
-        elseif resolved == 2;
-            plot( PARAM.premiums.ce.resolved(varlevel,:,1,sub), '--k', 'LineWidth', 3); box off; hold on;
         end
-        axis(axisscale);
-        xlabel('timepoints'); title([' variance ' num2str(varlevel)  ' (risk)' ]);
-        ylabel('counteroffer value');
-        
-        % ambiguous trials
-        subplot(2,5,varlevel+5);
-        scatter(varmat_ambi(18,:), varmat_ambi(16,:), 'k'); box off; hold on;
-        scatter(varmat_ambi(18,varmat_ambi(4,:)==1), varmat_ambi(16,varmat_ambi(4,:)==1), 'r', 'MarkerFaceColor', 'r');
-        if resolved == 1;
-            plot( PARAM.premiums.ce.control(varlevel,:,2,sub), '--k', 'LineWidth', 3); box off; hold on;
-        elseif resolved == 2;
-            plot( PARAM.premiums.ce.resolved(varlevel,:,2,sub), '--k', 'LineWidth', 3); box off; hold on;
-        end
-        axis(axisscale);
-        xlabel('timepoints'); title([' variance ' num2str(varlevel)  ' (ambiguity)' ]);
-        ylabel('counteroffer value');
-        
     end
-    
-    subplot(2,5,5);
-    if resolved == 1;
-        plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
-        plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
-        plot( ones(1, VAR_NR)*EV, ':k', 'LineWidth', 2);
-    elseif resolved == 2;
-        plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
-        plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
-        plot( ones(1, VAR_NR)*EV, ':k', 'LineWidth', 2);
-    end
-    axis([.5 4.5 5 25]);
-    xlabel('variance'); title('mean aversion'); legend('risk', 'ambiguity', 'neutrality');
-    ylabel('subjective value');
-    
-    subplot(2,5,10);
-    if resolved == 1;
-        plot( sum(PARAM.premiums.ce.control(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
-        plot( sum(PARAM.premiums.ce.control(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
-        plot( ones(1, VAR_NR)*EV, ':k', 'LineWidth', 2);
-    elseif resolved == 2;
-        plot( sum(PARAM.premiums.ce.resolved(:,:,1,sub), 2)/REPEATS_NR, 'b', 'LineWidth', 3); box off; hold on;
-        plot( sum(PARAM.premiums.ce.resolved(:,:,2,sub), 2)/REPEATS_NR, 'r', 'LineWidth', 3);
-        plot( ones(1, VAR_NR)*EV, ':k', 'LineWidth', 2);
-    end
-    axis([.5 4.5 5 25]);
-    xlabel('variance'); title('mean aversion'); legend('risk', 'ambiguity', 'neutrality');
-    ylabel('subjective value');
-    
-    % END PARAMETER 1
+
+    % END PARAMETER 2
     clear repeat risk_trials ambi_trials risk_choices ambi_choices;
     
     %% PARAMTER SECTION 3: --- (ADD FURTHER PARAMETER HERE WHEN NEEDED)
