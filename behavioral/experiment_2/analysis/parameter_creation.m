@@ -225,9 +225,6 @@ for sub = PART
             risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
             ambi_choices = ambi_trials(4,:)==2; % at which trials ambiguous offer was chosen
             
-            risk_trials_var = mat2cell(risk_trials, size(risk_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
-            ambi_trials_var = mat2cell(ambi_trials, size(ambi_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
-            
             new_axis = axisscale; % to scale y-axis to EV
             new_axis(3:4) = axisscale(3:4)*EV(ev_level);
             
@@ -262,7 +259,7 @@ for sub = PART
     end
 
     % END PARAMETER 2
-    clear repeat risk_trials ambi_trials risk_choices ambi_choices axisscale ce ev_level var_level new_axis x risk_trials_var ambi_trials_var;
+    clear repeat risk_trials ambi_trials risk_choices ambi_choices axisscale ce ev_level var_level new_axis x;
     
     %% PARAMTER SECTION 3: --- (ADD FURTHER PARAMETER HERE WHEN NEEDED)
     
