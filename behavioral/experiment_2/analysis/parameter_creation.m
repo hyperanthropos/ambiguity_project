@@ -8,20 +8,18 @@
 % RESULT_SEQ sorting trials as they were presented
 % RESULT_SORT sorting trials according to their design stucture
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % the matrices within these structures are sorted according to this:
 % LINE 01 - trial number
 % LINE 02 - trial presentation time
 % LINE 03 - reaction time
+
 % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
 % LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
 % LINE 06 - choice: 1 = left, 2 = right
 % LINE 07 - trial type: 1 = risky, 2 = ambiguous
-% LINE 08 - ambiguity resolved: 1 = yes, 0 = no, 3 = does not apply (risky trial)
+% LINE 08 - [not applicable]
 % LINE 09 - position of counteroffer: 1 = left, 2 = right
+
 % LINE 10 - probability of high amount
 % LINE 11 - probability of low amount
 % LINE 12 - risky amount high
@@ -31,10 +29,12 @@
 % LINE 16 - counteroffer amount
 
 % LINE 17 - stimulus number (sorted)
-% LINE 18 - number of repeat of the same variation of stimuli
-% LINE 19 - risk variance level (1-4; low to high variance)
-% LINE 20 - ambiguity variance level (1-4; low to high variance
+% LINE 18 - [not applicable]
+% LINE 19 - risk variance level (1-n; low to high variance)
+% LINE 20 - ambiguity variance level (1-n; low to high variance)
 % LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
+% LINE 22 - expected value level (1-n; low to high expected value)
+% LINE 23 - expected value of probabilistic offer
 
 %% SETUP
 clear; close('all'); clc;
@@ -43,18 +43,22 @@ clear; close('all'); clc;
 PAUSE = true; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
-PART{1} = 1:23; % subjects where ambiguity was not resolved
-PART{2} = 1:21; % subjects where ambiguity was resolved
+PART{1} = 1:28; % subjects first batch
+PART{2} = 1:24; % subjects second batch
 
 % design specification
-REPEATS_NR = 4; % how many times was one cycle repeated
-VAR_NR = 4; % how many steps of variance variation
+EV_LEVELS = 2; % how many steps of expected value variation
+VAR_NR = 9; % how many steps of variance variation
 COUNTER_NR = 12; % how many steps of counteroffer variation
-TRIAL_NR = 96; % how many trials was one cycle
-EV = 20; % what is the expected value of all gambles
+SESSIONS = 1; % how many sessions were recorded
+REPEATS_NR = 0; % how many times was one full variation repeated
 
-% skip loading of individual files
-SKIP_LOAD = false;
+EV = [8.5 34]; % what are the expected values of gambles
+TRIAL_NR = 216; % how many trials was one variance variation
+
+% logfile handling
+EXPERIMENT = 2; % behavioral data experiment identifier
+SKIP_LOAD = false; % skip loading of individual files
 
 %% DATA HANDLING
 
@@ -66,29 +70,36 @@ DIR.temp = fullfile(DIR.home, 'temp_data');
 
 % load data
 if SKIP_LOAD ~= 1;
+    counter = 0;
     
-    % for both groups (0 = unresolved; 1 = resolved);
-    for ambiguity = 0:1;
+    % for both batches of participants 
+    for iBatch = 1:2;
         
         % run for every participant in the group
-        for part = PART{1+ambiguity};
+        for part = PART{iBatch};
+            counter = counter+1;
             
             % combine 4 repeats of both sessions into one file
             temp_logrec_full = [];
             temp_logrec_sorted_full = [];
-            for sess = 1:2;
-                load_file = fullfile(DIR.input, [ 'part_' sprintf('%03d', part) '_sess_' num2str(sess) '_ambiguity_' num2str(ambiguity) '.mat'] );
+            for sess = 1:SESSIONS;
+                load_file = fullfile(DIR.input, [ 'exp_' num2str(EXPERIMENT) '_' sprintf('%03d', iBatch) '_part_' sprintf('%03d', part) '_sess_' num2str(sess) '.mat'] );
                 load(load_file, 'logrec', 'sorted_logrec');
                 temp_logrec_full = cat(2, temp_logrec_full, logrec);
                 temp_logrec_sorted_full = cat(2, temp_logrec_sorted_full, sorted_logrec);
             end
             
             % save participantns into a structure
-            RESULT_SEQ.ambi{ambiguity+1}.part{part}.mat = temp_logrec_full;
-            RESULT_SORT.ambi{ambiguity+1}.part{part}.mat = temp_logrec_sorted_full;
+            RESULT_SEQ.part{counter}.mat = temp_logrec_full;
+            RESULT_SORT.part{counter}.mat = temp_logrec_sorted_full;
             
         end % end participant loop
-    end % end group loop
+        
+        % save participantns into a structure
+        RESULT_SEQ.ambi{ambiguity+1}.part{part}.mat = temp_logrec_full;
+        RESULT_SORT.ambi{ambiguity+1}.part{part}.mat = temp_logrec_sorted_full;
+        
+    end % end batch loop
     
     % create temp directory to save data structure and save
     if exist(DIR.temp, 'dir') ~= 7; mkdir(DIR.temp); end
@@ -104,10 +115,23 @@ else
 end
 clear SKIP_LOAD;
 
+% unify PART variable
+PART = 1:length(PART{1})+length(PART{2});
+
 % create result directory if it doesn't exist
 if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% DATA PREPROCESSING
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 
 for resolved = 1:2; % 2 = resolved
     for sub = PART{resolved}
