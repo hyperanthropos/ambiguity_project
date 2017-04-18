@@ -51,14 +51,14 @@ EV_LEVELS = 2; % how many steps of expected value variation
 VAR_NR = 9; % how many steps of variance variation
 COUNTER_NR = 12; % how many steps of counteroffer variation
 SESSIONS = 1; % how many sessions were recorded
-REPEATS_NR = 0; % how many times was one full variation repeated
+REPEATS_NR = 1; % how many times was one full variation repeated
 
 EV = [8.5 34]; % what are the expected values of gambles
 TRIAL_NR = 216; % how many trials was one variance variation
 
 % logfile handling
 EXPERIMENT = 2; % behavioral data experiment identifier
-SKIP_LOAD = false; % skip loading of individual files
+SKIP_LOAD = true; % skip loading of individual files
 
 %% DATA HANDLING
 
@@ -73,8 +73,7 @@ if SKIP_LOAD ~= 1;
     counter = 0;
     
     % for both batches of participants 
-    for iBatch = 1:2;
-        
+    for iBatch = 1:2; 
         % run for every participant in the group
         for part = PART{iBatch};
             counter = counter+1;
@@ -94,18 +93,13 @@ if SKIP_LOAD ~= 1;
             RESULT_SORT.part{counter}.mat = temp_logrec_sorted_full;
             
         end % end participant loop
-        
-        % save participantns into a structure
-        RESULT_SEQ.ambi{ambiguity+1}.part{part}.mat = temp_logrec_full;
-        RESULT_SORT.ambi{ambiguity+1}.part{part}.mat = temp_logrec_sorted_full;
-        
     end % end batch loop
     
     % create temp directory to save data structure and save
     if exist(DIR.temp, 'dir') ~= 7; mkdir(DIR.temp); end
     save(fullfile(DIR.temp, 'temp.mat'), 'RESULT_SEQ', 'RESULT_SORT');
     
-    clear load_file part ambiguity sess logrec sorted_logrec temp_logrec_full temp_logrec_sorted_full;
+    clear load_file part sess logrec sorted_logrec temp_logrec_full temp_logrec_sorted_full counter iBatch;
     
 else
     
@@ -123,34 +117,29 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 %% DATA PREPROCESSING
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-for resolved = 1:2; % 2 = resolved
-    for sub = PART{resolved}
-        for repeat = 1:REPEATS_NR;
-            %%% add repeats from 1 to 4
-            RESULT_SORT.ambi{resolved}.part{sub}.mat(18,:) = kron(1:REPEATS_NR, ones(1,TRIAL_NR));
-            %%% create sub matrices for each repeat
-            x = RESULT_SORT.ambi{resolved}.part{sub}.mat; % get matrix of a participant
-            y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into the 4 repeats
-            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.all = y{repeat};
-            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.risk = y{repeat}(:, y{repeat}(7,:) == 1);
-            RESULT_SORT.ambi{resolved}.part{sub}.repeat{repeat}.ambi = y{repeat}(:, y{repeat}(7,:) == 2);
+for sub = PART
+    for repeat = 1:REPEATS_NR;
+        for ev_level = 1:EV_LEVELS;
+            % add repeats indicator
+            RESULT_SORT.part{sub}.mat(18,:) = kron(1:REPEATS_NR, ones(1,TRIAL_NR*EV_LEVELS));
+            % create sub matrices for each repeat
+            x = RESULT_SORT.part{sub}.mat; % get matrix of a participant
+            y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR*2); % split matrix into repeats
+            % sort repeats into EV levels and trial types
+            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.all = y{repeat}(:, y{repeat}(22,:)==ev_level);
+            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk = y{repeat}(:, y{repeat}(22,:)==ev_level & y{repeat}(7,:) == 1);
+            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi = y{repeat}(:, y{repeat}(22,:)==ev_level & y{repeat}(7,:) == 2);
         end
     end
 end
 
-clear x y sub resolved repeat;
+clear x y sub repeat ev_level;
 
 %% START LOOP OVER SUBJECTS AND CREATE A FIGURE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for resolved = 1:2; % 2 = resolved
     for sub = PART{resolved}
