@@ -40,44 +40,30 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = false; % 1 = pause; 2 = 3 seconds delay
+PAUSE = true; % 1 = pause; 2 = 3 seconds delay
 
+% set subjects to analyse
+PART{1} = 1:28; % subjects first batch
+PART{2} = 1:27; % subjects second batch
 
+% design specification
+EV_LEVELS = 6; % how many steps of expected value variation
+VAR_NR = 15; % how many steps of variance variation
+SESSIONS = 2; % how many sessions were recorded
+REPEATS_NR = 2; % how many times was one full variation repeated
 
+EV = 7.25 * [1 2 3 4 5 6]; % what are the expected values of gambles
+TRIAL_NR = 90; % how many trials was one variance variation
+
+% logfile handling
+EXPERIMENT = 3; % behavioral data experiment identifier
+SKIP_LOAD = false; % skip loading of individual files
+
+%% DATA HANDLING
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-% set subjects to analyse
-PART{1} = 1:28; % subjects first batch
-PART{2} = 1:24; % subjects second batch
-
-% design specification
-EV_LEVELS = 2; % how many steps of expected value variation
-VAR_NR = 9; % how many steps of variance variation
-COUNTER_NR = 12; % how many steps of counteroffer variation
-SESSIONS = 1; % how many sessions were recorded
-REPEATS_NR = 1; % how many times was one full variation repeated
-
-EV = [8.5 34]; % what are the expected values of gambles
-TRIAL_NR = 216; % how many trials was one variance variation
-
-% logfile handling
-EXPERIMENT = 2; % behavioral data experiment identifier
-SKIP_LOAD = true; % skip loading of individual files
-
-%% DATA HANDLING
-
-
-
-%%% ---> one needs a hypercube with EV/VAR and sub dimension containing risk/ambi preference
-
-
-
 
 % set directories
 DIR.home = pwd;
