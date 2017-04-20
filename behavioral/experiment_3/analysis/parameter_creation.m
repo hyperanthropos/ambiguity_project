@@ -161,8 +161,8 @@ for sub = PART
         
         % save choice matrix as parameter for later processing
         % (EV, variance, sub) | 1 = risky option; 2 = ambiguous option
-        PARAM.choice_matrix.choice(:,:,sub) = reshape(x(4,:), VAR_NR,EV_LEVELS)';
-        PARAM.choice_matrix.RT(:,:,sub) = reshape(x(3,:), VAR_NR,EV_LEVELS)';
+        PARAM.choice_matrix.choice(:,:,sub,repeat) = reshape(x(4,:), VAR_NR,EV_LEVELS)';
+        PARAM.choice_matrix.RT(:,:,sub,repeat) = reshape(x(3,:), VAR_NR,EV_LEVELS)';
 
         % calculate switschpoint from risk-averse --> ambiguity-averse
         % or switchpoint: ambiguity preference --> risk preference
@@ -190,19 +190,26 @@ for sub = PART
         PLOT.ambi = RESULT_SORT.part{sub}.repeat{repeat}.mat(4,:) == 2;
         
         % plot decisions
-        subplot(2,2,2+2*(repeat-1));
+        subplot(2,2,2+2*(repeat-1));    
         scatter(PLOT.EVs, PLOT.var, 'k'); box off; hold on;
         scatter(PLOT.EVs(PLOT.risk), PLOT.var(PLOT.risk), 'b', 'MarkerFaceColor', 'b');
         scatter(PLOT.EVs(PLOT.ambi), PLOT.var(PLOT.ambi),'r', 'MarkerFaceColor', 'r');
         plot( EV, PARAM.switchpoint(:,sub,repeat), '-*k', 'LineWidth', 3); box off; hold on;
-        plot( EV, ones(1, EV_LEVELS)*VAR_NR/2, '--k', 'LineWidth', 2); box off; hold on;
+        plot( EV, ones(1, EV_LEVELS)*ceil(VAR_NR/2), '--k', 'LineWidth', 2); box off; hold on;
         xlabel('expected value'); ylabel('variance'); title(['repeat: ' num2str(repeat)]);
         
         subplot(2,2,1+2*(repeat-1));
-        scatter(PLOT.var, PLOT.EVs, 'k'); box off; hold on;
-        scatter(PLOT.var(PLOT.risk), PLOT.EVs(PLOT.risk), 'b', 'MarkerFaceColor', 'b');
-        scatter(PLOT.var(PLOT.ambi), PLOT.EVs(PLOT.ambi), 'r', 'MarkerFaceColor', 'r');
-        ylabel('expected value'); xlabel('variance'); title(['repeat: ' num2str(repeat)]);
+        graphstyle = 'matrix';
+        switch graphstyle
+            case 'scatter'
+                scatter(PLOT.var, PLOT.EVs, 'k'); box off; hold on;
+                scatter(PLOT.var(PLOT.risk), PLOT.EVs(PLOT.risk), 'b', 'MarkerFaceColor', 'b');
+                scatter(PLOT.var(PLOT.ambi), PLOT.EVs(PLOT.ambi), 'r', 'MarkerFaceColor', 'r');
+                ylabel('expected value'); xlabel('variance'); title(['repeat: ' num2str(repeat)]);
+            case 'matrix'
+                imagesc(PARAM.choice_matrix.choice(:,:,sub,repeat)); colormap jet; 
+                ylabel('expected value'); xlabel('variance'); title(['repeat: ' num2str(repeat)]);
+        end
         
     end
 
