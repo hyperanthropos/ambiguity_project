@@ -22,8 +22,8 @@ DRAW = [1 2];
 PART = 1:52;
 
 % exclude subjects for certain reasons
-EXCLUDE_SUBS = 0;
-exclude_vec = [4 22]; % exclude candidates
+EXCLUDE = false;
+EXCLUDE_SUBS = [1 2 3 4 5]; % exclude candidates
 % this format allows to use an auto-generated exclude vector (e.g. exclude all risk averse)
 
 % design specification
@@ -31,10 +31,6 @@ VAR_NR = 9; % how many steps of variance variation
 EV = [8.5 34]; % what were the expected values of all gambles
 
 %% DATA HANDLING
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set directories
 DIR.home = pwd;
@@ -44,12 +40,17 @@ DIR.input = fullfile(DIR.home, 'analysis_results');
 load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
 
 % exclude subjects from subject vector
-if EXCLUDE_SUBS == 1;
+exclude_vec = EXCLUDE_SUBS;
+if EXCLUDE == 1
         PART(exclude_vec) = [];
 end
-clear i exclude;
+clear i exclude_vec;
 
 %% FIGURE 1: INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 5D matrix of premium paramters:
 % (var_level,ev_level,type,sub,repeat)
