@@ -57,13 +57,9 @@ TRIAL_NR = 90; % how many trials was one variance variation
 
 % logfile handling
 EXPERIMENT = 3; % behavioral data experiment identifier
-SKIP_LOAD = false; % skip loading of individual files
+SKIP_LOAD = true; % skip loading of individual files
 
 %% DATA HANDLING
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set directories
 DIR.home = pwd;
@@ -122,19 +118,13 @@ if exist(DIR.output, 'dir') ~= 7; mkdir(DIR.output); end
 
 for sub = PART
     for repeat = 1:REPEATS_NR;
+        % create sub matrices for each repeat
+        x = RESULT_SORT.part{sub}.mat; % get matrix of a participant
+        y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR); % split matrix into repeats
+        RESULT_SORT.part{sub}.repeat{repeat}.mat = y{repeat};
         for ev_level = 1:EV_LEVELS;
-            % add repeats indicator
-            RESULT_SORT.part{sub}.mat(18,:) = kron(1:REPEATS_NR, ones(1,TRIAL_NR*EV_LEVELS));
-            % unify variance levels (same variance levels for different EV levels
-            RESULT_SORT.part{sub}.mat(19,1:TRIAL_NR) = repmat( kron(1:VAR_NR, ones(1,COUNTER_NR)), 1, EV_LEVELS ); % for risk
-            RESULT_SORT.part{sub}.mat(20,TRIAL_NR+1:TRIAL_NR*2) = repmat( kron(1:VAR_NR, ones(1,COUNTER_NR)), 1, EV_LEVELS ); % and ambiguity
-            % create sub matrices for each repeat
-            x = RESULT_SORT.part{sub}.mat; % get matrix of a participant
-            y = mat2cell(x, size(x, 1), ones(1, REPEATS_NR)*TRIAL_NR*2); % split matrix into repeats
             % sort repeats into EV levels and trial types
-            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.all = y{repeat}(:, y{repeat}(22,:)==ev_level);
-            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk = y{repeat}(:, y{repeat}(22,:)==ev_level & y{repeat}(7,:) == 1);
-            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi = y{repeat}(:, y{repeat}(22,:)==ev_level & y{repeat}(7,:) == 2);
+            RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level} = y{repeat}(:, y{repeat}(22,:)==ev_level);
         end
     end
 end
@@ -153,63 +143,47 @@ for sub = PART
     
     % ... (insert code)
     
-    %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
+    %% PARAMETERS SECTION 1: SWITCHPOINT ANALYSIS
     
     % necessary lines fot this parameter
-    % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
-    % LINE 07 - trial type: 1 = risky, 2 = ambiguous
-    % LINE 16 - counteroffer amount
-    % LINE 19 - risk variance level (low to high variance)
-    % LINE 20 - ambiguity variance level (low to high variance
+    % LINE 03 - reaction time
+    % LINE 04 - choice: 1 = risky option; 2 = ambiguous option;
+    % LINE 19 - risk variance level (1-15; low to high variance)
+    % LINE 20 - ambiguity variance level (1-15; low to high variance)
+    % LINE 21 - [not applicable]
+    % LINE 22 - expected value level (1-6; low to high expected value)
     
     %% --- CREATE PARAMETER
+    
     for repeat = 1:REPEATS_NR;
+        
+        x = RESULT_SORT.part{sub}.repeat{repeat}.mat;
+        
+        % save choice matrix as parameter for later processing
+        % (EV, variance, sub) | 1 = risky option; 2 = ambiguous option
+        PARAM.choice_matrix.choice(:,:,sub) = reshape(x(4,:), VAR_NR,EV_LEVELS)';
+        PARAM.choice_matrix.RT(:,:,sub) = reshape(x(3,:), VAR_NR,EV_LEVELS)';
+
+        % calculate switschpoint from risk-averse --> ambiguity-averse
+        % or switchpoint: ambiguity preference --> risk preference
         for ev_level = 1:EV_LEVELS;
 
-            risk_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk;
-            ambi_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi;
-            risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
-            ambi_choices = ambi_trials(4,:)==2; % at which trials ambiguous offer was chosen
+            trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level};
+            ambi_choices = trials(4,:)==2; % trials at which ambiguous offer was chosen
+            x = sum(ambi_choices); % how many ambiguous trials were chosen in that EV level
+            ce = x+.5; % take interpolated value
             
-            risk_trials_var = mat2cell(risk_trials, size(risk_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
-            ambi_trials_var = mat2cell(ambi_trials, size(ambi_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
-            
-            PARAM.premiums.abs_gambles(:,ev_level,1,sub,repeat) = sum(risk_choices);
-            PARAM.premiums.abs_gambles(:,ev_level,2,sub,repeat) = sum(ambi_choices);
-            
-            % risky offers
-            for var_level = 1:VAR_NR;
-                x = sum(risk_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
-                % caclulate certainty equivalent
-                if x == 0; % no risky/ambiguous trials were chosen
-                    ce = risk_trials_var{var_level}(16,1); % take lowest value
-                elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
-                    ce = risk_trials_var{var_level}(16,COUNTER_NR); % take highest value
-                else
-                    ce =(risk_trials_var{var_level}(16,x)+risk_trials_var{var_level}(16,x+1))/2;
-                end
-                PARAM.premiums.ce(var_level,ev_level,1,sub,repeat) = ce;
-            end
-            
-            % ambiguous offers
-            for var_level = 1:VAR_NR;
-                x = sum(ambi_trials_var{var_level}(4,:)==2); % how many risky/ambiguous trials were chosen in that variance level
-                % caclulate certainty equivalent
-                if x == 0; % no risky/ambiguous trials were chosen
-                    ce = ambi_trials_var{var_level}(16,1); % take lowest value
-                elseif x == COUNTER_NR;  % only risky/ambiguous trials were chosen
-                    ce = ambi_trials_var{var_level}(16,COUNTER_NR); % take highest value
-                else
-                    ce =(ambi_trials_var{var_level}(16,x)+ambi_trials_var{var_level}(16,x+1))/2;
-                end
-                PARAM.premiums.ce(var_level,ev_level,2,sub,repeat) = ce;
-            end
+            PARAM.switchpoint.ce(ev_level,sub,repeat) = ce;
 
         end
     end
     
     %% --- CREATE FIGURE 1
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     for repeat = 1:REPEATS_NR;
         
         switch repeat
