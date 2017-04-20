@@ -21,13 +21,12 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 
 
 % set figures you want to draw
-DRAW = [1 2 3];
+DRAW = [1 2];
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
-% 02 | COMPARISON OF RESOLVED / UNRESOLVED GROUPS
-% 03 | COMPOSITE GROUP SUMMARY
+% 02 | GROUP SUMMARY
 
 % set subjects to analyse
-PART{1} = 1:23; % subjects where ambiguity was not resolved
+PART = 1:52;
 PART{2} = 1:21; % subjects where ambiguity was resolved
 
 % set group to analyze
@@ -68,8 +67,8 @@ clear i exclude;
 
 %% FIGURE 1: INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 
-% 4D matrix of premium paramters:
-% (var,repeat,type,sub)
+% 5D matrix of premium paramters:
+% (var_level,ev_level,type,sub,repeat)
 
 if sum(DRAW == 1);
     
@@ -106,80 +105,12 @@ if sum(DRAW == 1);
     
 end
 
-%% FIGURE 2: COMPARISON OF RESOLVED / UNRESOLVED GROUPS
+%% FIGURE 2: COMPOSITE GROUP SUMMARY
 
-% 4D matrix of premium paramters:
-% (var,repeat,type,sub)
+% 5D matrix of premium paramters:
+% (var_level,ev_level,type,sub,repeat)
 
 if sum(DRAW == 2);
-    
-    % setup for figure 2
-    axis_scale = [.5 4.5 10 22]; % scale fot axis
-    
-    figure('Name', 'F2: mean over time for variance levels between groups', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
-    
-    % plot for both groups independend of "GROUPS" setting (control left, resolved right)
-    for group = 1:2;
-        
-        if group == 1;
-            data = mean(PARAM.premiums.ce.control(:,:,:,:), 1);
-        elseif group == 2;
-            data = mean(PARAM.premiums.ce.resolved(:,:,:,:), 1);
-        end
-        
-        % plot mean preference over time
-        x = squeeze( mean( data,4 ) ); % calulate mean over subs
-        x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5); % calculate se
-        
-        subplot(2,2,group);
-        plot( x, 'LineWidth', 3 ); box off; hold on;
-        errorbar(x, x_se);
-        plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
-        axis(axis_scale); legend('R', 'A'); xlabel('time');
-        if group == 1;
-            title('control');
-        elseif group == 2;
-            title('resolved');
-        end
-        
-        % plot mean preference over time for each variance level
-        for varlevel = 1:VAR_NR;
-            
-            if group == 1;
-                data = mean(PARAM.premiums.ce.control(varlevel,:,:,:), 1);
-                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+varlevel);
-            elseif group == 2;
-                data = mean(PARAM.premiums.ce.resolved(varlevel,:,:,:), 1);
-                subplot(2, VAR_NR*2+1 ,VAR_NR*2+1+VAR_NR+1+varlevel);
-            end
-            
-            x = squeeze( mean( data,4 ) ); % calulate mean over subs
-            x_se = squeeze( std( data,1,4 )./(size(PART{group},2))^.5 ); % calculate se
-            
-            plot( x, 'LineWidth', 3 ); box off; hold on;
-            errorbar(x, x_se);
-            plot( ones(1,VAR_NR)*EV, '--k' , 'LineWidth', 2 );
-            axis(axis_scale); legend('R', 'A'); xlabel('time');
-            if group == 1;
-                title(['control var: ' num2str(varlevel)]);
-            elseif group == 2;
-                title(['resolved var: ' num2str(varlevel)]);
-            end
-            
-        end
-  
-    end
-    
-    clear group data x x_se varlevel axis_scale;
-    
-end
-
-%% FIGURE 3: COMPOSITE GROUP SUMMARY
-
-% 4D matrix of premium paramters:
-% (var,repeat,type,sub)
-
-if sum(DRAW == 3);
     
     % add function for "barrwitherr"
     addpath(SUBFUNCTIONS_PATH);
