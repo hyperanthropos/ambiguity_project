@@ -8,6 +8,40 @@
 % RESULT_SEQ sorting trials as they were presented
 % RESULT_SORT sorting trials according to their design stucture
 
+% the matrices within these structures are sorted according to this:
+% LINE 01 - trial number
+% LINE 02 - trial presentation time
+% LINE 03 - reaction time
+
+% LINE 04 - choice: 1 = risky option; 2 = ambiguous option;
+% LINE 05 - [not applicable]
+% LINE 06 - choice: 1 = left, 2 = right
+% LINE 07 - [not applicable]
+% LINE 08 - [not applicable]
+% LINE 09 - position of risky (non ambiguous) offer: 1 = left, 2 = right
+
+% LINE 10 - probability of high amount
+% LINE 11 - probability of low amount
+% LINE 12 - risky amount high
+% LINE 13 - risky amount low
+% LINE 14 - ambiguous amount high
+% LINE 15 - ambiguous amount low
+% LINE 16 - [not applicable]
+
+% LINE 17 - stimulus number (sorted)
+% LINE 18 - session 1 or 2 (number of repeat of the same variation of stimuli)
+% LINE 19 - risk variance level (1-15; low to high variance)
+% LINE 20 - ambiguity variance level (1-15; low to high variance)
+% LINE 21 - [not applicable]
+% LINE 22 - expected value level (1-6; low to high expected value)
+% LINE 23 - expected value of probabilistic offers
+
+%% SETUP
+clear; close('all'); clc;
+
+% pause after each subject to see output
+PAUSE = false; % 1 = pause; 2 = 3 seconds delay
+
 
 
 
@@ -17,40 +51,6 @@
 
 
 
-
-% the matrices within these structures are sorted according to this:
-% LINE 01 - trial number
-% LINE 02 - trial presentation time
-% LINE 03 - reaction time
-
-% LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
-% LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
-% LINE 06 - choice: 1 = left, 2 = right
-% LINE 07 - trial type: 1 = risky, 2 = ambiguous
-% LINE 08 - [not applicable]
-% LINE 09 - position of counteroffer: 1 = left, 2 = right
-
-% LINE 10 - probability of high amount
-% LINE 11 - probability of low amount
-% LINE 12 - risky amount high
-% LINE 13 - risky amount low
-% LINE 14 - ambiguous amount high
-% LINE 15 - ambiguous amount low
-% LINE 16 - counteroffer amount
-
-% LINE 17 - stimulus number (sorted)
-% LINE 18 - [not applicable]
-% LINE 19 - risk variance level (1-n; low to high variance)
-% LINE 20 - ambiguity variance level (1-n; low to high variance)
-% LINE 21 - counteroffer level (1-number of levels; low to high counteroffer)
-% LINE 22 - expected value level (1-n; low to high expected value)
-% LINE 23 - expected value of probabilistic offer
-
-%% SETUP
-clear; close('all'); clc;
-
-% pause after each subject to see output
-PAUSE = false; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:28; % subjects first batch
@@ -71,6 +71,13 @@ EXPERIMENT = 2; % behavioral data experiment identifier
 SKIP_LOAD = true; % skip loading of individual files
 
 %% DATA HANDLING
+
+
+
+%%% ---> one needs a hypercube with EV/VAR and sub dimension containing risk/ambi preference
+
+
+
 
 % set directories
 DIR.home = pwd;
