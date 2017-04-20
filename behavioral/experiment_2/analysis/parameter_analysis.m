@@ -13,13 +13,6 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 
 %% SETUP
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
 % set figures you want to draw
 DRAW = [1 2];
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
@@ -27,28 +20,21 @@ DRAW = [1 2];
 
 % set subjects to analyse
 PART = 1:52;
-PART{2} = 1:21; % subjects where ambiguity was resolved
-
-% set group to analyze
-GROUP = 1; % 1 = ambiguity not resolved; 2 = ambiguity resolved
 
 % exclude subjects for certain reasons
 EXCLUDE_SUBS = 0;
-% unresolved exclude candidates
-% #4 = obvious maladaptive strategie at varlevel 4
-% #22 = extremly risk averse
-exclude{1}.vec = [4 22];
-% resolved exclude candidates
-% #1 very risk seeking
-% #11 very risk averse (but still a pattern)
-exclude{2}.vec = [1 11];
+exclude_vec = [4 22]; % exclude candidates
+% this format allows to use an auto-generated exclude vector (e.g. exclude all risk averse)
 
 % design specification
-REPEATS_NR = 4; % how many times was one cycle repeated
-VAR_NR = 4; % how many steps of variance variation
-EV = 20; % what is the expected value of all gambles
+VAR_NR = 9; % how many steps of variance variation
+EV = [8.5 34]; % what were the expected values of all gambles
 
 %% DATA HANDLING
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set directories
 DIR.home = pwd;
@@ -59,9 +45,7 @@ load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
 
 % exclude subjects from subject vector
 if EXCLUDE_SUBS == 1;
-    for i = 1:2;
-        PART{i}(exclude{i}.vec) = [];
-    end
+        PART(exclude_vec) = [];
 end
 clear i exclude;
 
@@ -73,16 +57,11 @@ clear i exclude;
 if sum(DRAW == 1);
     
     figure('Name', 'F1: single subject per timepoint and variance', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
-    for sub = PART{GROUP};
+    for sub = PART;
         
-        if GROUP == 1;
-            x = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),1)); % over time
-            y = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),2)); % over variance
-        elseif GROUP == 2;
-            x = squeeze(mean(PARAM.premiums.ce.resolved(:,:,:,sub),2)); % over time
-            y = squeeze(mean(PARAM.premiums.ce.resolved(:,:,:,sub),2)); % over variance
-        end
-        
+        x = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),1)); % over time
+        y = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),2)); % over variance
+
         % plot single subjects over time
         subplot(10,5,sub);
         plot( x, 'LineWidth', 2 ); hold on; box off;
@@ -119,12 +98,8 @@ if sum(DRAW == 2);
     figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
     
     % prepare data to plot
-    if GROUP == 1;
-        data = PARAM.premiums.ce.control(:,:,:,PART{GROUP});
-    elseif GROUP == 2;
-        data = PARAM.premiums.ce.resolved(:,:,:,PART{GROUP});
-    end
-    
+    data = PARAM.premiums.ce.control(:,:,:,PART);
+
     % data for all subjects
     data_persub = mean(mean(data, 1),2);
     x = squeeze(data_persub); % x(1,:) = risk; x(2,:) = ambiguity
@@ -135,7 +110,7 @@ if sum(DRAW == 2);
     
     % --- PANEL 1: overall preference for risk / ambiguity
     subplot(1,3,1);
-    h = barwitherr(std(x, 1, 2)./(size(PART{GROUP},2))^.5, mean(x, 2)); hold on; box off;
+    h = barwitherr(std(x, 1, 2)./(size(PART,2))^.5, mean(x, 2)); hold on; box off;
     plot( [EV EV], '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto x'); ylabel('subjective value');
     set(gca, 'xtick',[1 2] ); set(gca, 'xticklabels', {'risk','ambiguity'} );
@@ -153,10 +128,10 @@ if sum(DRAW == 2);
     bar_or_line = 'line';
     switch bar_or_line
         case 'line';
-            h = errorbar(mean(y, 3), std(y, 1, 3)./(size(PART{GROUP},2))^.5, 'LineWidth', 2); hold on; box off;
+            h = errorbar(mean(y, 3), std(y, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
             set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
         case 'bar';
-            h = barwitherr(std(y, 1, 3)./(size(PART{GROUP},2))^.5, mean(y, 3)); hold on; box off;
+            h = barwitherr(std(y, 1, 3)./(size(PART,2))^.5, mean(y, 3)); hold on; box off;
             set(h(1), 'FaceColor', [.0 .0 .8]); set(h(2), 'FaceColor', [.8 .0 .0]);
     end
     clear bar_or_line;
