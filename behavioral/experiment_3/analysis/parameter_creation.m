@@ -167,76 +167,47 @@ for sub = PART
         % calculate switschpoint from risk-averse --> ambiguity-averse
         % or switchpoint: ambiguity preference --> risk preference
         for ev_level = 1:EV_LEVELS;
-
+            
             trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level};
             ambi_choices = trials(4,:)==2; % trials at which ambiguous offer was chosen
             x = sum(ambi_choices); % how many ambiguous trials were chosen in that EV level
             ce = x+.5; % take interpolated value
             
-            PARAM.switchpoint.ce(ev_level,sub,repeat) = ce;
-
+            PARAM.switchpoint(ev_level,sub,repeat) = ce;
+            
         end
     end
     
     %% --- CREATE FIGURE 1
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    FIGS.fig1 = figure('Name', [ 'subject' num2str(sub) ' | choice matrix ' ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
     
     for repeat = 1:REPEATS_NR;
         
-        switch repeat
-            case 1
-                FIGS.fig1 = figure('Name', [ 'subject' num2str(sub) ' | repeat ' num2str(repeat) ], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .5 1]);
-            case 2
-                FIGS.fig2 = figure('Name', [ 'subject' num2str(sub) ' | repeat ' num2str(repeat)], 'Color', 'w', 'units', 'normalized', 'outerposition', [.5 .5 .5 1]);
-        end
+        PLOT.EVs = RESULT_SORT.part{sub}.repeat{repeat}.mat(23,:);
+        PLOT.var = RESULT_SORT.part{sub}.repeat{repeat}.mat(20,:);
+        PLOT.risk = RESULT_SORT.part{sub}.repeat{repeat}.mat(4,:) == 1;
+        PLOT.ambi = RESULT_SORT.part{sub}.repeat{repeat}.mat(4,:) == 2;
         
-        axisscale = [.5 VAR_NR+.5 0 2.2];
+        % plot decisions
+        subplot(2,2,2+2*(repeat-1));
+        scatter(PLOT.EVs, PLOT.var, 'k'); box off; hold on;
+        scatter(PLOT.EVs(PLOT.risk), PLOT.var(PLOT.risk), 'b', 'MarkerFaceColor', 'b');
+        scatter(PLOT.EVs(PLOT.ambi), PLOT.var(PLOT.ambi),'r', 'MarkerFaceColor', 'r');
+        plot( EV, PARAM.switchpoint(:,sub,repeat), '-*k', 'LineWidth', 3); box off; hold on;
+        plot( EV, ones(1, EV_LEVELS)*VAR_NR/2, '--k', 'LineWidth', 2); box off; hold on;
+        xlabel('expected value'); ylabel('variance'); title(['repeat: ' num2str(repeat)]);
         
-        for ev_level = 1:EV_LEVELS;
-            
-            risk_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk;
-            ambi_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi;
-            risk_choices = risk_trials(4,:)==2; % at which trials risky offer was chosen
-            ambi_choices = ambi_trials(4,:)==2; % at which trials ambiguous offer was chosen
-            
-            new_axis = axisscale; % to scale y-axis to EV
-            new_axis(3:4) = axisscale(3:4)*EV(ev_level);
-            
-            % risky trials
-            subplot(2,3,1+(3*ev_level-3));
-            scatter(risk_trials(19,:), risk_trials(16,:), 'k'); box off; hold on;
-            scatter(risk_trials(19,risk_trials(4,:)==1), risk_trials(16,risk_choices==0), 'b', 'MarkerFaceColor', 'b');
-            plot( PARAM.premiums.ce(:,ev_level,1,sub,repeat), '--k', 'LineWidth', 3); box off; hold on;
-            axis(new_axis);
-            xlabel('variance'); title([' EV: ' num2str(EV(ev_level)) ' (risk)' ]);
-            ylabel('counteroffer value');
-            
-            % ambiguous trials
-            subplot(2,3,2+(3*ev_level-3));
-            scatter(ambi_trials(20,:), ambi_trials(16,:), 'k'); box off; hold on;
-            scatter(ambi_trials(20,ambi_trials(4,:)==1), ambi_trials(16,ambi_choices==0), 'r', 'MarkerFaceColor', 'r');
-            plot( PARAM.premiums.ce(:,ev_level,2,sub,repeat), '--k', 'LineWidth', 3); box off; hold on;
-            axis(new_axis);
-            xlabel('variance'); title([' EV: ' num2str(EV(ev_level))  ' (ambiguity)' ]);
-            ylabel('counteroffer value');
-            
-            % comparison
-            subplot(2,3,3+(3*ev_level-3));
-            plot( PARAM.premiums.ce(:,ev_level,1,sub,repeat)/EV(ev_level), 'b', 'LineWidth', 3); box off; hold on;
-            plot( PARAM.premiums.ce(:,ev_level,2,sub,repeat)/EV(ev_level), 'r', 'LineWidth', 3)
-            plot( ones(1, VAR_NR), ':k', 'LineWidth', 2);
-            axis(new_axis); axis('auto y');
-            xlabel('variance'); title([' EV: ' num2str(EV(ev_level))  ' (comparison)']); legend('risk', 'ambiguity', 'neutrality');
-            ylabel('subjective value');
-            
-        end
+        subplot(2,2,1+2*(repeat-1));
+        scatter(PLOT.var, PLOT.EVs, 'k'); box off; hold on;
+        scatter(PLOT.var(PLOT.risk), PLOT.EVs(PLOT.risk), 'b', 'MarkerFaceColor', 'b');
+        scatter(PLOT.var(PLOT.ambi), PLOT.EVs(PLOT.ambi), 'r', 'MarkerFaceColor', 'r');
+        ylabel('expected value'); xlabel('variance'); title(['repeat: ' num2str(repeat)]);
+        
     end
 
     % END PARAMETER 2
-    clear repeat risk_trials ambi_trials risk_choices ambi_choices axisscale ce ev_level var_level new_axis x;
+    clear repeat ambi_choices ce ev_level trials x PLOT;
     
     %% PARAMTER SECTION 3: --- (ADD FURTHER PARAMETER HERE WHEN NEEDED)
     
