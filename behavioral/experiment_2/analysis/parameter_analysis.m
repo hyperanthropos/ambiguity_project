@@ -28,6 +28,7 @@ EXCLUDE_SUBS = [1 2 3 4 5]; % exclude candidates
 
 % design specification
 VAR_NR = 9; % how many steps of variance variation
+EV_LEVELS = 2; % how many steps of expected value variation
 EV = [8.5 34]; % what were the expected values of all gambles
 
 %% DATA HANDLING
@@ -48,47 +49,48 @@ clear i exclude_vec;
 
 %% FIGURE 1: INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % 5D matrix of premium paramters:
-% (var_level,ev_level,type,sub,repeat)
+% (var_level,ev_level,type,sub,[repeat])
 
 if sum(DRAW == 1);
-    
-    figure('Name', 'F1: single subject per timepoint and variance', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
-    for sub = PART;
+    for ev_level = 1:EV_LEVELS;
         
-        x = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),1)); % over time
-        y = squeeze(mean(PARAM.premiums.ce.control(:,:,:,sub),2)); % over variance
-
-        % plot single subjects over time
-        subplot(10,5,sub);
+        figure('Name', ['F1: EV: ' num2str(EV(ev_level)) ' | single subject variance respsonse'], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+        for sub = PART;
+            
+            x = squeeze(PARAM.premiums.ce(:,ev_level,:,sub)); % EV 1
+            
+            % plot single subjects over time
+            subplot(9,6,sub);
+            plot( x, 'LineWidth', 2 ); hold on; box off;
+            plot( ones(1,VAR_NR)*EV(ev_level), '--k', 'LineWidth', 2 );
+            axis([1 VAR_NR 0 1]); axis('auto y');
+            xlabel('variance');
+            
+        end
+        
+        % plot subject mean in same figure and show a legend
+        x = mean(squeeze(PARAM.premiums.ce(:,ev_level,:,:)), 3);
+        subplot(15,6,90);
         plot( x, 'LineWidth', 2 ); hold on; box off;
-        plot( ones(1,VAR_NR)*EV, '--k', 'LineWidth', 2 );
-        legend('R', 'A', 'N', 'Location', 'westoutside');
-        axis([1 VAR_NR 0 1]); axis('auto y');
-        xlabel('time');
-        
-        % plot single subjects over variance
-        subplot(10,5,sub+25);
-        plot( y, 'LineWidth', 2 ); hold on; box off;
-        plot( ones(1,VAR_NR)*EV, '--k', 'LineWidth', 2 );
+        plot( ones(1,VAR_NR)*EV(ev_level), '--k', 'LineWidth', 2 );
         legend('R', 'A', 'N', 'Location', 'westoutside');
         axis([1 VAR_NR 0 1]); axis('auto y');
         xlabel('variance');
         
+        clear x y sub;
+        
     end
-    
-    clear x y sub;
-    
 end
 
 %% FIGURE 2: COMPOSITE GROUP SUMMARY
 
 % 5D matrix of premium paramters:
-% (var_level,ev_level,type,sub,repeat)
+% (var_level,ev_level,type,sub,[repeat])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% GOOD TILL HERE %%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if sum(DRAW == 2);
     
