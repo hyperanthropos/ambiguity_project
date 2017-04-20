@@ -40,7 +40,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = false; % 1 = pause; 2 = 3 seconds delay
+PAUSE = true; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:28; % subjects first batch
