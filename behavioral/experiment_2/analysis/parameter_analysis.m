@@ -95,7 +95,7 @@ if sum(DRAW == 2);
     addpath(SUBFUNCTIONS_PATH);
     
     % set axes (multiples of ev for y axis)
-    axis_scale = [.5 VAR_NR+.5 0 2 ];
+    axis_scale = [.5 VAR_NR+.5 0.5 1.1 ];
     
     % draw figure
     FIGS.fig2_1 = figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
@@ -120,7 +120,7 @@ if sum(DRAW == 2);
         figure(FIGS.fig2_1);
         
         % --- PANEL 1: overall preference for risk / ambiguity
-        subplot(2,3,1+3*(ev_level-1));
+        subplot(4,4,1+8*(ev_level-1));
         h = barwitherr(std(x, 1, 2)./(size(PART,2))^.5, mean(x, 2)); hold on; box off;
         plot( [EV(ev_level) EV(ev_level)], '--k' , 'LineWidth', 2 );
         axis(new_axis); axis('auto x'); ylabel('subjective value');
@@ -128,14 +128,14 @@ if sum(DRAW == 2);
         set(h(1), 'FaceColor', [.5 .5 .5]);
         
         % --- PANLEL 2: overall correlation of risk & ambiguity
-        subplot(2,3,2+3*(ev_level-1));
+        subplot(4,4,2+8*(ev_level-1));
         scatter(x(1,:), x(2,:));
         h = lsline; set(h, 'LineWidth', 2); hold on;
         scatter(x(1,:), x(2,:), 'k', 'MarkerFaceColor', 'k' );
         xlabel('SV risk'); ylabel('SV ambiguity');
         
         % --- PANEL 3: preference for different variance levels
-        subplot(2,3,3+3*(ev_level-1));
+        subplot(2,2,2+2*(ev_level-1));
         bar_or_line = 'line';
         switch bar_or_line
             case 'line';
