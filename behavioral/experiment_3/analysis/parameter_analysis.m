@@ -64,6 +64,9 @@ for repeat = 1:REPEATS_NR;
         l_red = [1 .8 .8];
         bar_gray = [.2 .2 .2];
         
+        % max choices
+        max_c = length(PART);
+        
         % recode risk = 1 / ambiguity = -1
         x = PARAM.choice_matrix.choice(:,:,:,repeat);
         x(x==2)=-1;
@@ -80,16 +83,16 @@ for repeat = 1:REPEATS_NR;
         bar(mean(sum(x==1,3),1), 'FaceColor', l_blue); hold on;
         bar(-mean(sum(x==-1,3),1), 'FaceColor', l_red);
         bar(mean(sum(x,3),1), 'FaceColor', bar_gray);
-        plot(1:15, ones(1,15)*90, '-b', 'LineWidth', 3);
-        plot(1:15, ones(1,15)*-90,'-r', 'LineWidth', 3);
+        plot(1:15, ones(1,15)*max_c, '-b', 'LineWidth', 3);
+        plot(1:15, ones(1,15)*-max_c,'-r', 'LineWidth', 3);
         xlabel('variance'); ylabel('relative / abs. sum of choices');
         
         subplot(2,2,4);
         bar(sum(x==1,3)', 'FaceColor', l_blue); hold on;
         bar(-sum(x==-1,3)', 'FaceColor', l_red);
         bar(sum(x,3)', 'FaceColor', bar_gray);
-        plot(1:15, ones(1,15)*90, '-b', 'LineWidth', 3);
-        plot(1:15, ones(1,15)*-90,'-r', 'LineWidth', 3);
+        plot(1:15, ones(1,15)*max_c, '-b', 'LineWidth', 3);
+        plot(1:15, ones(1,15)*-max_c,'-r', 'LineWidth', 3);
         xlabel('variance'); ylabel('relative / abs. sum of choices');
         
         %%% plot EV
@@ -97,19 +100,19 @@ for repeat = 1:REPEATS_NR;
         bar(mean(sum(x==1,3),2), 'FaceColor', l_blue); hold on;
         bar(-mean(sum(x==-1,3),2), 'FaceColor', l_red);
         bar(mean(sum(x,3),2), 'FaceColor', bar_gray);
-        plot(1:6, ones(1,6)*90, '-b', 'LineWidth', 3);
-        plot(1:6, ones(1,6)*-90,'-r', 'LineWidth', 3);
+        plot(1:6, ones(1,6)*max_c, '-b', 'LineWidth', 3);
+        plot(1:6, ones(1,6)*-max_c,'-r', 'LineWidth', 3);
         xlabel('expected value'); ylabel('relative / abs. sum of choices');
         
         subplot(2,2,3);
         bar(sum(x==1,3), 'FaceColor', l_blue); hold on;
         bar(-sum(x==-1,3), 'FaceColor', l_red);
         bar(sum(x,3), 'FaceColor', bar_gray);
-        plot(1:6, ones(1,6)*90, '-b', 'LineWidth', 3);
-        plot(1:6, ones(1,6)*-90, '-r', 'LineWidth', 3);
+        plot(1:6, ones(1,6)*max_c, '-b', 'LineWidth', 3);
+        plot(1:6, ones(1,6)*-max_c, '-r', 'LineWidth', 3);
         xlabel('expected value'); ylabel('relative / abs. sum of choices');
         
-        clear x h l_blue l_red bar_gray repeat;
+        clear x h l_blue l_red bar_gray repeat max_c;
         
     end
 end
