@@ -117,14 +117,20 @@ for repeat = 1:REPEATS_NR;
     end
 end
 
-%% FIGURE 2: ???
+%% FIGURE 2: PLOT EXP 3 RESPONSE OVER VARIANCE AND PROB LEVELS AND COMPARE WITH EXP 2 RESPONSE
 
 % used parameter specifications
 % PARAM.switchpoint             (ev_level,sub,repeat)
 
 if sum(DRAW == 2);
     
+    % needs new 3d scatter with var, prob, ev
     
+    % needs factor transormation in behav 2 data - how much more likely to take
+    % A/R
+
+    % 1 response profile comparing to mvar
+    % 1 response profile comparing to prob
+
     
 end
-
