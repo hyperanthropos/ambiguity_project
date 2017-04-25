@@ -18,6 +18,9 @@ DRAW = [1 2];
 % 01 | BINARY CHOICE ANANLYSIS
 % 02 | SWITCHPOINT ANALYSIS
 
+% for which repeats you want figures
+DRAW_REPEATS = 1:2;
+
 % set subjects to analyse
 PART = 1:55;
 
@@ -54,7 +57,7 @@ clear i exclude_vec;
 % PARAM.choice_matrix.choice    (ev_level,variance,sub,repeat) | 1 = risky option; 2 = ambiguous option
 % PARAM.choice_matrix.RT        (ev_level,variance,sub,repeat)
 
-for repeat = 1:REPEATS_NR;
+for repeat = DRAW_REPEATS;
     if sum(DRAW == 1);
         
         figure('Name', ['F1: binary decision analysis | repeat: ' num2str(repeat) ] , 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
@@ -120,17 +123,90 @@ end
 %% FIGURE 2: PLOT EXP 3 RESPONSE OVER VARIANCE AND PROB LEVELS AND COMPARE WITH EXP 2 RESPONSE
 
 % used parameter specifications
-% PARAM.switchpoint             (ev_level,sub,repeat)
+% PARAM.choice_matrix.choice            (ev_level,variance,sub,repeat) | 1 = risky option; 2 = ambiguous option
+% PARAM.choice_matrix.RT                (ev_level,variance,sub,repeat)
+% PARAM.choice_matrix.fixed.mvar        (EV, variance)
+% PARAM.choice_matrix.fixed.prob_high   (EV, variance)
+% PARAM.choice_matrix.fixed.EV          (EV, variance)
 
-if sum(DRAW == 2);
-    
-    % needs new 3d scatter with var, prob, ev
-    
-    % needs factor transormation in behav 2 data - how much more likely to take
-    % A/R
+for repeat = DRAW_REPEATS;
+    if sum(DRAW == 2);
+        
+        figure('Name', ['F2: normalize over variance and probability | repeat: ' num2str(repeat) ] , 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+        
+        %%% PREPARE DATA
+        
+        % create choice frequency matrix (EV, var)
+        x = PARAM.choice_matrix.choice(:,:,:,repeat);
+        x(x==2)=-1; % recode risk = 1 / ambiguity = -1
+        choice_freq = sum(x,3);
+       
+        clear x;
+        
+        % create choice, mvar, prob, ev matrix
+        ch_var_pr_ev(1,:) = choice_freq(:);
+        ch_var_pr_ev(2,:) = log(PARAM.choice_matrix.fixed.mvar(:));
+        ch_var_pr_ev(3,:) = PARAM.choice_matrix.fixed.prob_high(:);
+        ch_var_pr_ev(4,:) = PARAM.choice_matrix.fixed.EV(:);
+        
+        %%% PLOT DATA
+        
+        % relationship between mean variance and probability
+        subplot(2,3,1);
+        x = log(PARAM.choice_matrix.fixed.mvar);
+        surf(x); box off;
+        
+        xlabel('probability (variance)');
+        ylabel('expected value levels');
+        zlabel('mean variance [log]');
+        title('outcome variance over EV levels');
+        
+        clear x;
+        
+        % plot decisions over actual variance
+        subplot(2,3,2);
+        x = sortrows(ch_var_pr_ev',2)';
+        plot(x(2,:), x(1,:), 'LineWidth', 2); box off;
+        xlabel('mean variance [log]');
+        ylabel('sum of risky choices');
+        title('choices sorted by mean variance');
+        
+        clear x;
+        
+        % plot decisions over actual variance for each EV level
+        subplot(2,3,3);
+        x(:,:,1) = log(PARAM.choice_matrix.fixed.mvar);
+        x(:,:,2) = choice_freq;
+        for i = 1:6;
+        plot(x(i,:,1), x(i,:,2), 'LineWidth', 2); hold on; box off;
+        end
+        xlabel('mean variance [log]');
+        ylabel('sum of risky choices');
+        title('choices by variance for each EV level');
+        
+        clear x;
+        
+        % plot decisions over variance and probability
+        subplot(2,3,4);
+        x = ch_var_pr_ev;
+        % normalize choice vector for marker size
+        marker_size = ( x(1,:)-min(x(1,:)) ) / ( max(x(1,:))-min(x(1,:)) );
+        scatter3(x(2,:), x(3,:), x(1,:), 1+marker_size*40, 'MarkerFaceColor', 'b'); hold on;
+        plot(x(2,:), x(3,:), 'k')
+        xlabel('mean variance [log]');
+        ylabel('probability of high amount');
+        zlabel('sum of risky choices');
+        
+        clear x marker size;
 
-    % 1 response profile comparing to mvar
-    % 1 response profile comparing to prob
 
-    
+        
+        % needs factor transormation in behav 2 data - how much more likely to take
+        % A/R
+        
+        % 1 response profile comparing to mvar
+        % 1 response profile comparing to prob
+        
+        
+    end
 end
