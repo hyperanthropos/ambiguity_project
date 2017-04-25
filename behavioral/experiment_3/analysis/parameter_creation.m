@@ -131,6 +131,21 @@ end
 
 clear x y sub repeat ev_level;
 
+%% FIXED VALUES INDPENDENT OF SUBJECT AND REPEAT NUMBER
+
+% fixed attributes corresponding to choice matrix
+% (EV, variance)
+x = RESULT_SORT.part{1}.repeat{1}.mat;
+y = NaN(1,TRIAL_NR);
+for i = 1:TRIAL_NR % calc mean variance of trials
+   y(i) = mean_variance(.5, x(14,i), .5, x(15,i)); % using matched ambiguous offers
+end
+PARAM.choice_matrix.fixed.mvar = reshape(y, VAR_NR,EV_LEVELS)'; % variance
+PARAM.choice_matrix.fixed.prob_high = reshape(x(10,:), VAR_NR,EV_LEVELS)'; % probability of higher offer
+PARAM.choice_matrix.fixed.EV = reshape(x(23,:), VAR_NR,EV_LEVELS)'; % expected value
+
+clear x y;
+
 %% START LOOP OVER SUBJECTS AND CREATE A FIGURE
 
 for sub = PART
@@ -143,7 +158,7 @@ for sub = PART
     
     % ... (insert code)
     
-    %% PARAMETERS SECTION 1: SWITCHPOINT ANALYSIS
+    %% PARAMETERS SECTION 1: SWITCHPOINT AND CHOICE MATRIX ANALYSIS
     
     % necessary lines fot this parameter
     % LINE 03 - reaction time
