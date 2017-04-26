@@ -19,7 +19,7 @@ DRAW = [1 2];
 % 02 | SWITCHPOINT ANALYSIS
 
 % for which repeats you want figures
-DRAW_REPEATS = 1:2;
+DRAW_REPEATS = 1;
 
 % set subjects to analyse
 PART = 1:55;
@@ -71,7 +71,7 @@ for repeat = DRAW_REPEATS;
         max_c = length(PART);
         
         % recode risk = 1 / ambiguity = -1
-        x = PARAM.choice_matrix.choice(:,:,:,repeat);
+        x = PARAM.choice_matrix.choice(:,:,PART,repeat);
         x(x==2)=-1;
         
         % surf
@@ -137,7 +137,7 @@ for repeat = DRAW_REPEATS;
         %%% PREPARE DATA
         
         % create choice frequency matrix (EV, var)
-        x = PARAM.choice_matrix.choice(:,:,:,repeat);
+        x = PARAM.choice_matrix.choice(:,:,PART,repeat);
         x(x==2)=-1; % recode risk = 1 / ambiguity = -1
         choice_freq = sum(x,3);
        
