@@ -14,9 +14,10 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [1 2];
+DRAW = [2 3];
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 % 02 | GROUP SUMMARY
+% 03 | COMPARISON OF CHOICE REVERSAL IN EV LEVELS
 
 % set subjects to analyse
 PART = 1:52;
@@ -47,6 +48,9 @@ if EXCLUDE == 1
 end
 clear i exclude_vec;
 
+% add function for "barrwitherr"
+addpath(SUBFUNCTIONS_PATH);
+
 %% FIGURE 1: INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 
 % 5D matrix of premium paramters:
@@ -56,7 +60,7 @@ if sum(DRAW == 1);
     for ev_level = 1:EV_LEVELS;
         
         % draw figure
-        figure('Name', ['F1: EV: ' num2str(EV(ev_level)) ' | single subject variance respsonse'], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+        FIGS.fig1 = figure('Name', ['F1: EV: ' num2str(EV(ev_level)) ' | single subject variance respsonse'], 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
         for sub = PART;
             
             x = squeeze(PARAM.premiums.ce(:,ev_level,:,sub)); % EV 1
@@ -90,9 +94,6 @@ end
 % (var_level,ev_level,type,sub,[repeat])
 
 if sum(DRAW == 2);
-    
-    % add function for "barrwitherr"
-    addpath(SUBFUNCTIONS_PATH);
     
     % set axes (multiples of ev for y axis)
     axis_scale = [.5 VAR_NR+.5 0.5 1.1 ];
@@ -171,4 +172,75 @@ if sum(DRAW == 2);
     clear data data_persub data_persub_var data_allrep x y varlevel axis_scale new_axis h;
     
 end
+%% FIGURE 2: COMPARISON OF CHOICE REVERSAL IN EV LEVELS
+
+% 5D matrix of premium paramters:
+% (var_level,ev_level,type,sub,[repeat])
+
+if sum(DRAW == 3);
+    
+    % set axes (multiples of ev for y axis)
+    axis_scale = [.5 VAR_NR+.5 0 1 ];
+    
+    % draw figure
+    FIGS.fig3 = figure('Name', 'F3: comparison of EV levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .6 .6 .4]);
+    
+    % create data for all levels
+    data = cell(1, EV_LEVELS);
+    data_allrep = cell(1, EV_LEVELS);
+    x = cell(1, EV_LEVELS);
+    y = cell(1, EV_LEVELS);
+    z = cell(1, EV_LEVELS);
+    for ev_level = 1:EV_LEVELS
+        
+        % prepare data to plot
+        data{ev_level} = PARAM.premiums.ce(:,ev_level,:,PART);
+        
+        % mean data of all repeats (var, risk/ambi, sub)
+        data_allrep{ev_level} = mean(data{ev_level}, 2);
+        y{ev_level} = squeeze(data_allrep{ev_level});
+        
+        % normalized mean preference
+        z{ev_level} = y{ev_level}/EV(ev_level);
+        
+        % difference of norm. pref ambi - risk
+        x{ev_level} = z{ev_level}(:,2,:)-z{ev_level}(:,1,:);
+        
+    end
+    
+    % --- FIGURE 3
+    figure(FIGS.fig3);
+    
+    % --- PANEL 1: preference for different variance levels
+    subplot(1,3,1);
+    h = errorbar(mean(z{1}, 3), std(z{1}, 1, 3)./(size(PART,2))^.5, 'LineWidth', 1); hold on; box off;
+    set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
+    h = errorbar(mean(z{2}, 3), std(z{2}, 1, 3)./(size(PART,2))^.5, '-.', 'LineWidth', 1);
+    set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
+    plot( ones(1,VAR_NR), '--k' , 'LineWidth', 2 );
+    axis(axis_scale); axis('auto y');
+    legend(['risk ' num2str(EV(1))], ['ambiguity ' num2str(EV(1))], ['risk ' num2str(EV(2))], ['ambiguity ' num2str(EV(1))]);
+    set(gca, 'xtick', 1:VAR_NR );
+    xlabel('variance');  ylabel('subjective value ratio');
+    
+    % --- PANEL 2: difference between R & A aversion over variance levels
+    subplot(1,3,2);
+    errorbar(mean(x{1}, 3), std(x{1}, 1, 3)./(size(PART,2))^.5, 'k', 'LineWidth', 2); hold on; box off;
+    errorbar(mean(x{2}, 3), std(x{2}, 1, 3)./(size(PART,2))^.5,  'k-.', 'LineWidth', 2); hold on; box off;
+    plot( zeros(1,VAR_NR), '--k' , 'LineWidth', 2 );
+    axis(axis_scale); axis('auto y');
+    legend(['EV: ' num2str(EV(1))], ['EV: ' num2str(EV(2))]);
+    set(gca, 'xtick', 1:VAR_NR );
+    xlabel('variance');  ylabel('subjective difference [ambiguity - risk]');
+    
+    % --- PANEL 3: plot different EV levels over mean variance
+    
+    
+    
+    
+    
+    clear data data_allrep x y z varlevel axis_scale h;
+    
+end
+
 
