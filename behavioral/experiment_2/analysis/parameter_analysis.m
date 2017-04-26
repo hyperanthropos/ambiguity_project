@@ -235,6 +235,8 @@ if sum(DRAW == 3);
     
     % --- PANEL 3: plot different EV levels over mean variance
     
+    %%% ---> needs to be supplied with mvar level from parameter creation
+    %%% script
     
     
     
