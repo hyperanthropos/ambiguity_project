@@ -166,7 +166,8 @@ for repeat = DRAW_REPEATS;
         % plot decisions over actual variance
         subplot(2,3,2);
         x = sortrows(ch_var_pr_ev',2)';
-        plot(x(2,:), x(1,:), 'LineWidth', 2); box off;
+        plot(x(2,:), x(1,:), 'LineWidth', 2); box off; hold on;
+        scatter(x(2,:), x(1,:), 'k');
         xlabel('mean variance [log]');
         ylabel('sum of risky choices');
         title('choices sorted by mean variance');
