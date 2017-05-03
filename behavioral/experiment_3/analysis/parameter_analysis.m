@@ -14,7 +14,7 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [1 2];
+DRAW = [1 2 3];
 % 01 | BINARY CHOICE ANANLYSIS
 % 02 | SWITCHPOINT ANALYSIS
 
@@ -43,6 +43,11 @@ DIR.input = fullfile(DIR.home, 'analysis_results');
 
 % load data
 load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
+
+% load data from experiment 2 for comparions
+cd ..; cd ..;
+exp2_data = load('experiment_2/analysis/analysis_results/parameters.mat', 'PARAM');
+cd(DIR.home);
 
 % exclude subjects from subject vector
 exclude_vec = EXCLUDE_SUBS;
@@ -199,8 +204,24 @@ for repeat = DRAW_REPEATS;
         zlabel('sum of risky choices');
         
         clear x marker size;
+        
+    end
+end
 
+%% FIGURE 3: COMPARISON WITH EXP 2 RESPONSE OVER VARIANCE AND PROBABILITY LEVELS
 
+% used parameter specifications
+% PARAM.choice_matrix.choice            (ev_level,variance,sub,repeat) | 1 = risky option; 2 = ambiguous option
+% PARAM.choice_matrix.RT                (ev_level,variance,sub,repeat)
+% PARAM.choice_matrix.fixed.mvar        (EV, variance)
+% PARAM.choice_matrix.fixed.prob_high   (EV, variance)
+% PARAM.choice_matrix.fixed.EV          (EV, variance)
+
+for repeat = DRAW_REPEATS;
+    if sum(DRAW == 3);
+        
+        figure('Name', ['F3: comparision with data from experiment 2 | repeat: ' num2str(repeat) ] , 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
+        
         
         % needs factor transormation in behav 2 data - how much more likely to take
         % A/R
@@ -211,3 +232,4 @@ for repeat = DRAW_REPEATS;
         
     end
 end
+
