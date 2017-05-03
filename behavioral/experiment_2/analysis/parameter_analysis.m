@@ -183,7 +183,7 @@ if sum(DRAW == 3);
     axis_scale = [.5 VAR_NR+.5 0 1 ];
     
     % draw figure
-    FIGS.fig3 = figure('Name', 'F3: comparison of EV levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .6 .6 .4]);
+    FIGS.fig3 = figure('Name', 'F3: comparison of EV levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .6 1 .4]);
     
     % create data for all levels
     data = cell(1, EV_LEVELS);
@@ -200,7 +200,7 @@ if sum(DRAW == 3);
         data_allrep{ev_level} = mean(data{ev_level}, 2);
         y{ev_level} = squeeze(data_allrep{ev_level});
         
-        % normalized mean preference
+        % normalized mean preference (var, risk/ambi, sub)
         z{ev_level} = y{ev_level}/EV(ev_level);
         
         % difference of norm. pref ambi - risk
@@ -219,29 +219,32 @@ if sum(DRAW == 3);
     set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
     plot( ones(1,VAR_NR), '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto y');
-    legend(['risk ' num2str(EV(1))], ['ambiguity ' num2str(EV(1))], ['risk ' num2str(EV(2))], ['ambiguity ' num2str(EV(1))]);
-    set(gca, 'xtick', 1:VAR_NR );
-    xlabel('variance');  ylabel('subjective value ratio');
-    
+    legend(['risk ' num2str(EV(1))], ['ambiguity ' num2str(EV(1))], ['risk ' num2str(EV(2))], ['ambiguity ' num2str(EV(2))], 'Location', 'northeastoutside');
+    legend('boxoff'); set(gca, 'xtick', 1:VAR_NR );
+
     % --- PANEL 2: difference between R & A aversion over variance levels
     subplot(1,3,2);
     errorbar(mean(x{1}, 3), std(x{1}, 1, 3)./(size(PART,2))^.5, 'k', 'LineWidth', 2); hold on; box off;
     errorbar(mean(x{2}, 3), std(x{2}, 1, 3)./(size(PART,2))^.5,  'k-.', 'LineWidth', 2); hold on; box off;
     plot( zeros(1,VAR_NR), '--k' , 'LineWidth', 2 );
     axis(axis_scale); axis('auto y');
-    legend(['EV: ' num2str(EV(1))], ['EV: ' num2str(EV(2))]);
+    legend(['EV: ' num2str(EV(1))], ['EV: ' num2str(EV(2))], 'Location', 'northeastoutside'); legend('boxoff');
     set(gca, 'xtick', 1:VAR_NR );
     xlabel('variance');  ylabel('subjective difference [ambiguity - risk]');
     
     % --- PANEL 3: plot different EV levels over mean variance
-    
-    %%% ---> needs to be supplied with mvar level from parameter creation
-    %%% script
-    
-    
-    
-    
-    clear data data_allrep x y z varlevel axis_scale h;
+    subplot(1,3,3);
+    varscale = log(PARAM.premiums.fixed.mvar); % scale data on log mean variance
+    plot(varscale(:,1), mean(z{1}(:,1,:), 3), 'LineWidth', 1, 'Color', [.0 .0 .8]); hold on; % EV 1, risk
+    plot(varscale(:,1), mean(z{1}(:,2,:), 3), 'LineWidth', 1, 'Color', [.8 .0 .0]); % EV 1, ambi
+    plot(varscale(:,2), mean(z{2}(:,1,:), 3), '-.', 'LineWidth', 1, 'Color', [.0 .0 .8]); % EV 2, risk
+    plot(varscale(:,2), mean(z{2}(:,2,:), 3), '-.', 'LineWidth', 1, 'Color', [.8 .0 .0]); % EV 2, ambi
+    plot([min(min(varscale)), max(max(varscale))], ones(1,2), '--k' , 'LineWidth', 2 );
+    legend(['risk ' num2str(EV(1))], ['ambiguity ' num2str(EV(1))], ['risk ' num2str(EV(2))], ['ambiguity ' num2str(EV(2))], 'Location', 'northeastoutside');
+    legend('boxoff');
+    xlabel('mean variance [log]');  ylabel('subjective value ratio');
+
+    clear data data_allrep x y z varlevel axis_scale varscale h;
     
 end
 
