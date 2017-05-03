@@ -40,7 +40,7 @@
 clear; close('all'); clc;
 
 % pause after each subject to see output
-PAUSE = true; % 1 = pause; 2 = 3 seconds delay
+PAUSE = false; % 1 = pause; 2 = 3 seconds delay
 
 % set subjects to analyse
 PART{1} = 1:28; % subjects first batch
@@ -137,6 +137,27 @@ for sub = PART
 end
 
 clear x y sub repeat ev_level;
+
+%% FIXED VALUES INDPENDENT OF SUBJECT AND REPEAT NUMBER
+
+% fixed attributes corresponding to certainty equivalent matrix
+% (var_level, ev_level)
+for iEV_level = 1:EV_LEVELS
+    x = RESULT_SORT.part{1}.repeat{1}.EV{iEV_level}.all; % select data for one EV level
+    x = x(:,1:COUNTER_NR:length(x)); % select every n-th trial, where n = COUNTER_NR
+    x_ambi = x(:,x(7,:)==2); % select only ambiguous trials (risyk ones are matched anyways)
+    x_risk = x(:,x(7,:)==1); % select only risky trials (for probabilities)
+    y = NaN(1,VAR_NR);
+    for i = 1:VAR_NR % calc mean variance of trials
+        y(i) = mean_variance(.5, x_ambi(14,i), .5, x_ambi(15,i)); % using matched ambiguous offers
+    end
+    PARAM.premiums.fixed.mvar(:,iEV_level) = y; % variance
+    PARAM.premiums.fixed.prob_high(:,iEV_level) = x_risk(10,:); % probability of higher offer
+    PARAM.premiums.fixed.EV(:,iEV_level) = x_ambi(23,:); % expected value
+end
+
+clear i iEV_level x x_risk x_ambi y;
+
 
 %% START LOOP OVER SUBJECTS AND CREATE A FIGURE
 
