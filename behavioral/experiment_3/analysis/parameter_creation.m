@@ -53,7 +53,7 @@ SESSIONS = 2; % how many sessions were recorded
 REPEATS_NR = 2; % how many times was one full variation repeated
 
 EV = 7.25 * [1 2 3 4 5 6]; % what are the expected values of gambles
-TRIAL_NR = 90; % how many trials was one variance variation
+TRIAL_NR = 90; % how many trials in total variation
 
 % logfile handling
 EXPERIMENT = 3; % behavioral data experiment identifier
