@@ -14,7 +14,7 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [3];
+DRAW = [1 2 3];
 % 01 | BINARY CHOICE ANANLYSIS
 % 02 | SWITCHPOINT ANALYSIS
 
