@@ -24,12 +24,24 @@ EV = [8.5 34]; % what were the expected values of all gambles
 % specific trials
 nTrials = VAR_NR*EV_LEVELS*2;
 
-% trials are sorted: risk ev1, risk ev2, ambi ev1, ambi ev2
+% trials are sorted: risk ev1, risk ev2, ambi ev1, ambi ev2 | low to high variance
 TRIALS.type = [ones(1,VAR_NR*EV_LEVELS),ones(1,VAR_NR*EV_LEVELS)*2];
-TRIALS.prob_h = [1];
-TRIALS.val_h = [1];
-TRIALS.prob_l = [1];
-TRIALS.val_l = [1];
+
+risk = [0.8200    0.7400    0.6600    0.5800    0.5000    0.4200    0.3400    0.2600    0.1800    0.8200    0.7400    0.6600    0.5800    0.5000   0.4200    0.3400    0.2600    0.1800]; % probability high value
+ambi = ones(1,VAR_NR*EV_LEVELS)*.5;
+TRIALS.prob_h = [risk,ambi];
+
+risk = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21.1529   26.6422   34.9370   37.5565   41.1774   45.9135   52.0000   59.8531   70.2248   84.6116  106.5687]; % risky value levels high
+ambi = [9    10    11    12    13    14    15    16    17    36    40    44    48    52    56    60    64    68]; % ambiguitly levels high
+TRIALS.val_h = [risk,ambi];
+
+risk = [0.1800    0.2600    0.3400    0.4200    0.5000    0.5800    0.6600    0.7400    0.8200    0.1800    0.2600    0.3400    0.4200    0.5000   0.5800    0.6600    0.7400    0.8200]; % probability low value
+ambi = ones(1,VAR_NR*EV_LEVELS)*.5;
+TRIALS.prob_l = [risk,ambi];
+
+risk =  [7.4328    5.9694    5.0168    4.3870    4.0000    3.8197    3.8347    4.0544    4.5176   29.7313   23.8777   20.0674   17.5480   16.0000   15.2788   15.3387   16.2175   18.0703]; % risky value levels low
+ambi = [8     7     6     5     4     3     2     1     0    32    28    24    20    16    12     8     4     0]; % ambiguitly levels low
+TRIALS.val_l = [risk,ambi];
 
 TRIALS.mat(1,:) = TRIALS.type; % 1 risky, 2 ambigous
 TRIALS.mat(2,:) = TRIALS.prob_h; % probability of high amount
@@ -37,35 +49,52 @@ TRIALS.mat(3,:) = TRIALS.val_h; % high amount
 TRIALS.mat(4,:) = TRIALS.prob_l; % prob. of low amount
 TRIALS.mat(5,:) = TRIALS.val_l; % low amount
 
+clear x;
+
 %% DEFINE UTILITY FUNCTIONS AND PARAMETERS
 
 % set utility function and calculate expected value
 utility_function_risk = 'hyperbolic';
-utility_function_ambi = 'prospect';
+utility_function_ambi = 'hyperbolic';
 
 % set paramters for functions
-funparam.hyperbolic.param1.risk = [];
-funparam.hyperbolic.param1.ambi = [];
+PARAMETERS.risk.hyperbolic = 1.5;
+PARAMETERS.ambi.hyperbolic = 1.6;
+PARAMETERS.risk.prospect = .9;
+PARAMETERS.ambi.prospect = .8;
 
 % calculate subjective value for all trials
 sv = NaN(1,nTrials);
 for iTrial = 1:nTrials
-    if TRIALS.type(iTrial) == 1;
+    
+    if TRIALS.type(iTrial) == 1; % risky
         utility_function = utility_function_risk;
-    elseif TRIALS.type(iTrial) == 2;
+        funparam = PARAMETERS.risk;
+    elseif TRIALS.type(iTrial) == 2; % ambiguous
         utility_function = utility_function_ambi;
+        funparam = PARAMETERS.ambi;
     end
+    
+    X.PH = TRIALS.prob_h(iTrial);
+    X.PL = TRIALS.prob_l(iTrial);
+    X.VH = TRIALS.val_h(iTrial);
+    X.VL = TRIALS.val_l(iTrial);
+    
     switch utility_function
         case 'hyperbolic'
-            sv(iTrial) = 1;
+            odds_high = (1-X.PH)./X.PH; % transform p to odds for high value prob
+            odds_low = (1-X.PL)./X.PL; % transform p to odds for low value prob
+            sv(iTrial) = X.VH ./ (1+funparam.hyperbolic.*odds_high) + X.VL ./ (1+funparam.hyperbolic.*odds_low); % subjective value of offer
         case 'prospect'
-            sv(iTrial) = 2;
+            sv(iTrial) = [];
+            error('not yet implemented');
         otherwise
             error('utitity function not found - check spelling');
     end
+    
 end
 
-clear utility_function iTrial;
+clear utility_function iTrial X odds_high odds_low PARAMETER;
 
 % --- SCRATCHPAD ---
 
@@ -82,12 +111,6 @@ clear utility_function iTrial;
 % % %     % subjective value according to k parameter
 % % %     SV.mvar = ones(2,stim_nr).*repmat(r_matrix(17,:), 2, 1) + mvar * K.mvar;
 % % % 
-% % %     % SUBJECTIVE VALUE ACCORDING TO HYPERBOLIC DISCOUNTING
-% % %     odds_high = (1-r_matrix(10,:))./r_matrix(10,:); % transform p to odds for high value prob
-% % %     odds_low = (1-(1-r_matrix(10,:)))./(1-r_matrix(10,:)); % transform p to odds for low value prob
-% % %     SV.hyp(1,:) = r_matrix(12,:)./(1+K.hyp.*odds_high) + r_matrix(11,:)./(1+K.hyp.*odds_low); % subjective value of risky offers
-% % %     odds = ones(1,stim_nr);  % odds are equal for ambiguous offers
-% % %     SV.hyp(2,:) = r_matrix(13,:)./(1+K.hyp.*odds) + r_matrix(14,:)./(1+K.hyp.*odds); % subjective value of ambiguous offers
 % % % 
 % % %     % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
 % % %     SV.pros(1,:) = r_matrix(10,:).*r_matrix(12,:).^K.pros + (1-r_matrix(10,:)).*r_matrix(11,:).^K.pros; % subjective value of risky offers
