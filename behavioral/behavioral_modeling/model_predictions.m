@@ -64,16 +64,14 @@ for iTrial = 1:nTrials
     end
 end
 
-%% PLOT ACTUAL RESULTS FROM EXPERIMENT 2 AS REFERENCE
+%% DERIVE PARAMETERS OF FUNCTIONS ON AVERAGED UTILITY FUNCTION OF EXPERIMENT 2
 
-%%% --- SETUP
+%%% --- LOAD DATA
 
 % set subjects to analyse
 PART = 1:52;
 EXCLUDE = false;
 EXCLUDE_SUBS = [];
-
-%%% --- PLOT RESULTS
 
 % exclude subjects from subject vector
 exclude_vec = EXCLUDE_SUBS;
@@ -84,6 +82,12 @@ clear i exclude_vec;
 
 % load data
 load(fullfile(DIR.input, 'parameters.mat'), 'PARAM');
+
+%%% --- FIT UTILITY FUNCTION
+
+% ---> insert code
+
+%% PLOT ACTUAL RESULTS FROM EXPERIMENT 2 AS REFERENCE
 
 % set axes (multiples of ev for y axis)
 axis_scale = [.5 VAR_NR+.5 0 1 ];
