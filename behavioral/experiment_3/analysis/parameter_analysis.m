@@ -14,7 +14,7 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [1 2 3];
+DRAW = [3];
 % 01 | BINARY CHOICE ANANLYSIS
 % 02 | SWITCHPOINT ANALYSIS
 
@@ -129,7 +129,6 @@ end
 
 % used parameter specifications
 % PARAM.choice_matrix.choice            (ev_level,variance,sub,repeat) | 1 = risky option; 2 = ambiguous option
-% PARAM.choice_matrix.RT                (ev_level,variance,sub,repeat)
 % PARAM.choice_matrix.fixed.mvar        (EV, variance)
 % PARAM.choice_matrix.fixed.prob_high   (EV, variance)
 % PARAM.choice_matrix.fixed.EV          (EV, variance)
@@ -203,7 +202,7 @@ for repeat = DRAW_REPEATS;
         ylabel('probability of high amount');
         zlabel('sum of risky choices');
         
-        clear x marker size;
+        clear x i marker_size ch_var_pr_ev choice_freq;
         
     end
 end
@@ -212,23 +211,80 @@ end
 
 % used parameter specifications
 % PARAM.choice_matrix.choice            (ev_level,variance,sub,repeat) | 1 = risky option; 2 = ambiguous option
-% PARAM.choice_matrix.RT                (ev_level,variance,sub,repeat)
 % PARAM.choice_matrix.fixed.mvar        (EV, variance)
 % PARAM.choice_matrix.fixed.prob_high   (EV, variance)
 % PARAM.choice_matrix.fixed.EV          (EV, variance)
+
+% used exp2_data paramaters
+% PARAM.premiums.fixed.mvar             (variance, EV)
+% PARAM.premiums.fixed.prob_high        (variance, EV)
+% PARAM.premiums.fixed.EV               (variance, EV)
+% PARAM.premiums.ce                     (var_level,ev_level,type,sub,[repeat])
 
 for repeat = DRAW_REPEATS;
     if sum(DRAW == 3);
         
         figure('Name', ['F3: comparision with data from experiment 2 | repeat: ' num2str(repeat) ] , 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 1 1]);
         
+        % max choices
+        max_c = length(PART);
         
-        % needs factor transormation in behav 2 data - how much more likely to take
-        % A/R
+        % recode risk = 1 / ambiguity = -1
+        x = PARAM.choice_matrix.choice(:,:,PART,repeat);
+        x(x==2)=-1;
+
+        % prepare exp 2 data
+        exp2_EVs = exp2_data.PARAM.premiums.fixed.EV(1,:); % load ev levels
+        y = mean(exp2_data.PARAM.premiums.ce, 4); % load ce's (mean of subjects)
+        z = cell(1, length(exp2_EVs)); % preallocate
+        for iEV_level = 1:2 % 
+            z{iEV_level} = y(:,iEV_level,:)/exp2_EVs(iEV_level); % normalize to EV levels
+            z{iEV_level} = squeeze(z{iEV_level}(:,:,2)-z{iEV_level}(:,:,1)); % difference ambiguity minus risk
+            z{iEV_level} = z{iEV_level}*max_c; % normalize to exp 3
+            z{iEV_level} = -z{iEV_level}; % invert scale to match exp 3 data
+        end
+
+        %%% COMPARE OVER PROBABILTY DISTRIBUTION
+        subplot(3,3,2);
+        % define variables
+        x_sum = mean(sum(x,3),1);
+        x_prob_scale = PARAM.choice_matrix.fixed.prob_high(1,:);
+        second_data = z;
+        second_prob_scale = exp2_data.PARAM.premiums.fixed.prob_high(:,1)';
+        % plot exp 3 data
+        bar(x_prob_scale, x_sum, 'FaceColor', 'k'); hold on;
+        plot(x_prob_scale, ones(1,VAR_NR)*max_c, '-b', 'LineWidth', 3);
+        plot(x_prob_scale, ones(1,VAR_NR)*-max_c,'-r', 'LineWidth', 3);
+        % plot exp 2 data
+        plot(second_prob_scale, second_data{1}, '-', 'Color', [.8 .8 .8], 'LineWidth', 3);
+        plot(second_prob_scale, second_data{2}, '-.', 'Color', [.5 .5 .5], 'LineWidth', 3);
+        % label
+        xlabel('probabilities'); ylabel('sum of choices / exp 2 preference');
+
+        %%% COMPARE OVER VARIANCE DISTRIBUTION
+        for iEV_level = 1:EV_LEVELS
+            subplot(3,3,iEV_level+3);
+            % define variables
+            x_sum = sum(x,3);
+            x_var_scale = PARAM.choice_matrix.fixed.mvar(iEV_level,:);
+            second_data = z;
+            second_var_scale_ev{1} = exp2_data.PARAM.premiums.fixed.mvar(:,1)';
+            second_var_scale_ev{2} = exp2_data.PARAM.premiums.fixed.mvar(:,2)';
+            % plot exp 3 data
+            bar(x_var_scale, x_sum(iEV_level,:), 'FaceColor', 'k');  hold on;
+            plot(x_var_scale, ones(1,VAR_NR)*max_c, '-b', 'LineWidth', 3);
+            plot(x_var_scale, ones(1,VAR_NR)*-max_c, '-r', 'LineWidth', 3);
+            preserve_axis = axis;
+            % plot exp 2 data
+            plot(second_var_scale_ev{1}, second_data{1}, '-', 'Color', [.8 .8 .8], 'LineWidth', 3);
+            plot(second_var_scale_ev{2}, second_data{2}, '-.', 'Color', [.5 .5 .5], 'LineWidth', 3);
+            axis(preserve_axis);
+            % label
+            xlabel(['variance - EV: ' num2str(EV(iEV_level)) ]); ylabel('sum of choices / exp 2 preference');
+            legend;
+        end
         
-        % 1 response profile comparing to mvar
-        % 1 response profile comparing to prob
-        
+        clear x y z x_sum x_var_scale x_prob_scale repeat max_c iEV_level second_data second_prob_scale second_data_ev second_var_scale_ev exp2_EVs preserve_axis;
         
     end
 end
