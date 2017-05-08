@@ -55,13 +55,15 @@ clear x;
 
 % set utility function and calculate expected value
 utility_function_risk = 'hyperbolic';
-utility_function_ambi = 'hyperbolic';
+utility_function_ambi = 'meanvariance';
 
 % set paramters for functions
-PARAMETERS.risk.hyperbolic = 1.5;
-PARAMETERS.ambi.hyperbolic = 1.6;
-PARAMETERS.risk.prospect = .9;
-PARAMETERS.ambi.prospect = .8;
+PARAMETERS.risk.hyperbolic = 1.4; % (>1 is risk averse)
+PARAMETERS.ambi.hyperbolic = 1.6; % (>1 is risk averse)
+PARAMETERS.risk.prospect = .96; % (<1 is risk averse)
+PARAMETERS.ambi.prospect = .92; % (<1 is risk averse)
+PARAMETERS.risk.meanvariance = -.015; % (<0 is risk averse)
+PARAMETERS.ambi.meanvariance = -.025; % (<0 is risk averse)
 
 % calculate subjective value for all trials
 sv = NaN(1,nTrials);
@@ -86,35 +88,17 @@ for iTrial = 1:nTrials
             odds_low = (1-X.PL)./X.PL; % transform p to odds for low value prob
             sv(iTrial) = X.VH ./ (1+funparam.hyperbolic.*odds_high) + X.VL ./ (1+funparam.hyperbolic.*odds_low); % subjective value of offer
         case 'prospect'
-            sv(iTrial) = [];
-            error('not yet implemented');
+            sv(iTrial) = X.PH.*X.VH.^funparam.prospect + X.PL.*X.VL.^funparam.prospect; % subjective value of offer
+        case 'meanvariance'
+            [mvar,ev] = mean_variance(X.PH, X.VH, X.PL, X.VL);
+            sv(iTrial) = ev + mvar * funparam.meanvariance;
         otherwise
             error('utitity function not found - check spelling');
     end
     
 end
 
-clear utility_function iTrial X odds_high odds_low PARAMETER;
-
-% --- SCRATCHPAD ---
-
-% % %     % SUBJECTIVE VALUE ACCORDING TO MEAN VARIANCE
-% % %     % mean variance of risky trials
-% % %     mvar = NaN(2,stim_nr);
-% % %     for i = 1:stim_nr;
-% % %         [mvar(1, i)] = mean_variance(r_matrix(10,i), r_matrix(12,i), (1-r_matrix(10,i)), r_matrix(11,i));
-% % %     end
-% % %     % mean variance for ambiguous trials
-% % %     for i = 1:stim_nr;
-% % %         [mvar(2, i)] = mean_variance( .5, r_matrix(13,i), .5, r_matrix(14,i) );
-% % %     end
-% % %     % subjective value according to k parameter
-% % %     SV.mvar = ones(2,stim_nr).*repmat(r_matrix(17,:), 2, 1) + mvar * K.mvar;
-% % % 
-% % % 
-% % %     % SUBJECTIVE VALUE ACCORDING TO PROSPECT THEORY DISCOUNTING
-% % %     SV.pros(1,:) = r_matrix(10,:).*r_matrix(12,:).^K.pros + (1-r_matrix(10,:)).*r_matrix(11,:).^K.pros; % subjective value of risky offers
-% % %     SV.pros(2,:) = .5.*r_matrix(13,:).^K.pros + .5.*r_matrix(14,:).^K.pros; % subjective value of ambiguous offers
+clear utility_function iTrial X odds_high odds_low mvar PARAMETER;
 
 %% DERIVE PARAMETERS OF FUNCTIONS ON AVERAGED UTILITY FUNCTION OF EXPERIMENT 2
 
@@ -203,7 +187,6 @@ for ev_level = 1:EV_LEVELS;
     h(2) = plot(ambi_data(ev_level,:), 'LineWidth', 2, 'Color', [.8 .0 .0]);
     legend('risk-data', 'ambiguity-data', 'neutrality', ['risk-' utility_function_risk], ['ambiguity-' utility_function_ambi], 'Location', 'southwest');
     legend('boxoff'); set(gca, 'xtick', 1:VAR_NR );
-    
 end
 
 clear risk_data_all_ev ambi_data_all_ev risk_data ambi_data h ev_level;
