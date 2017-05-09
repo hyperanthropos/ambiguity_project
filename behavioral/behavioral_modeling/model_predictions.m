@@ -53,34 +53,65 @@ clear x;
 
 %% DEFINE UTILITY FUNCTIONS AND PARAMETERS
 
-% set utility function and calculate expected value
-utility_function_risk = 'hyperbolic';
-utility_function_ambi = 'meanvariance';
+%%% --- --- --- START MODEL SETUP
+% set utility function to calculate subjective value
 
-% set paramters for functions
+% separate models for risk and ambiguity or mixed model with same
+% parameters for risk and ambiguity
+model_type = 'mixed'; % separate or mixed
+
+% define separate models
+utility_function_risk = 'hyperbolic';
+utility_function_ambi = 'modelOne';
+
+% define mixed model
+utility_function_mixed = 'modelTwo';
+
+% set paramters for separate utitlity functions
 PARAMETERS.risk.hyperbolic = 1.4; % (>1 is risk averse)
 PARAMETERS.ambi.hyperbolic = 1.6; % (>1 is risk averse)
+
 PARAMETERS.risk.prospect = .96; % (<1 is risk averse)
 PARAMETERS.ambi.prospect = .92; % (<1 is risk averse)
+
 PARAMETERS.risk.meanvariance = -.015; % (<0 is risk averse)
 PARAMETERS.ambi.meanvariance = -.025; % (<0 is risk averse)
 
-% calculate subjective value for all trials
+PARAMETERS.risk.modelOne = -.2; % (<0 is risk averse)
+PARAMETERS.ambi.modelOne = -.4; % (<0 is risk averse)
+
+% set paramters for mixed utitlity functions
+PARAMETERS.mixed.modelTwo(1) = -.4; % (<0 is risk averse)
+PARAMETERS.mixed.modelTwo(2) = 2; % (<0 is risk averse)
+
+%%% --- --- --- END MODEL SETUP
+
+%% CALCULATE SUBJECTIVE VALUE FOR TEST TRIALS
+
 sv = NaN(1,nTrials);
 for iTrial = 1:nTrials
     
-    if TRIALS.type(iTrial) == 1; % risky
-        utility_function = utility_function_risk;
-        funparam = PARAMETERS.risk;
-    elseif TRIALS.type(iTrial) == 2; % ambiguous
-        utility_function = utility_function_ambi;
-        funparam = PARAMETERS.ambi;
+    % select models and parameters
+    switch model_type
+        case 'separate'
+            if TRIALS.type(iTrial) == 1; % risky
+                utility_function = utility_function_risk;
+                funparam = PARAMETERS.risk;
+            elseif TRIALS.type(iTrial) == 2; % ambiguous
+                utility_function = utility_function_ambi;
+                funparam = PARAMETERS.ambi;
+            end
+        case'mixed'
+            utility_function = utility_function_mixed;
+            funparam = PARAMETERS.mixed;
     end
-    
+        
     X.PH = TRIALS.prob_h(iTrial);
     X.PL = TRIALS.prob_l(iTrial);
     X.VH = TRIALS.val_h(iTrial);
     X.VL = TRIALS.val_l(iTrial);
+    
+    [mvar,ev] = mean_variance(X.PH, X.VH, X.PL, X.VL);
     
     switch utility_function
         case 'hyperbolic'
@@ -90,15 +121,23 @@ for iTrial = 1:nTrials
         case 'prospect'
             sv(iTrial) = X.PH.*X.VH.^funparam.prospect + X.PL.*X.VL.^funparam.prospect; % subjective value of offer
         case 'meanvariance'
-            [mvar,ev] = mean_variance(X.PH, X.VH, X.PL, X.VL);
             sv(iTrial) = ev + mvar * funparam.meanvariance;
+        case 'modelOne'
+            sv(iTrial) = ev + sqrt(mvar) * funparam.modelOne;
+        case 'modelTwo'
+            % combine modelOne + hyperbolic model
+            part_1 = ev + sqrt(mvar) * funparam.modelTwo(1);
+            odds_high = (1-X.PH)./X.PH;
+            odds_low = (1-X.PL)./X.PL;
+            part_2 = X.VH ./ (1+funparam.modelTwo(2).*odds_high) + X.VL ./ (1+funparam.modelTwo(2).*odds_low);
+            sv(iTrial) = (part_1 + part_2)/2;
         otherwise
             error('utitity function not found - check spelling');
     end
     
 end
 
-clear utility_function iTrial X odds_high odds_low mvar PARAMETER;
+clear part_1 part_2 utility_function iTrial X odds_high odds_low mvar PARAMETER;
 
 %% DERIVE PARAMETERS OF FUNCTIONS ON AVERAGED UTILITY FUNCTION OF EXPERIMENT 2
 
