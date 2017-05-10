@@ -81,8 +81,10 @@ PARAMETERS.risk.modelOne = -.2; % (<0 is risk averse)
 PARAMETERS.ambi.modelOne = -.4; % (<0 is risk averse)
 
 % set paramters for mixed utitlity functions
-PARAMETERS.mixed.modelTwo(1) = -.4; % (<0 is risk averse)
-PARAMETERS.mixed.modelTwo(2) = 2; % (<0 is risk averse)
+PARAMETERS.mixed.modelTwo(1) = -.25; % reaction to variance
+PARAMETERS.mixed.modelTwo(2) = 1.2; % reaction to probabilites
+PARAMETERS.mixed.modelTwo(3) = .1; % reaction to EV
+PARAMETERS.mixed.modelTwo(4) = .5; % 
 
 %%% --- --- --- END MODEL SETUP
 
@@ -126,11 +128,11 @@ for iTrial = 1:nTrials
             sv(iTrial) = ev + sqrt(mvar) * funparam.modelOne;
         case 'modelTwo'
             % combine modelOne + hyperbolic model
-            part_1 = ev + sqrt(mvar) * funparam.modelTwo(1);
-            odds_high = (1-X.PH)./X.PH;
-            odds_low = (1-X.PL)./X.PL;
-            part_2 = X.VH ./ (1+funparam.modelTwo(2).*odds_high) + X.VL ./ (1+funparam.modelTwo(2).*odds_low);
-            sv(iTrial) = (part_1 + part_2)/2;
+            odds_high = ((1-X.PH)./X.PH)^funparam.modelTwo(4);
+            odds_low = ((1-X.PL)./X.PL)^funparam.modelTwo(4);
+            p1 = X.VH ./ (1+funparam.modelTwo(2).*odds_high) + (sqrt(mvar) * funparam.modelTwo(1));
+            p2 = X.VL ./ (1+funparam.modelTwo(2).*odds_low) + (sqrt(mvar) * funparam.modelTwo(1));
+            sv(iTrial) = (p1+p2) + funparam.modelTwo(3)*ev;
         otherwise
             error('utitity function not found - check spelling');
     end
@@ -145,8 +147,10 @@ clear part_1 part_2 utility_function iTrial X odds_high odds_low mvar PARAMETER;
 
 % set subjects to analyse
 PART = 1:52;
-EXCLUDE = false;
+EXCLUDE = true;
 EXCLUDE_SUBS = [];
+% subjects with ceiling effects (3 extreme choices aversive choices in last 3 variance levels of EV 34)
+% EXCLUDE_SUBS = [1 5 7 13 16 19 29 31 32 34 38 40 44 47 48];
 
 % exclude subjects from subject vector
 exclude_vec = EXCLUDE_SUBS;
@@ -220,12 +224,18 @@ ambi_data(1,:) = ambi_data_all_ev(1:VAR_NR); % ev level 1
 ambi_data(2,:) = ambi_data_all_ev(VAR_NR+1:VAR_NR*2); % ev level 2
 
 % ...and plot it over the experimental dataset
-for ev_level = 1:EV_LEVELS; 
+for ev_level = 1:EV_LEVELS;
     subplot(1,2,ev_level);
     h(1) = plot(risk_data(ev_level,:), 'LineWidth', 2, 'Color', [.0 .0 .8]);
     h(2) = plot(ambi_data(ev_level,:), 'LineWidth', 2, 'Color', [.8 .0 .0]);
-    legend('risk-data', 'ambiguity-data', 'neutrality', ['risk-' utility_function_risk], ['ambiguity-' utility_function_ambi], 'Location', 'southwest');
+    switch model_type
+        case 'separate'
+            legend('risk-data', 'ambiguity-data', 'neutrality', ['risk-' utility_function_mixed], ['ambiguity-' utility_function_mixed], 'Location', 'southwest');
+        case'mixed'
+            legend('risk-data', 'ambiguity-data', 'neutrality', ['risk-' utility_function_mixed], ['ambiguity-' utility_function_mixed], 'Location', 'southwest');
+    end
     legend('boxoff'); set(gca, 'xtick', 1:VAR_NR );
+    % axis('auto y');
 end
 
 clear risk_data_all_ev ambi_data_all_ev risk_data ambi_data h ev_level;
