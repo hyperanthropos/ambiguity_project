@@ -138,10 +138,6 @@ for resolved = 1:2; % 2 = resolved
         % necessary lines fot this parameter
         % LINE 03 - reaction time
         % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
-        % LINE 05 - choice: 1 = fixed, risky; 2 = risky; 3 = fixed, ambiguous; 4 = ambiguous
-        % LINE 07 - trial type: 1 = risky, 2 = ambiguous
-        % LINE 19 - risk variance level (1-4; low to high variance)
-        % LINE 20 - ambiguity variance level (1-4; low to high variance
         
         %%% --- CREATE PARAMETER
         
@@ -157,25 +153,27 @@ for resolved = 1:2; % 2 = resolved
                 
                 for var_level = 1:VAR_NR;
                     
-                x = risk_trials_var{var_level}([3 4],:);
+                    x = risk_trials_var{var_level}([3 4],:);
                     
-                PARAM.RT.mean.control(var_level,repeat,1,sub) = mean( x(1,:) );
-                
-                PARAM.RT.choice.probabilistic.control(var_level,repeat,1,sub) =  mean( x(1,x(2,:)==2) );
-                PARAM.RT.choice.certain.control(var_level,repeat,1,sub) =  mean( x(1,x(2,:)==1) );
-                
+                    PARAM.RT.mean.control(var_level,repeat,1,sub) = mean( x(1,:) );
+                    
+                    PARAM.RT.choice.probabilistic.control(var_level,repeat,1,sub) =  mean( x(1,x(2,:)==2) );
+                    PARAM.RT.choice.certain.control(var_level,repeat,1,sub) =  mean( x(1,x(2,:)==1) );
+                    
                 end
                 
             elseif resolved == 2;
                 
                 x = ambi_trials_var{var_level}([3 4],:);
-                    
+                
                 PARAM.RT.mean.resolved(var_level,repeat,2,sub) = mean( x(1,:) );
                 
                 PARAM.RT.choice.probabilistic.resolved(var_level,repeat,2,sub) =  mean( x(1,x(2,:)==2) );
                 PARAM.RT.choice.certain.resolved(var_level,repeat,2,sub) =  mean( x(1,x(2,:)==1) );
-
+                
             end
+            
+            clear x;
             
         end
         
