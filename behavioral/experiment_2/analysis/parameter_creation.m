@@ -158,7 +158,6 @@ end
 
 clear i iEV_level x x_risk x_ambi y;
 
-
 %% START LOOP OVER SUBJECTS AND CREATE A FIGURE
 
 for sub = PART
@@ -167,9 +166,45 @@ for sub = PART
     
     %% PARAMETER SECTION 0: REACTION TIME
     
-    %% --- CREATE PARAMETER
+    % structure of RT parameters
+    % (var,ev,type,sub,[repeat]) | 1 = risky, 2 = ambiguous
     
-    % ... (insert code)
+    % necessary lines fot this parameter
+    % LINE 03 - reaction time
+    % LINE 04 - choice: 1 = fixed option; 2 = risky/ambiguous option
+    
+    %%% --- CREATE PARAMETER
+    
+    for repeat = 1:REPEATS_NR;
+        for ev_level = 1:EV_LEVELS;
+            
+            risk_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.risk;
+            ambi_trials = RESULT_SORT.part{sub}.repeat{repeat}.EV{ev_level}.ambi;
+            
+            risk_trials_var = mat2cell(risk_trials, size(risk_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
+            ambi_trials_var = mat2cell(ambi_trials, size(ambi_trials, 1), ones(1, VAR_NR)*COUNTER_NR );
+            
+            for var_level = 1:VAR_NR;
+                
+                x = risk_trials_var{var_level}([3 4],:);
+                y = ambi_trials_var{var_level}([3 4],:);
+                
+                PARAM.RT.mean(var_level,repeat,1,sub,repeat) = mean( x(1,:) );
+                PARAM.RT.choice.probabilistic(var_level,repeat,1,sub,repeat) =  mean( x(1,x(2,:)==2) );
+                PARAM.RT.choice.certain(var_level,repeat,1,sub,repeat) =  mean( x(1,x(2,:)==1) );
+                
+                PARAM.RT.mean(var_level,repeat,2,sub,repeat) = mean( y(1,:) );
+                PARAM.RT.choice.probabilistic(var_level,repeat,2,sub,repeat) =  mean( y(1,y(2,:)==2) );
+                PARAM.RT.choice.certain(var_level,repeat,2,sub,repeat) =  mean( y(1,y(2,:)==1) );
+                
+                clear x y;
+                
+            end
+
+        end
+    end
+    
+    
     
     %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
     
@@ -180,7 +215,7 @@ for sub = PART
     % LINE 19 - risk variance level (low to high variance)
     % LINE 20 - ambiguity variance level (low to high variance
     
-    %% --- CREATE PARAMETER
+    %%% --- CREATE PARAMETER
     for repeat = 1:REPEATS_NR;
         for ev_level = 1:EV_LEVELS;
 
