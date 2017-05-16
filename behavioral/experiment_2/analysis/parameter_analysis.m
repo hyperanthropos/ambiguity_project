@@ -14,7 +14,7 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = 4;
+DRAW = [2 4];
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 % 02 | GROUP SUMMARY
 % 03 | COMPARISON OF CHOICE REVERSAL IN EV LEVELS
@@ -255,34 +255,91 @@ end
 % structure of RT parameters
 % (var,ev,type,sub,[repeat]) | 1 = risky, 2 = ambiguous
 
+% 5D matrix of premium paramters:
+% (var_level,ev_level,type,sub,[repeat]) | 1 = risky, 2 = ambiguous
+
 if sum(DRAW == 4);
     
     % select EV
-    ev_level = 1; % fixed EV selection
+    ev_level = 2; % fixed EV selection
     
-    % set axes
-    axis_scale = [.5 VAR_NR+.5 0 1 ];
+    % prepare data to plot
+    data = PARAM.RT.mean(:,ev_level,:,PART);
+    data_chosen = PARAM.RT.choice.probabilistic(:,ev_level,:,PART);
+    data_unchosen = PARAM.RT.choice.certain(:,ev_level,:,PART);
     
+    % mean RT of variance levels (var, risk/ambi, sub)
+    x = squeeze(data);
+    x_chosen = squeeze(data_chosen);
+    x_unchosen = squeeze(data_unchosen);
+
+    % mean RT over all variance levels (risk/ambi, sub)
+    y = squeeze(mean(x, 1));
+    y_chosen = squeeze(mean(x_chosen, 1));
+    y_unchosen = squeeze(mean(x_unchosen, 1));
+
     % draw figure
-    FIGS.fig4 = figure('Name', 'F4: RT analysis', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
+    FIGS.fig4 = figure('Name', 'F4: RT analysis', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 1 .6 .7]);
 
     % --- PANEL 1: global comparison between ambi & risk
     subplot(2,4,1);
+    plot_data = y;
+    bar(1, nanmean(plot_data(1,:), 2), 'FaceColor', [.2 .2 .8]); box off; hold on;
+    bar(2, nanmean(plot_data(2,:), 2), 'FaceColor', [.8 .2 .2]);
+    h = errorbar(nanmean(plot_data, 2), nanstd(plot_data, 1, 2)./(size(PART,2))^.5, 'k', 'Linewidth', 1);
+    set(h, 'LineStyle', 'none');
+    axis([.5 2.5 0 1]); axis('auto y'); ylabel('RT [s]');
+    set(gca, 'xtick',[1 2] ); set(gca, 'xticklabels', {'risk','ambiguity'} );
     
     % --- PANEL 2: global comparison between chosen & unchosen
     subplot(2,4,2);
-    
-    % --- PANEL 3: global comparison between EV1 & EV2
-    subplot(2,4,5);
+    plot_data = [ nanmean(y_chosen, 1); nanmean(y_unchosen, 1) ];
+    h = barwitherr(nanstd(plot_data, 1, 2)./(size(PART,2))^.5, nanmean(plot_data, 2)); box off;
+    axis([.5 2.5 0 1]); axis('auto y'); ylabel('RT [s]');
+    set(gca, 'xtick',[1 2] ); set(gca, 'xticklabels', {'chosen','unchosen'} );
+    set(h(1), 'FaceColor', [.5 .5 .5]);
 
-    % --- PANEL 4: difference between R & A RT over variance levels
+    % --- PANEL 3: difference between R & A RT over variance levels
     subplot(2,2,2);
+    plot_data = x;
+    h = errorbar(nanmean(plot_data, 3), nanstd(plot_data, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
+    set(h(1), 'Color', [.0 .0 .8]); set(h(2), 'Color', [.8 .0 .0]);
+    ylabel('RT [s]'); xlabel('variance');
+    legend('risk', 'ambiguity'); legend('Location', 'southOutside');
     
-    % --- PANEL 5: difference between R & A RT over variance levels & choice
+    % --- PANEL 4: difference between R & A RT over variance levels & choice
     subplot(2,2,4);
+    plot_data = x_chosen;
+    h = errorbar(nanmean(plot_data, 3), nanstd(plot_data, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
+    set(h(1), 'Color', [.0 .0 .8], 'LineStyle', '-'); set(h(2), 'Color', [.8 .0 .0], 'LineStyle', '-');
+    plot_data = x_unchosen;
+    h = errorbar(nanmean(plot_data, 3), nanstd(plot_data, 1, 3)./(size(PART,2))^.5, 'LineWidth', 2); hold on; box off;
+    set(h(1), 'Color', [.0 .0 .8], 'LineStyle', '--'); set(h(2), 'Color', [.8 .0 .0], 'LineStyle', '--');
+    ylabel('RT [s]'); xlabel('variance');
+    legend('risk chosen', 'ambiguity chosen', 'risk unchosen', 'ambiguity unchosen');
+    legend('Location', 'southOutside');
+    
+    %%% correlation betweem difficulty ( |EV-ce|/EV ) and RT
+    difficulty = squeeze ( abs(EV(ev_level)-PARAM.premiums.ce(:,ev_level,:,PART))/EV(ev_level) ); % (var, type, sub)
+    
+    % --- PANEL 5 & 6: RT and difficulty
+    subplot(2,4,5);
+    plot_data = x;
+    a = plot_data(:,1,:); b = difficulty(:,1,:); % risky trials
+    scatter(b(:), a(:), '+k', 'MarkerEdgeColor', [.2 .2 .8]);
+    axis([0 .6 0 8]);
+    h = lsline; set(h, 'LineWidth', 2);
+    ylabel('RT [s]'); xlabel('difficulty | risk');
+    
+    subplot(2,4,6);
+    plot_data = x;
+    a = plot_data(:,2,:); b = difficulty(:,2,:); % risky trials
+    scatter(b(:), a(:), '+k', 'MarkerEdgeColor', [.8 .2 .2]);
+    axis([0 .6 0 8]);
+    h = lsline; set(h, 'LineWidth', 2);
+    ylabel('RT [s]'); xlabel('difficulty | ambiguity');
 
-
-    clear axis_scale;
+    clear a b x x_chosen x_unchosen y y_chosen y_unchosen data h;
     
 end
 
