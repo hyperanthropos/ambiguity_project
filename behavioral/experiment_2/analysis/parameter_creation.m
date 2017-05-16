@@ -189,13 +189,13 @@ for sub = PART
                 x = risk_trials_var{var_level}([3 4],:);
                 y = ambi_trials_var{var_level}([3 4],:);
                 
-                PARAM.RT.mean(var_level,repeat,1,sub,repeat) = mean( x(1,:) );
-                PARAM.RT.choice.probabilistic(var_level,repeat,1,sub,repeat) =  mean( x(1,x(2,:)==2) );
-                PARAM.RT.choice.certain(var_level,repeat,1,sub,repeat) =  mean( x(1,x(2,:)==1) );
+                PARAM.RT.mean(var_level,ev_level,1,sub,repeat) = mean( x(1,:) );
+                PARAM.RT.choice.probabilistic(var_level,ev_level,1,sub,repeat) =  mean( x(1,x(2,:)==2) );
+                PARAM.RT.choice.certain(var_level,ev_level,1,sub,repeat) =  mean( x(1,x(2,:)==1) );
                 
-                PARAM.RT.mean(var_level,repeat,2,sub,repeat) = mean( y(1,:) );
-                PARAM.RT.choice.probabilistic(var_level,repeat,2,sub,repeat) =  mean( y(1,y(2,:)==2) );
-                PARAM.RT.choice.certain(var_level,repeat,2,sub,repeat) =  mean( y(1,y(2,:)==1) );
+                PARAM.RT.mean(var_level,ev_level,2,sub,repeat) = mean( y(1,:) );
+                PARAM.RT.choice.probabilistic(var_level,ev_level,2,sub,repeat) =  mean( y(1,y(2,:)==2) );
+                PARAM.RT.choice.certain(var_level,ev_level,2,sub,repeat) =  mean( y(1,y(2,:)==1) );
                 
                 clear x y;
                 
@@ -203,8 +203,6 @@ for sub = PART
 
         end
     end
-    
-    
     
     %% PARAMETERS SECTION 1: RISK / AMBIGUITY PREMIUMS
     
