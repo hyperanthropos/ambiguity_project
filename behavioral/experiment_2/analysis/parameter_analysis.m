@@ -14,10 +14,11 @@ SUBFUNCTIONS_PATH = '/home/fridolin/DATA/MATLAB/downloaded_functions';
 %% SETUP
 
 % set figures you want to draw
-DRAW = [2 3];
+DRAW = 4;
 % 01 | INDIVIDUAL SUBJECTS RISK AND AMBIGUITY ATTITUDE
 % 02 | GROUP SUMMARY
 % 03 | COMPARISON OF CHOICE REVERSAL IN EV LEVELS
+% 04 | ANALYSIS OF RT
 
 % set subjects to analyse
 PART = 1:52;
@@ -99,8 +100,8 @@ if sum(DRAW == 2);
     axis_scale = [.5 VAR_NR+.5 0.5 1.1 ];
     
     % draw figure
-    FIGS.fig2_1 = figure('Name', 'F3: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
-    FIGS.fig2_2 = figure('Name', 'F3.1: correlation for different variance levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .6 .4]);
+    FIGS.fig2_1 = figure('Name', 'F2: group summary', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
+    FIGS.fig2_2 = figure('Name', 'F2.1: correlation for different variance levels', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 0 .6 .4]);
     
     for ev_level = 1:EV_LEVELS;
        
@@ -172,7 +173,8 @@ if sum(DRAW == 2);
     clear data data_persub data_persub_var data_allrep x y varlevel axis_scale new_axis h;
     
 end
-%% FIGURE 2: COMPARISON OF CHOICE REVERSAL IN EV LEVELS
+
+%% FIGURE 3: COMPARISON OF CHOICE REVERSAL IN EV LEVELS
 
 % 5D matrix of premium paramters:
 % (var_level,ev_level,type,sub,[repeat])
@@ -245,6 +247,42 @@ if sum(DRAW == 3);
     xlabel('mean variance [log]');  ylabel('subjective value ratio');
 
     clear data data_allrep x y z varlevel axis_scale varscale h;
+    
+end
+
+%% FIGURE 4: COMPARISON OF CHOICE REVERSAL IN EV LEVELS
+
+% structure of RT parameters
+% (var,ev,type,sub,[repeat]) | 1 = risky, 2 = ambiguous
+
+if sum(DRAW == 4);
+    
+    % select EV
+    ev_level = 1; % fixed EV selection
+    
+    % set axes
+    axis_scale = [.5 VAR_NR+.5 0 1 ];
+    
+    % draw figure
+    FIGS.fig4 = figure('Name', 'F4: RT analysis', 'Color', 'w', 'units', 'normalized', 'outerposition', [0 .5 .6 .5]);
+
+    % --- PANEL 1: global comparison between ambi & risk
+    subplot(2,4,1);
+    
+    % --- PANEL 2: global comparison between chosen & unchosen
+    subplot(2,4,2);
+    
+    % --- PANEL 3: global comparison between EV1 & EV2
+    subplot(2,4,5);
+
+    % --- PANEL 4: difference between R & A RT over variance levels
+    subplot(2,2,2);
+    
+    % --- PANEL 5: difference between R & A RT over variance levels & choice
+    subplot(2,2,4);
+
+
+    clear axis_scale;
     
 end
 
