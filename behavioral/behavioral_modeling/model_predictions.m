@@ -54,6 +54,7 @@ clear x;
 %% DEFINE UTILITY FUNCTIONS AND PARAMETERS
 
 %%% --- --- --- START MODEL SETUP
+
 % set utility function to calculate subjective value
 
 % separate models for risk and ambiguity or mixed model with same
@@ -65,7 +66,7 @@ utility_function_risk = 'hyperbolic';
 utility_function_ambi = 'modelOne';
 
 % define mixed model
-utility_function_mixed = 'modelTwo';
+utility_function_mixed = 'modelThree';
 
 % set paramters for separate utitlity functions
 PARAMETERS.risk.hyperbolic = 1.4; % (>1 is risk averse)
@@ -84,7 +85,15 @@ PARAMETERS.ambi.modelOne = -.4; % (<0 is risk averse)
 PARAMETERS.mixed.modelTwo(1) = -.25; % reaction to variance
 PARAMETERS.mixed.modelTwo(2) = 1.2; % reaction to probabilites
 PARAMETERS.mixed.modelTwo(3) = .1; % reaction to EV
-PARAMETERS.mixed.modelTwo(4) = .5; % 
+PARAMETERS.mixed.modelTwo(4) = .5; % reaction to probabilites
+
+% PARAMETERS.mixed.modelThree(1) = .2; % reaction to variance
+% PARAMETERS.mixed.modelThree(2) = -.9; % precision for probabilites
+% PARAMETERS.mixed.modelThree(3) = 2; % precision for information
+
+PARAMETERS.mixed.modelThree(1) = .2; % reaction to variance
+PARAMETERS.mixed.modelThree(2) = -.9; % precision for probabilites
+PARAMETERS.mixed.modelThree(3) = 2; % precision for information
 
 %%% --- --- --- END MODEL SETUP
 
@@ -130,23 +139,36 @@ for iTrial = 1:nTrials
             % combine modelOne + hyperbolic model
             odds_high = ((1-X.PH)./X.PH)^funparam.modelTwo(4);
             odds_low = ((1-X.PL)./X.PL)^funparam.modelTwo(4);
-            p1 = X.VH ./ (1+funparam.modelTwo(2).*odds_high) + (sqrt(mvar) * funparam.modelTwo(1));
-            p2 = X.VL ./ (1+funparam.modelTwo(2).*odds_low) + (sqrt(mvar) * funparam.modelTwo(1));
-            sv(iTrial) = (p1+p2) + funparam.modelTwo(3)*ev;
+            % seperate components of decision
+            c1 = X.VH ./ (1+funparam.modelTwo(2).*odds_high) + (sqrt(mvar) * funparam.modelTwo(1));
+            c2 = X.VL ./ (1+funparam.modelTwo(2).*odds_low) + (sqrt(mvar) * funparam.modelTwo(1));
+            sv(iTrial) = (c1+c2) + funparam.modelTwo(3)*ev;
+        case 'modelThree'
+            prob_switch = 1; % is probability present
+            % seperate components of decision
+            c1_1 = (X.PL./(1-X.PL));
+            % c1_1 = ((1-X.PH)./(X.PH));
+            c1_2 = prob_switch + funparam.modelThree(3);
+            c1_3 = c1_2 + funparam.modelThree(2) * log(c1_2) * c1_1;
+            c1 = ev- funparam.modelThree(1) * (sqrt(mvar) / c1_2) ^ c1_3;
+            % subjective value
+            sv(iTrial) = c1;
         otherwise
             error('utitity function not found - check spelling');
     end
     
 end
 
-clear part_1 part_2 utility_function iTrial X odds_high odds_low mvar PARAMETER;
+clear c1 c2 utility_function iTrial X odds_high odds_low mvar PARAMETER;
 
 %% DERIVE PARAMETERS OF FUNCTIONS ON AVERAGED UTILITY FUNCTION OF EXPERIMENT 2
 
 %%% --- LOAD DATA
 
 % set subjects to analyse
-PART = 1:52;
+PART = 25;
+% PART = 11;
+% PART = 1:52;
 EXCLUDE = true;
 EXCLUDE_SUBS = [];
 % subjects with ceiling effects (3 extreme choices aversive choices in last 3 variance levels of EV 34)
@@ -235,7 +257,7 @@ for ev_level = 1:EV_LEVELS;
             legend('risk-data', 'ambiguity-data', 'neutrality', ['risk-' utility_function_mixed], ['ambiguity-' utility_function_mixed], 'Location', 'southwest');
     end
     legend('boxoff'); set(gca, 'xtick', 1:VAR_NR );
-    % axis('auto y');
+    axis('auto y');
 end
 
 clear risk_data_all_ev ambi_data_all_ev risk_data ambi_data h ev_level;
