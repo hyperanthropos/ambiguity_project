@@ -323,13 +323,14 @@ if sum(DRAW == 4);
     difficulty = squeeze ( abs(EV(ev_level)-PARAM.premiums.ce(:,ev_level,:,PART))/EV(ev_level) ); % (var, type, sub)
     
     % --- PANEL 5 & 6: RT and difficulty
+    warning('difficulty displayed per variance level not per trial!');
     subplot(2,4,5);
     plot_data = x;
     a = plot_data(:,1,:); b = difficulty(:,1,:); % risky trials
     scatter(b(:), a(:), '+k', 'MarkerEdgeColor', [.2 .2 .8]);
     axis([0 .6 0 8]);
     h = lsline; set(h, 'LineWidth', 2);
-    ylabel('RT [s]'); xlabel('difficulty | risk');
+    ylabel('RT [s]'); xlabel('difficulty (VAR) | risk');
     
     subplot(2,4,6);
     plot_data = x;
@@ -337,7 +338,7 @@ if sum(DRAW == 4);
     scatter(b(:), a(:), '+k', 'MarkerEdgeColor', [.8 .2 .2]);
     axis([0 .6 0 8]);
     h = lsline; set(h, 'LineWidth', 2);
-    ylabel('RT [s]'); xlabel('difficulty | ambiguity');
+    ylabel('RT [s]'); xlabel('difficulty (VAR) | ambiguity');
 
     clear a b x x_chosen x_unchosen y y_chosen y_unchosen data h;
     
