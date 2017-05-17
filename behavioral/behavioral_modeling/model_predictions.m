@@ -87,13 +87,13 @@ PARAMETERS.mixed.modelTwo(2) = 1.2; % reaction to probabilites
 PARAMETERS.mixed.modelTwo(3) = .1; % reaction to EV
 PARAMETERS.mixed.modelTwo(4) = .5; % reaction to probabilites
 
+PARAMETERS.mixed.modelThree(1) = .4; % reaction to variance
+PARAMETERS.mixed.modelThree(2) = -.6; % precision for probabilites
+PARAMETERS.mixed.modelThree(3) = 1; % precision for information
+
 % PARAMETERS.mixed.modelThree(1) = .2; % reaction to variance
 % PARAMETERS.mixed.modelThree(2) = -.9; % precision for probabilites
 % PARAMETERS.mixed.modelThree(3) = 2; % precision for information
-
-PARAMETERS.mixed.modelThree(1) = .2; % reaction to variance
-PARAMETERS.mixed.modelThree(2) = -.9; % precision for probabilites
-PARAMETERS.mixed.modelThree(3) = 2; % precision for information
 
 %%% --- --- --- END MODEL SETUP
 
@@ -166,9 +166,9 @@ clear c1 c2 utility_function iTrial X odds_high odds_low mvar PARAMETER;
 %%% --- LOAD DATA
 
 % set subjects to analyse
-PART = 25;
+% PART = 25;
 % PART = 11;
-% PART = 1:52;
+PART = 1:52;
 EXCLUDE = true;
 EXCLUDE_SUBS = [];
 % subjects with ceiling effects (3 extreme choices aversive choices in last 3 variance levels of EV 34)
