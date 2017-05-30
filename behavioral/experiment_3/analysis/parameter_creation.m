@@ -131,6 +131,21 @@ end
 
 clear x y sub repeat ev_level;
 
+%% EXPORT DATA TO CSV
+
+variables_to_export = [3 4 10:15 18 19 22];
+
+csvdata = [];
+for sub = PART
+    csvpart = RESULT_SORT.part{sub}.mat(variables_to_export,:);
+    csvpart(length(variables_to_export)+1,:) = ones(1,TRIAL_NR*REPEATS_NR)*sub;
+    csvdata = [csvdata, csvpart]; %#ok<AGROW>
+end
+
+csvwrite(fullfile(DIR.output, 'experiment2.csv'), csvdata);
+
+clear csvdata;
+
 %% FIXED VALUES INDPENDENT OF SUBJECT AND REPEAT NUMBER
 
 % fixed attributes corresponding to choice matrix
