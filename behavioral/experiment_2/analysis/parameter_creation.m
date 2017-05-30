@@ -138,6 +138,19 @@ end
 
 clear x y sub repeat ev_level;
 
+%% EXPORT DATA TO CSV
+
+csvdata = [];
+for sub = PART
+    csvpart(1:23,:) = RESULT_SORT.part{sub}.mat;
+    csvpart(24,:) = ones(1,TRIAL_NR*EV_LEVELS)*sub;
+    csvdata = [csvdata, csvpart]; %#ok<AGROW>
+end
+
+csvwrite(fullfile(DIR.output, 'experiment2.csv'), csvdata);
+
+clear csvdata;
+
 %% FIXED VALUES INDPENDENT OF SUBJECT AND REPEAT NUMBER
 
 % fixed attributes corresponding to certainty equivalent matrix
