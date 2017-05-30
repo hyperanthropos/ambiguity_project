@@ -142,7 +142,7 @@ for sub = PART
     csvdata = [csvdata, csvpart]; %#ok<AGROW>
 end
 
-csvwrite(fullfile(DIR.output, 'experiment2.csv'), csvdata);
+csvwrite(fullfile(DIR.output, 'experiment3.csv'), csvdata);
 
 clear csvdata;
 
