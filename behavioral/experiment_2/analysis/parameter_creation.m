@@ -140,10 +140,12 @@ clear x y sub repeat ev_level;
 
 %% EXPORT DATA TO CSV
 
+variables_to_export = [3 4 7 10 11 12 13 14 15 16 19 20 22];
+
 csvdata = [];
 for sub = PART
     csvpart(1:23,:) = RESULT_SORT.part{sub}.mat;
-    csvpart(24,:) = ones(1,TRIAL_NR*EV_LEVELS)*sub;
+    csvpart(length(variables_to_export)+1,:) = ones(1,TRIAL_NR*EV_LEVELS)*sub; %#ok<SAGROW>
     csvdata = [csvdata, csvpart]; %#ok<AGROW>
 end
 
