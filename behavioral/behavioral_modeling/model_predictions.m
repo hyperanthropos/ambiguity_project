@@ -27,7 +27,7 @@ nTrials = VAR_NR*EV_LEVELS*2;
 % trials are sorted: risk ev1, risk ev2, ambi ev1, ambi ev2 | low to high variance
 TRIALS.type = [ones(1,VAR_NR*EV_LEVELS),ones(1,VAR_NR*EV_LEVELS)*2];
 
-risk = [0.8200    0.7400    0.6600    0.5800    0.5000    0.4200    0.3400    0.2600    0.1800    0.8200    0.7400    0.6600    0.5800    0.5000   0.4200    0.3400    0.2600    0.1800]; % probability high value
+risk = ([0.8200    0.7400    0.6600    0.5800    0.5000    0.4200    0.3400    0.2600    0.1800    0.8200    0.7400    0.6600    0.5800    0.5000   0.4200    0.3400    0.2600    0.1800]); % probability high value
 ambi = ones(1,VAR_NR*EV_LEVELS)*.5;
 TRIALS.prob_h = [risk,ambi];
 
@@ -35,7 +35,7 @@ risk = [8.7343    9.3891   10.2944   11.4784   13.0000   14.9633   17.5562   21.
 ambi = [9    10    11    12    13    14    15    16    17    36    40    44    48    52    56    60    64    68]; % ambiguitly levels high
 TRIALS.val_h = [risk,ambi];
 
-risk = [0.1800    0.2600    0.3400    0.4200    0.5000    0.5800    0.6600    0.7400    0.8200    0.1800    0.2600    0.3400    0.4200    0.5000   0.5800    0.6600    0.7400    0.8200]; % probability low value
+risk = ([0.1800    0.2600    0.3400    0.4200    0.5000    0.5800    0.6600    0.7400    0.8200    0.1800    0.2600    0.3400    0.4200    0.5000   0.5800    0.6600    0.7400    0.8200]); % probability low value
 ambi = ones(1,VAR_NR*EV_LEVELS)*.5;
 TRIALS.prob_l = [risk,ambi];
 
@@ -88,7 +88,7 @@ PARAMETERS.mixed.modelTwo(3) = .1; % reaction to EV
 PARAMETERS.mixed.modelTwo(4) = .5; % reaction to probabilites
 
 PARAMETERS.mixed.modelThree(1) = .4; % reaction to variance
-PARAMETERS.mixed.modelThree(2) = -.6; % precision for probabilites
+PARAMETERS.mixed.modelThree(2) = -.75; % precision for probabilites
 PARAMETERS.mixed.modelThree(3) = 1; % precision for information
 
 % PARAMETERS.mixed.modelThree(1) = .2; % reaction to variance
