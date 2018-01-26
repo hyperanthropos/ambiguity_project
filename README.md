@@ -1,4 +1,4 @@
-# madleine
+# ambigutiy_project
 
 ### cognitive neuroscience project
 
