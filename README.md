@@ -1,4 +1,4 @@
-# ambigutiy_project
+# ambigutiy project
 
 ### cognitive neuroscience project
 
